@@ -9,8 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Adam Pahlevi"]
   spec.email         = ["adam.pahlevi@gmail.com"]
 
-  spec.summary       = %q{Bali is the Ruby language authorization library}
-  spec.description   = %q{Bali (Bulwark Authorizer Library) is a simple to use Ruby authorization library, it can be used within your Rails project, or Sinatra, or plain Ruby files. It does not assume you to use specific Ruby library/gem/framework, just pure Ruby and you can still use it.}
+  spec.summary       = %q{Bali is a powerful, framework-agnostic, thread-safe Ruby language authorization library}
+  spec.description   = %q{Bali (Bulwark Authorizer Library) is the long-awaited universal authorization library, missing within the Ruby community. 
+                          It does not assume you to use specific Ruby library/gem/framework.}
   spec.homepage      = "https://github.com/saveav/bali"
   spec.license       = "MIT"
 
@@ -22,4 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "pry"
+
 end
