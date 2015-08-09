@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["adam.pahlevi@gmail.com"]
 
   spec.summary       = %q{Bali is a powerful, framework-agnostic, thread-safe Ruby language authorization library}
-  spec.description   = %q{Bali (Bulwark Authorizer Library) is the long-awaited universal authorization library, missing within the Ruby community. 
-                          It does not assume you to use specific Ruby library/gem/framework.}
+  spec.description   = %q{Bali (Bulwark Authorization Library) is a universal authorization library, in the sense that 
+                          it does not assume you to use specific Ruby library/gem/framework.}
   spec.homepage      = "https://github.com/saveav/bali"
   spec.license       = "MIT"
 

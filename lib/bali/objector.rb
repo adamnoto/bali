@@ -16,8 +16,12 @@ end
 
 module Bali::Objector::Statics
   def can?(subtarget, operation, record = self)
-    rule_group = Bali.rule_group_for(subtarget, operation)
+    rule_group = Bali.rule_group_for(record.class, subtarget)
     rule = rule_group.get_rule(:can, operation)
+
+    # godly subtarget is allowed to do as he wishes
+    # so long that the rule is not specificly defined
+    return true if rule_group.zeus? && rule.nil?
 
     # default to false when asked about can? but no rule to be found
     return false if rule.nil?
@@ -37,8 +41,12 @@ module Bali::Objector::Statics
   end
 
   def cant?(subtarget, operation)
-    rule_group = Bali.rule_group_for(subtarget, operation)
+    rule_group = Bali.rule_group_for(self.class, subtarget)
     rule = rule_group.get_rule(:cant, operation)
+
+    # godly subtarget is not to be prohibited in his endeavours
+    # so long that no specific rule about this operation is defined
+    return false if rule_group.zeus? && rule.nil?
 
     # default to true when asked about cant? but no rule to be found
     return true if rule.nil?

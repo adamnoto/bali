@@ -19,7 +19,7 @@ class Bali::Rule
     if aval == :can || aval == :cant
       @auth_val = aval
     else
-      raise "auth_val can only either be :can or :cant"
+      raise Bali::DslError, "auth_val can only either be :can or :cant"
     end
   end
 

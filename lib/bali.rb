@@ -8,9 +8,12 @@ require_relative "bali/objector"
 # exception classes
 require_relative "bali/exceptions/dsl_error"
 module Bali
+  # mapping class to a RuleClass
   RULE_CLASS_MAP = {}
+
   # from symbol to full class name
   ALIASED_RULE_CLASS_MAP = {}
+
   # from full class name to symbol
   REVERSE_ALIASED_RULE_CLASS_MAP = {}
 end
@@ -170,6 +173,10 @@ module Bali
 
     def cant(*operations)
       process_auth_rules(:cant, operations)
+    end
+
+    def can_all
+      self.current_rule_group.zeus = true
     end
 
   end # class

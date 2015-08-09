@@ -11,10 +11,23 @@ class Bali::RuleGroup
   # what can be done and what cannot be done
   attr_accessor :cans, :cants
 
+  # if set to true then the subtarget can do anything
+  attr_accessor :zeus
+  alias :zeus? :zeus
+
+  # allowing "general user" and :general_user to route to the same rule group
+  def self.canon_name(subtarget)
+    if subtarget.is_a?(String)
+      return subtarget.gsub(" ", "_").to_sym
+    else
+      return subtarget
+    end
+  end
+
   def initialize(target, alias_tgt, subtarget)
     self.target = target
     self.alias_tgt = alias_tgt
-    self.subtarget = subtarget
+    self.subtarget = Bali::RuleGroup.canon_name(subtarget)
 
     self.cans = {}
     self.cants = {}
@@ -24,7 +37,7 @@ class Bali::RuleGroup
     # operation cannot be defined twice
     operation = rule.operation.to_sym
 
-    raise "Rule is defined twice for operation #{operation}" if self.cants[operation] && self.cans[operation]
+    raise Bali::DslError, "Rule is defined twice for operation #{operation}" if self.cants[operation] && self.cans[operation]
 
     if rule.is_discouragement?
       self.cants[rule.operation.to_sym] = rule
@@ -44,7 +57,6 @@ class Bali::RuleGroup
       raise Bali::DslError, "Undefined operation: #{auth_val}"
     end
 
-    raise Bali::DslError, "Undefined rule #{auth_val} #{operation}" if rule.nil?
     rule
   end
 

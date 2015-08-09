@@ -24,7 +24,8 @@ class Bali::RuleClass
     end
   end
 
-  def rules_for(target_user)
-    self.rule_groups[target_user.to_sym]
+  def rules_for(subtarget)
+    subtarget = Bali::RuleGroup.canon_name(subtarget)
+    self.rule_groups[subtarget]
   end
 end

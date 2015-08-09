@@ -44,9 +44,6 @@ describe Bali::RuleGroup do
       @rule_group.get_rule(:can, :new).should == rule_can_new
     end
 
-    it "raises error when retrieving undefined rule" do
-      expect { @rule_group.get_rule(:can, :delete) }.to raise_error(Bali::DslError)
-    end
   end
 
   context "rule objection" do
@@ -85,15 +82,33 @@ describe Bali::Rule do
 
   it "can have decider" do
     rule = Bali::Rule.new(:can, :delete)
+    expect(rule.has_decider?).to be_falsey
+
     rule.decider = -> { true }
     expect(rule.has_decider?).to be_truthy
   end
 
-  context "cant-type rule" do
-    
+  context "based on auth_val" do
+    it "can only be either can or cant type" do
+      expect {Bali::Rule.new(:xyz, :delete) }.to raise_error(Bali::DslError)
+      expect {Bali::Rule.new(:can, :delete) }.to_not raise_error
+      expect {Bali::Rule.new(:cant, :delete)}.to_not raise_error
+    end
+    context "cant-type rule" do
+      let(:rule) { Bali::Rule.new(:cant, :delete) }
+      
+      it "is a discouragement" do
+        expect(rule.is_discouragement?).to be_truthy
+      end
+    end
+
+    context "can-type rule" do
+      let(:rule) { Bali::Rule.new(:can, :delete ) }
+
+      it "is not a discouragement" do
+        expect(rule.is_discouragement?).to be_falsey
+      end
+    end
   end
 
-  context "can-type rule" do
-
-  end
 end
