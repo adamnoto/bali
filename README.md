@@ -26,7 +26,7 @@ And then execute:
 
 ### First things first: defining rules
 
-Rule in Bali is the law determining whether a user (called 'subtarget') can specific operation on a target (which is your resource).
+Rule in Bali is the law determining whether a user (called `subtarget`) can do or perform specific operation on a target (which is your resource/model).
 
 ```ruby
   Bali.map_rules do
@@ -44,6 +44,7 @@ Rule in Bali is the law determining whether a user (called 'subtarget') can spec
         can :update, :delete, :edit
         can :delete, if: proc { |record| record.is_settled? }
       end # finance_user description
+      describe :guest { cant_all }
     end # rules_for
   end
 ```
@@ -73,6 +74,7 @@ transaction.can?(:monitoring_user, :view)    # => true
 transaction.can?("monitoring user", :view)   # => true
 transaction.can?(:admin_user, :cancel)       # depend on context
 transaction.can?(:supreme_user, :cancel)     # => true
+transaction.can?(:guest, :view)              # => false
 ```
 
 If a rule is depending on a certain context, then the context will be evaluated to determine whether the subtarget is authorized or not.
@@ -82,7 +84,8 @@ In the above example, deletion of `transaction` is only allowed if the subtarget
 Rule can also be called on a class, instead of on an object:
 
 ```ruby
-My::Transaction.can?(:bank_corp, :new)      # => true
+My::Transaction.can?(:supreme_user, :new)      # => true
+My::Transaction.can?(:guest, :view)            # => false
 ```
 
 ## Contributing
@@ -93,3 +96,12 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+### Changelog
+
+#### Version 1.0.0beta1
+1. Initial version
+
+#### Version 1.0.0rc1
+1. Fix bug where user can't check on class
+2. Adding new clause: cant_all
