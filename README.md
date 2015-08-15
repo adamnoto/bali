@@ -110,3 +110,4 @@ The gem is available as open source under the terms of the [MIT License](http://
 #### Version 1.0.0rc2
 1. [Fix bug when class's name, as a constant, is reloaded](http://stackoverflow.com/questions/2509350/rails-class-object-id-changes-after-i-make-a-request) (re-allocated to different address in the memory)
 2. Allow describing rule for `nil`, useful if user is not authenticated thus role is probably `nil`
+3. Remove pry from development dependency
