@@ -1,3 +1,18 @@
+describe Bali do 
+  it "cannot add rule class other than of class Bali::RuleClass" do
+    expect { Bali.add_rule_class(nil) }.to raise_error(Bali::DslError)
+    expect { Bali.add_rule_class("adam") }.to raise_error(Bali::DslError)
+    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction)).should_not be_nil
+  end
+
+  it "rule class for is only defined for a Class" do
+    expect { Bali.rule_class_for("adam") }.to raise_error(Bali::DslError)
+
+    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+  end
+end
+
 describe Bali::RuleClass do
   it "is creatable" do
     rule_class = Bali::RuleClass.new(My::Transaction)
