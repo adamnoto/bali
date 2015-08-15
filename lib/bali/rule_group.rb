@@ -15,6 +15,10 @@ class Bali::RuleGroup
   attr_accessor :zeus
   alias :zeus? :zeus
 
+  # if set to true, well, cannot do anything
+  attr_accessor :plant
+  alias :plant? :plant
+
   # allowing "general user" and :general_user to route to the same rule group
   def self.canon_name(subtarget)
     if subtarget.is_a?(String)

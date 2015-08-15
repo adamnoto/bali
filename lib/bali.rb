@@ -177,6 +177,12 @@ module Bali
 
     def can_all
       self.current_rule_group.zeus = true
+      self.current_rule_group.plant = false
+    end
+
+    def cant_all
+      self.current_rule_group.plant = true
+      self.current_rule_group.zeus = false
     end
 
   end # class
