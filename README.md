@@ -45,6 +45,7 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
         can :delete, if: proc { |record| record.is_settled? }
       end # finance_user description
       describe :guest { cant_all }
+      describe nil { cant_all }
     end # rules_for
   end
 ```
@@ -107,4 +108,5 @@ The gem is available as open source under the terms of the [MIT License](http://
 2. Adding new clause: cant_all
 
 #### Version 1.0.0rc2
-1. Fix bug when class's name, as a constant, is reloaded (re-allocated to different address in the memory)
+1. [Fix bug when class's name, as a constant, is reloaded](http://stackoverflow.com/questions/2509350/rails-class-object-id-changes-after-i-make-a-request) (re-allocated to different address in the memory)
+2. Allow describing rule for `nil`, useful if user is not authenticated thus role is probably `nil`
