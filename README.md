@@ -44,6 +44,7 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
         can :update, :delete, :edit
         can :delete, if: proc { |record| record.is_settled? }
       end # finance_user description
+      describe :guest { cant_all }
     end # rules_for
   end
 ```
@@ -73,6 +74,7 @@ transaction.can?(:monitoring_user, :view)    # => true
 transaction.can?("monitoring user", :view)   # => true
 transaction.can?(:admin_user, :cancel)       # depend on context
 transaction.can?(:supreme_user, :cancel)     # => true
+transaction.can?(:guest, :view)              # => false
 ```
 
 If a rule is depending on a certain context, then the context will be evaluated to determine whether the subtarget is authorized or not.
@@ -82,7 +84,8 @@ In the above example, deletion of `transaction` is only allowed if the subtarget
 Rule can also be called on a class, instead of on an object:
 
 ```ruby
-My::Transaction.can?(:bank_corp, :new)      # => true
+My::Transaction.can?(:supreme_user, :new)      # => true
+My::Transaction.can?(:guest, :view)            # => false
 ```
 
 ## Contributing
