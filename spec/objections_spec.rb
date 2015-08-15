@@ -13,7 +13,7 @@ describe "Model objections" do
 
     it "can answer to can? on a class" do
       My::Transaction.can?(:supreme_user, :new).should be_truthy
-      My::Transaction.can?(:general_user, :update).should be_falsey
+      My::Transaction.can?(:general_user, :delete).should be_falsey
     end
 
     it "can asnwer to cant? on a class" do
@@ -84,11 +84,14 @@ describe "Model objections" do
               if: proc { |record| record.payment_channel == "CREDIT_CARD" && 
                                   !record.is_settled? }
           end
-          describe "general user", can: [:view], cant: [:delete]
+          describe "general user", can: [:view, :edit, :update], cant: [:delete]
           describe "finance user" do
             can :update, :delete, :edit
             can :delete, if: proc { |record| record.is_settled? }
           end # finance_user description
+          describe nil do
+            can :view
+          end
         end # rules_for
       end
     end # before each
@@ -96,9 +99,28 @@ describe "Model objections" do
     describe My::Transaction do
       it_behaves_like "objector"
 
+      context "unauthenticated/nil-role user" do
+        it "can view transaction" do
+          txn.can?(nil, :view).should be_truthy
+        end
+
+        it "can't edit or update transaction" do
+          txn.can?(nil, :edit).should be_falsey
+          txn.can?(nil, :update).should be_falsey
+        end
+      end
+
       context "general user" do
         it "can view transaction" do
           txn.can?("general user", :view).should be_truthy
+        end
+
+        it "can edit transaction" do
+          txn.can?(:general_user, :edit).should be_truthy
+        end
+
+        it "can update transaction" do
+          txn.can?(:general_user, :update).should be_truthy
         end
 
         it "cannot delete transaction" do

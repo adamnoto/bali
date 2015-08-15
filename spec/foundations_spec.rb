@@ -1,3 +1,18 @@
+describe Bali do 
+  it "cannot add rule class other than of class Bali::RuleClass" do
+    expect { Bali.add_rule_class(nil) }.to raise_error(Bali::DslError)
+    expect { Bali.add_rule_class("adam") }.to raise_error(Bali::DslError)
+    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction)).should_not be_nil
+  end
+
+  it "rule class for is only defined for a Class" do
+    expect { Bali.rule_class_for("adam") }.to raise_error(Bali::DslError)
+
+    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+  end
+end
+
 describe Bali::RuleClass do
   it "is creatable" do
     rule_class = Bali::RuleClass.new(My::Transaction)
@@ -6,6 +21,24 @@ describe Bali::RuleClass do
   it "does not allow creation of instance for target other than class" do
     expect { Bali::RuleClass.new(Object.new) }.to raise_error(Bali::DslError)
   end
+
+  # non-nil rule group is rule group that is defined with proper-named group
+  # such as :user, :admin, :supreme, etc
+  it "can add non-nil rule group" do
+    rule_group = Bali::RuleGroup.new(My::Transaction, :transaction, :user)
+    rule_class = Bali::RuleClass.new(My::Transaction)
+    expect { rule_class.add_rule_group(rule_group) }.to_not raise_error
+    rule_class.rules_for(:user).class.should == Bali::RuleGroup
+  end
+
+  # nil rule group is for rule group that rules is targeting nil/un-authorized
+  # un-authenticated or other un-available group for that matter: nil
+  it "can add nil rule group" do
+    rule_group = Bali::RuleGroup.new(My::Transaction, :transaction, nil)
+    rule_class = Bali::RuleClass.new(My::Transaction)
+    expect { rule_class.add_rule_group(rule_group) }.to_not raise_error
+    rule_class.rules_for(nil).class.should == Bali::RuleGroup
+  end
 end
 
 describe Bali::RuleGroup do
@@ -13,57 +46,72 @@ describe Bali::RuleGroup do
   let(:rule_can_new)    { Bali::Rule.new(:can, :new)    }
   let(:rule_cant_edit)  { Bali::Rule.new(:cant, :edit)  }
 
-  before(:each) do
-    @rule_group = Bali::RuleGroup.new(My::Transaction, :transaction, :user)
-  end
+  RSpec.shared_examples "rule" do
+    context "rule objection" do
+      it "can responds to can?" do
+        transaction = My::Transaction.new
+        expect(transaction.respond_to?(:can?)).to eq true
+        transaction.class.ancestors.include?(Bali::Objector).should be_truthy 
 
-  it "is creatable" do
-    @rule_group.target.should == My::Transaction
-    @rule_group.alias_tgt.should == :transaction
-    @rule_group.subtarget.should == :user
-  end
+        # class-level question too
+        My::Transaction.respond_to?(:can?).should == true
+      end
 
-  context "rule manipulation" do
-    it "allows adding new rule" do
-      @rule_group.rules.size.should == 0
-      @rule_group.add_rule(rule_can_delete)
-      @rule_group.rules.size.should == 1
+      it "can responds to cant?" do
+        transaction = My::Transaction.new
+        expect(transaction.respond_to?(:cant?)).to eq true
+        transaction.class.ancestors.include?(Bali::Objector).should be_truthy
 
-      @rule_group.add_rule(rule_can_new)
-      @rule_group.rules.size.should == 2
-
-      @rule_group.add_rule(rule_cant_edit)
-      @rule_group.rules.size.should == 3
+        # class-level question too
+        My::Transaction.respond_to?(:can?).should == true
+      end
     end
 
-    it "allows retrieval of defined rule" do
-      @rule_group.add_rule rule_can_delete
-      @rule_group.add_rule rule_can_new
+    context "rule manipulation" do
+      it "allows adding new rule" do
+        rule_group.rules.size.should == 0
+        rule_group.add_rule(rule_can_delete)
+        rule_group.rules.size.should == 1
 
-      @rule_group.get_rule(:can, :delete).should == rule_can_delete
-      @rule_group.get_rule(:can, :new).should == rule_can_new
+        rule_group.add_rule(rule_can_new)
+        rule_group.rules.size.should == 2
+
+        rule_group.add_rule(rule_cant_edit)
+        rule_group.rules.size.should == 3
+      end
+
+      it "allows retrieval of defined rule" do
+        rule_group.add_rule rule_can_delete
+        rule_group.add_rule rule_can_new
+
+        rule_group.get_rule(:can, :delete).should == rule_can_delete
+        rule_group.get_rule(:can, :new).should == rule_can_new
+      end
+    end
+  end # shared examples
+
+  context "for :user" do
+    let(:rule_group) { Bali::RuleGroup.new(My::Transaction, :transaction, :user) }
+    
+    it "is creatable" do
+      rule_group.target.should == My::Transaction
+      rule_group.alias_tgt.should == :transaction
+      rule_group.subtarget.should == :user
+    end
+    
+    it_behaves_like "rule"
+  end # context for :user
+
+  context "for nil" do
+    let(:rule_group) { Bali::RuleGroup.new(My::Transaction, :transaction, nil) }
+
+    it "is creatable" do
+      rule_group.target.should == My::Transaction
+      rule_group.alias_tgt.should == :transaction
+      rule_group.subtarget.should == nil
     end
 
-  end
-
-  context "rule objection" do
-    it "can responds to can?" do
-      transaction = My::Transaction.new
-      expect(transaction.respond_to?(:can?)).to eq true
-      transaction.class.ancestors.include?(Bali::Objector).should be_truthy 
-
-      # class-level question too
-      My::Transaction.respond_to?(:can?).should == true
-    end
-
-    it "can responds to cant?" do
-      transaction = My::Transaction.new
-      expect(transaction.respond_to?(:cant?)).to eq true
-      transaction.class.ancestors.include?(Bali::Objector).should be_truthy
-
-      # class-level question too
-      My::Transaction.respond_to?(:can?).should == true
-    end
+    it_behaves_like "rule"
   end
 end # RuleObject
 

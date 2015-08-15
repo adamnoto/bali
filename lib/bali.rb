@@ -32,7 +32,8 @@ module Bali
 
       rule_class_for(class_name)
     else
-      rule_class = RULE_CLASS_MAP[target]
+      raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
+      rule_class = RULE_CLASS_MAP[target.to_s]
       raise Bali::DslError, "Rule class is not defined for: #{target}" if rule_class.nil?
       rule_class
     end
@@ -50,7 +51,7 @@ module Bali
       target = rule_class.target_class
       alias_target = rule_class.alias_name
 
-      raise "Target must be a class" unless target.is_a?(Class)
+      raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
 
       # remove any previous association of rule
       begin 
@@ -68,9 +69,10 @@ module Bali
         Bali::REVERSE_ALIASED_RULE_CLASS_MAP[target] = alias_target
       end
 
-      Bali::RULE_CLASS_MAP[target] = rule_class
+      Bali::RULE_CLASS_MAP[target.to_s] = rule_class
+      rule_class
     else
-      raise "Only allow instance of Bali::RuleClass"
+      raise Bali::DslError, "Only allow instance of Bali::RuleClass"
     end
   end # add_rule_class
 end
