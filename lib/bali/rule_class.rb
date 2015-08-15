@@ -18,7 +18,7 @@ class Bali::RuleClass
   def add_rule_group(rule_group)
     if rule_group.is_a?(Bali::RuleGroup)
       target_user = rule_group.subtarget
-      self.rule_groups[target_user.to_sym] = rule_group
+      self.rule_groups[Bali::RuleGroup.canon_name(target_user)] = rule_group
     else
       raise Bali::DslError, "Rule group must be an instance of Bali::RuleGroup"
     end

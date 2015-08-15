@@ -7,6 +7,7 @@ describe Bali do
     before(:each) do
       Bali.clear_rules
     end
+
     it "allows definition of rules" do
       expect(Bali.rule_classes.size).to eq(0)
       Bali.map_rules do
@@ -15,6 +16,19 @@ describe Bali do
           describe :finance_user do |record|
             can :update, :delete, :edit
             can :delete, if: -> { record.is_settled? }
+          end
+        end
+      end
+      Bali.rule_classes.size.should == 1
+      Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    end
+
+    it "can define nil rule group" do
+      expect(Bali.rule_classes.size).to eq(0)
+      Bali.map_rules do
+        rules_for My::Transaction, as: :transaction do
+          describe nil do
+            can :view
           end
         end
       end
