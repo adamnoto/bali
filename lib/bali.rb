@@ -70,7 +70,7 @@ module Bali
 
       Bali::RULE_CLASS_MAP[target] = rule_class
     else
-      raise "Only allow instance of Bali::RuleClass"
+      raise Bali::DslError, "Only allow instance of Bali::RuleClass"
     end
   end # add_rule_class
 end
