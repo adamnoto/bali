@@ -105,3 +105,6 @@ The gem is available as open source under the terms of the [MIT License](http://
 #### Version 1.0.0rc1
 1. Fix bug where user can't check on class
 2. Adding new clause: cant_all
+
+#### Version 1.0.0rc2
+1. Fix bug when class's name, as a constant, is reloaded (re-allocated to different address in the memory)
