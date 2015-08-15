@@ -26,7 +26,7 @@ And then execute:
 
 ### First things first: defining rules
 
-Rule in Bali is the law determining whether a user (called 'subtarget') can specific operation on a target (which is your resource).
+Rule in Bali is the law determining whether a user (called `subtarget`) can do or perform specific operation on a target (which is your resource/model).
 
 ```ruby
   Bali.map_rules do
@@ -93,3 +93,12 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+### Changelog
+
+#### Version 1.0.0beta1
+1. Initial version
+
+#### Version 1.0.0rc1
+1. Fix bug where user can't check on class
+2. Adding new clause: cant_all
