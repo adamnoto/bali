@@ -47,7 +47,7 @@ describe Bali do
       rc.class.should == Bali::RuleClass
       rc.rules_for(:general_user).class.should == Bali::RuleGroup
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
-      Bali.rule_class_for(:transaction).should be_nil
+      expect { Bali.rule_class_for(:transaction) }.to raise_error(Bali::DslError)
 
       Bali.map_rules do 
         rules_for My::Transaction, as: :transaction do
