@@ -2,15 +2,6 @@ describe "Model objections" do
   let(:txn) { My::Transaction.new }
 
   RSpec.shared_examples "objector" do
-    it "extends Bali::Objector::Statics automatically" do
-      txn.class.respond_to?(:can?).should be_truthy
-      txn.class.respond_to?(:cant?).should be_truthy
-    end
-
-    it "includes Bali::Objector automatically" do
-      txn.class.included_modules.include?(Bali::Objector).should be_truthy
-    end
-
     it "can answer to can? on a class" do
       My::Transaction.can?(:supreme_user, :new).should be_truthy
       My::Transaction.can?(:general_user, :delete).should be_falsey
