@@ -1,4 +1,6 @@
 describe Bali do 
+  before(:each) { Bali.clear_rules }
+
   it "cannot add rule class other than of class Bali::RuleClass" do
     expect { Bali.add_rule_class(nil) }.to raise_error(Bali::DslError)
     expect { Bali.add_rule_class("adam") }.to raise_error(Bali::DslError)
@@ -10,6 +12,26 @@ describe Bali do
 
     Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
     Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+  end
+
+  it "should return nil whenever trying to search for inexistent rule class" do
+    Bali.rule_class_for(My::Transaction).should be_nil
+  end
+
+  it "should return Bali::RuleClass if rule class is defined" do
+    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+  end
+
+  it "should return nil whenever trying to search for inexistent rule group" do
+    Bali.rule_group_for(My::Transaction, :basic_user).should be_nil
+  end
+
+  it "should return Bali::RuleGroup if rule group is defined" do
+    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    rule_class = Bali.rule_class_for(My::Transaction)
+    rule_class.add_rule_group(Bali::RuleGroup.new(My::Transaction, :transaction, :basic))
+    Bali.rule_group_for(My::Transaction, :basic).class.should == Bali::RuleGroup
   end
 end
 
