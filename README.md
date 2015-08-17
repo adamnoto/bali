@@ -95,7 +95,7 @@ In the above example, deletion of `transaction` is only allowed if the subtarget
 
 Also, asking `can?` on which the subtarget is not yet defined will always return `false`. In the example above, as `undefined_subtarget` is by itself has never been defined in `describe` under `My::Transaction` rule class, `can?` for `undefined_subtarget` will always return `false`. But, `cant` on simillar ocassion will return `true`.
 
-Rule can also be called on a class:
+Rule can also be tested on a class:
 
 ```ruby
 My::Transaction.can?(:supreme_user, :new)      # => true
