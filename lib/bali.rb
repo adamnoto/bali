@@ -94,8 +94,6 @@ module Bali
 
         # done processing the block, now add the rule class
         Bali.add_rule_class(self.current_rule_class)
-
-        target_class.include(Bali::Objector) unless target_class.include?(Bali::Objector)
       end
     end
   end
