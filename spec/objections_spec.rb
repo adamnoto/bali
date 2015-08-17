@@ -1,5 +1,38 @@
 describe "Model objections" do
+  before(:each) { Bali.clear_rules }
   let(:txn) { My::Transaction.new }
+
+  it "should return false to can? for undefined rule class" do
+    Bali.rule_class_for(My::Employee).should be_nil
+    My::Employee.can?(:undefined_subtarget, :new).should be_falsey
+  end
+
+  it "should return true to cant? for undefined rule class" do 
+    Bali.rule_class_for(My::Employee).should be_nil
+    My::Employee.cant?(:undefined_subtarget, :new).should be_truthy
+  end
+
+  it "should return false to can? for undefined rule group" do
+    Bali.map_rules do
+      rules_for My::Transaction do
+      end
+    end
+
+    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    Bali.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
+    My::Transaction.can?(:undefined_subtarget, :new).should be_falsey
+  end
+
+  it "should return true to cant? for undefined rule group" do
+    Bali.map_rules do
+      rules_for My::Transaction do
+      end
+    end
+
+    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    Bali.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
+    My::Transaction.cant?(:undefined_subtarget, :new).should be_truthy
+  end
 
   RSpec.shared_examples "objector" do
     it "extends Bali::Objector::Statics automatically" do

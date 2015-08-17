@@ -24,6 +24,11 @@ module Bali::Objector::Statics
       rule_group = Bali.rule_group_for(self.class, subtarget)
     end
 
+    # default of can? is false whenever RuleClass for that class is undefined
+    # or RuleGroup for that subtarget is not defined
+    return false if rule_group.nil?
+
+    # get the specific rule
     rule = rule_group.get_rule(:can, operation)
 
     # godly subtarget is allowed to do as he wishes
@@ -56,6 +61,10 @@ module Bali::Objector::Statics
     else
       rule_group = Bali.rule_group_for(self.class, subtarget)
     end
+
+    # default of cant? is true whenever RuleClass for that class is undefined
+    # or RuleGroup for that subtarget is not defined
+    return true if rule_group.nil?
 
     rule = rule_group.get_rule(:cant, operation)
 

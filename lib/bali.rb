@@ -28,22 +28,23 @@ module Bali
   def rule_class_for(target)
     if target.is_a?(Symbol)
       class_name = ALIASED_RULE_CLASS_MAP[target]
-      raise Bali::DslError, "Rule class is not defined for: #{target}" if class_name.nil?
-
-      rule_class_for(class_name)
+      return class_name.nil? ? nil : rule_class_for(class_name)
     else
       raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
       rule_class = RULE_CLASS_MAP[target.to_s]
-      raise Bali::DslError, "Rule class is not defined for: #{target}" if rule_class.nil?
-      rule_class
+      return rule_class.nil? ? nil : rule_class
     end
   end
 
+  # attempt to search the rule group, but if not exist, will return nil
   def rule_group_for(target_class, subtarget)
     rule_class = Bali.rule_class_for(target_class)
-    rule_group = rule_class.rules_for(subtarget)
-    
-    rule_group
+    if rule_class
+      rule_group = rule_class.rules_for(subtarget)
+      return rule_group
+    else
+      return nil
+    end
   end
 
   def add_rule_class(rule_class)
