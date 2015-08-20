@@ -1,4 +1,4 @@
-# for internal use, representing rule
+# for internal use, representing one, single, atomic rule
 class Bali::Rule
   # auth_val is either :can or :cant
   attr_reader :auth_val
