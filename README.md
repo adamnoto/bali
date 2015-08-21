@@ -137,3 +137,8 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 
 #### Version 1.0.0
 1. Released the stable version of this gem
+
+#### Version 1.1.0rc1
+1. Ability for rule class to be parsed later by parsing later: true to rule class definition
+2. Add `Bali.parse` and `Bali.parse!` (Bali.parse! executes "later"-tagged rule class, Bali.parse executes automatically after all rules are defined)
+3. Added more thorough testing specs
