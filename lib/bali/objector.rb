@@ -10,7 +10,7 @@ module Bali::Objector
   end
 
   def cant?(subtarget, operation)
-    self.class.can?(subtarget, operation, self)
+    self.class.cant?(subtarget, operation, self)
   end
 end
 
@@ -33,7 +33,17 @@ module Bali::Objector::Statics
 
     # godly subtarget is allowed to do as he wishes
     # so long that the rule is not specificly defined
-    return true if rule_group.zeus? && rule.nil?
+    # or overwritten by subsequent rule
+    if rule_group.zeus?
+      if rule.nil?
+        # check further whether cant is defined to overwrite this can_all
+        if self.cant?(subtarget, operation, record)
+          return false
+        else
+          return true
+        end
+      end
+    end
     
     # plan subtarget is not allowed unless spesificly defined
     return false if rule_group.plant? && rule.nil?
@@ -73,18 +83,34 @@ module Bali::Objector::Statics
     return false if rule_group.zeus? && rule.nil?
 
     # plant subtarget is not allowed to do things unless specificly defined
-    return true if rule_group.plant? && rule.nil?
-
-    # default to true when asked about cant? but no rule to be found
-    return true if rule.nil?
-
-    if rule.has_decider?
-      decider = rule.decider
-      if decider.arity == 0
-        decider.() == true
-      else
-        decider.(record) == true
+    if rule_group.plant?
+      if rule.nil?
+        # check further whether defined in can?
+        if self.can?(subtarget, operation, record)
+          return false # well, it is defined in can, so it must overwrite this cant_all rule
+        else
+          # plant, and then rule is not defined for further inspection. stright
+          # is not allowed to do this thing
+          return true
+        end
       end
     end
+
+    # if rule cannot be found, then true is returned for cant? unless 
+    # can? is defined exactly for the same target, and subtarget, and record (if given)
+    if rule.nil?
+      return self.can?(subtarget, operation, record) ? false : true
+    else
+      if rule.has_decider?
+        decider = rule.decider
+        if decider.arity == 0
+          decider.() == true
+        else
+          decider.(record) == true
+        end
+      else
+        return true # rule is properly defined
+      end # if rule has decider
+    end # if rule is nil
   end
 end

@@ -48,9 +48,14 @@ describe "Model objections" do
 
   context "Abstractly defined rules" do 
     before(:each) do 
+      Bali.clear_rules
       Bali.map_rules do 
         rules_for My::Transaction, as: :transaction do
           describe(:supreme_user) { can_all }
+          describe(:admin_user) do
+            can_all
+            cant :delete
+          end
           describe(:general_user) do 
             cant_all
             can :view
@@ -63,12 +68,31 @@ describe "Model objections" do
     describe My::Transaction do
       it_behaves_like "objector"
 
+      context "admin user" do 
+        it "can do anything, but not delete" do 
+          txn.can?(:admin_user, :cancel).should be_truthy
+          txn.can?(:admin_user, :delete).should be_falsey
+          txn.can?(:admin_user, :create).should be_truthy
+          txn.can?(:admin_user, :update).should be_truthy
+
+          txn.cant?(:admin_user, :cancel).should be_falsey
+          txn.cant?(:admin_user, :delete).should be_truthy
+          txn.cant?(:admin_user, :create).should be_falsey
+          txn.cant?(:admin_user, :update).should be_falsey
+        end
+      end
+
       context "supreme user" do 
         it "can do anything" do
           txn.can?(:supreme_user, :cancel).should be_truthy
           txn.can?(:supreme_user, :delete).should be_truthy
           txn.can?(:supreme_user, :create).should be_truthy
           txn.can?(:supreme_user, :update).should be_truthy
+
+          txn.cant?(:supreme_user, :cancel).should be_falsey
+          txn.cant?(:supreme_user, :delete).should be_falsey
+          txn.cant?(:supreme_user, :create).should be_falsey
+          txn.cant?(:supreme_user, :update).should be_falsey
         end
       end
 
@@ -78,20 +102,28 @@ describe "Model objections" do
           txn.can?(:general_user, :delete).should be_falsey
           txn.can?(:general_user, :create).should be_falsey
           txn.can?(:general_user, :update).should be_falsey
+
+          txn.cant?(:general_user, :cancel).should be_truthy
+          txn.cant?(:general_user, :delete).should be_truthy
+          txn.cant?(:general_user, :create).should be_truthy
+          txn.cant?(:general_user, :update).should be_truthy
         end
 
         it "can view transaction" do
           txn.can?(:general_user, :view).should be_truthy
+          txn.cant?(:general_user, :view).should be_falsey
         end
 
         it "can print if transaction is settled" do
           txn.is_settled = true
           txn.can?(:general_user, :print).should be_truthy
+          txn.cant?(:general_user, :print).should be_falsey
         end
 
         it "can't print if transaction is not settled" do
           txn.is_settled = false
           txn.can?(:general_user, :print).should be_falsey
+          txn.cant?(:general_user, :print).should be_truthy
         end
       end
     end
@@ -113,6 +145,10 @@ describe "Model objections" do
             can :update, :delete, :edit
             can :delete, if: proc { |record| record.is_settled? }
           end # finance_user description
+          describe :monitoring do
+            cant_all
+            can :monitor
+          end
           describe nil do
             can :view
           end
@@ -220,6 +256,34 @@ describe "Model objections" do
           txn.can?(:supreme_user, :create).should be_truthy
           txn.can?(:supreme_user, :update).should be_truthy
         end
+      end
+
+      it "can answer to can?" do
+        My::Transaction.can?(:supreme_user, :delete).should be_truthy
+        My::Transaction.can?(:admin_user, :delete).should be_truthy
+        My::Transaction.can?(:general_user, :view).should be_truthy
+        My::Transaction.can?(:general_user, :delete).should be_falsey
+        My::Transaction.can?(:general_user, :do_something_undefined).should be_falsey
+        My::Transaction.can?(:finance_user, :update).should be_truthy
+        My::Transaction.can?(:finance_user, :save).should be_falsey
+        My::Transaction.can?(:monitoring, :read).should be_falsey
+        My::Transaction.can?(:monitoring, :monitor).should be_truthy
+        My::Transaction.can?(nil, :view).should be_truthy
+        My::Transaction.can?(nil, :save).should be_falsey
+      end
+
+      it "can answer to cant?" do
+        My::Transaction.cant?(:supreme_user, :delete).should be_falsey
+        My::Transaction.cant?(:admin_user, :delete).should be_falsey
+        My::Transaction.cant?(:general_user, :edit).should be_falsey
+        My::Transaction.cant?(:general_user, :view).should be_falsey
+        My::Transaction.cant?(:general_user, :delete).should be_truthy
+        My::Transaction.cant?(:finance_user, :update).should be_falsey
+        My::Transaction.cant?(:finance_user, :new).should be_truthy
+        My::Transaction.cant?(:monitoring, :read).should be_truthy
+        My::Transaction.cant?(:monitoring, :monitor).should be_falsey
+        My::Transaction.cant?(nil, :view).should be_falsey
+        My::Transaction.cant?(nil, :save).should be_truthy
       end
 
     end
