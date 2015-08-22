@@ -57,7 +57,13 @@ class Bali::RulesForDsl
     if conditional_hash
       op = operations[0]
       rule = Bali::Rule.new(auth_val, op)
-      rule.decider = conditional_hash[:if] || conditional_hash["if"]
+      if conditional_hash[:if] || conditional_hash["if"]
+        rule.decider = conditional_hash[:if] || conditional_hash["if"]
+        rule.decider_type = :if
+      elsif conditional_hash[:unless] || conditional_hash[:unless]
+        rule.decider = conditional_hash[:unless] || conditional_hash["unless"]
+        rule.decider_type = :unless
+      end
       self.current_rule_group.add_rule(rule)
     else
       # no conditional hash, proceed adding operations one by one
