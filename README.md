@@ -43,6 +43,7 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
       describe "finance user" do
         can :update, :delete, :edit
         can :delete, if: proc { |record| record.is_settled? }
+        can :cancel, unless: proc { |record| record.is_settled? }
       end # finance_user description
       describe :guest { cant_all }
       describe nil { cant_all }
@@ -137,3 +138,9 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 
 #### Version 1.0.0
 1. Released the stable version of this gem
+
+#### Version 1.1.0rc1
+1. Ability for rule class to be parsed later by parsing later: true to rule class definition
+2. Add `Bali.parse` and `Bali.parse!` (Bali.parse! executes "later"-tagged rule class, Bali.parse executes automatically after all rules are defined)
+3. Added more thorough testing specs
+4. Proc can be served under `unless` for defining the rule's decider
