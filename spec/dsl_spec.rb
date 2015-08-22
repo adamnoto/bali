@@ -23,6 +23,90 @@ describe Bali do
       Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
     end
 
+    it "allows if-decider to be executed in context" do
+      expect(Bali.rule_classes.size).to eq(0)
+      Bali.map_rules do
+        rules_for My::Transaction do
+          describe :finance_user do
+            can :delete, if: proc { |record| record.is_settled? }
+            cant :payout, if: proc { |record| !record.is_settled? }
+          end
+        end
+      end
+
+      txn = My::Transaction.new
+      txn.is_settled = false
+      txn.can?(:finance_user, :delete).should be_falsey
+      txn.cant?(:finance_user, :delete).should be_truthy
+      txn.can?(:finance_user, :payout).should be_falsey
+      txn.cant?(:finance_user, :payout).should be_truthy
+
+      txn.is_settled = true
+      txn.can?(:finance_user, :delete).should be_truthy
+      txn.cant?(:finance_user, :delete).should be_falsey
+      txn.can?(:finance_user, :payout).should be_truthy
+      txn.cant?(:finance_user, :payout).should be_falsey
+
+      # reverse meaning of the above, should return the same
+      Bali.clear_rules
+      Bali.map_rules do
+        rules_for My::Transaction do
+          describe :finance_user do
+            cant :delete, unless: proc { |record| record.is_settled? }
+            can :payout, unless: proc { |record| !record.is_settled? }
+          end
+        end
+      end
+
+      txn = My::Transaction.new
+      txn.is_settled = false
+      txn.can?(:finance_user, :delete).should be_falsey
+      txn.cant?(:finance_user, :delete).should be_truthy
+
+      txn.is_settled = true
+      txn.can?(:finance_user, :delete).should be_truthy
+      txn.cant?(:finance_user, :delete).should be_falsey
+    end
+
+    it "allows unless-decider to be executed in context" do
+      expect(Bali.rule_classes.size).to eq(0)
+      Bali.map_rules do
+        rules_for My::Transaction do
+          describe :finance_user do
+            cant :chargeback, unless: proc { |record| record.is_settled? }
+          end
+        end
+      end
+
+      txn = My::Transaction.new
+      txn.is_settled = false
+      txn.cant?(:finance_user, :chargeback).should be_truthy
+      txn.can?(:finance_user, :chargeback).should be_falsey
+      
+      txn.is_settled = true
+      txn.cant?(:finance_user, :chargeback).should be_falsey
+      txn.can?(:finance_user, :chargeback).should be_truthy
+
+      # reverse meaning of the above, should return the same
+      Bali.clear_rules
+      Bali.map_rules do
+        rules_for My::Transaction do
+          describe :finance_user do
+            can :chargeback, if: proc { |record| record.is_settled? }
+          end
+        end
+      end
+
+      txn = My::Transaction.new
+      txn.is_settled = false
+      txn.cant?(:finance_user, :chargeback).should be_truthy
+      txn.can?(:finance_user, :chargeback).should be_falsey
+      
+      txn.is_settled = true
+      txn.cant?(:finance_user, :chargeback).should be_falsey
+      txn.can?(:finance_user, :chargeback).should be_truthy
+    end
+
     it "can define nil rule group" do
       expect(Bali.rule_classes.size).to eq(0)
       Bali.map_rules do
