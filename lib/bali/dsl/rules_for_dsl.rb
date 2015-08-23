@@ -9,38 +9,63 @@ class Bali::RulesForDsl
     self.map_rules_dsl = map_rules_dsl
   end
 
-  def describe(subtarget, rules = {})
+  def current_rule_class
+    self.map_rules_dsl.current_rule_class
+  end
+
+  def describe(*params)
+
+    subtargets = []
+    rules = {}
+
+    params.each do |passed_argument|
+      if passed_argument.is_a?(Symbol) || passed_argument.is_a?(String)
+        subtargets << passed_argument
+      elsif passed_argument.is_a?(NilClass)
+        subtargets << passed_argument
+      elsif passed_argument.is_a?(Array)
+        subtargets += passed_argument
+      elsif passed_argument.is_a?(Hash)
+        rules = passed_argument
+      else 
+        raise Bali::DslError, "Allowed argument: symbol, string, nil and hash"
+      end
+    end
+
     target_class = self.map_rules_dsl.current_rule_class.target_class
     target_alias = self.map_rules_dsl.current_rule_class.alias_name
 
-    @@lock.synchronize do
-      rule_group = Bali::RuleGroup.new(target_class, target_alias, subtarget)
-      self.current_rule_group = rule_group
+    subtargets.each do |subtarget|
+      @@lock.synchronize do
+        rule_group = self.current_rule_class.rules_for(subtarget)
+        if rule_group.nil?
+          rule_group = Bali::RuleGroup.new(target_class, target_alias, subtarget)
+        end
 
-      if block_given?
-        the_object = Object.new
-        # the_object would be the record, or the object of class as specified
-        # in rules_for
-        yield the_object
-      else
-        # auth_val is either can or cant
-        rules.each do |auth_val, operations|
-          if operations.is_a?(Array)
-            operations.each do |op|
-              rule = Bali::Rule.new(auth_val, op)
-              rule_group.add_rule(rule)
+        self.current_rule_group = rule_group
+
+        if block_given?
+          yield
+        else
+          # auth_val is either can or cant
+          rules.each do |auth_val, operations|
+            if operations.is_a?(Array)
+              operations.each do |op|
+                rule = Bali::Rule.new(auth_val, op)
+                self.current_rule_group.add_rule(rule)
+              end
+            else
+              operation = operations # well, basically is 1 only
+              rule = Bali::Rule.new(auth_val, operation) 
+              self.current_rule_group.add_rule(rule)
             end
-          else
-            operation = operations # well, basically is 1 only
-            rule = Bali::Rule.new(auth_val, operation) 
-            rule_group.add_rule(rule)
-          end
-        end # each rules
-      end # block_given?
+          end # each rules
+        end # block_given?
 
-      # add current_rule_group
-      self.map_rules_dsl.current_rule_class.add_rule_group(rule_group)
-    end # mutex synchronize
+        # add current_rule_group
+        self.map_rules_dsl.current_rule_class.add_rule_group(self.current_rule_group)
+      end # mutex synchronize
+    end # each subtarget
   end # describe
 
   # to define can and cant is basically using this method

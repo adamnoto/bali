@@ -8,19 +8,115 @@ describe Bali do
       Bali.clear_rules
     end
 
-    it "allows definition of rules" do
+    it "allows definition of rules per subtarget" do
       expect(Bali.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
           describe :general_user, can: :show
-          describe :finance_user do |record|
+          describe :finance_user do
             can :update, :delete, :edit
-            can :delete, if: -> { record.is_settled? }
+            can :delete, if: proc { |record| record.is_settled? }
           end
         end
       end
       Bali.rule_classes.size.should == 1
       Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    end
+
+    it "allows definition of rules per multiple subtarget" do
+      expect(Bali.rule_classes.size).to eq(0)
+      Bali.map_rules do
+        rules_for My::Transaction do
+          describe(:general_user, :finance_user, can: [:show])
+          describe :general_user, :finance_user do
+            can :print
+          end
+          describe :finance_user do
+            can :delete, if: proc { |record| record.is_settled? }
+          end
+        end
+      end
+
+      Bali.rule_classes.size.should == 1
+      Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      
+      rule_group_gu = Bali.rule_group_for(My::Transaction, :general_user)
+      rule_group_fu = Bali.rule_group_for(My::Transaction, :finance_user)
+
+      rule_group_gu.get_rule(:can, :show).class.should == Bali::Rule
+      rule_group_gu.get_rule(:can, :print).class.should == Bali::Rule
+      rule_group_fu.get_rule(:can, :show).class.should == Bali::Rule
+      rule_group_gu.get_rule(:can, :print).class.should == Bali::Rule
+      rule_group_fu.get_rule(:can, :delete).class.should == Bali::Rule
+      rule_group_gu.get_rule(:can, :delete).class.should == NilClass
+    end
+
+    it "does not allowe describe without rules_for" do
+      expect do
+        Bali.map_rules do
+          describe :general_user, can: [:print]
+        end
+      end.to raise_error(Bali::DslError)
+    end
+
+    it "does not allows subtarget definition other than using string, symbol, array and hash" do
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do 
+            describe :general_user do
+              can :print
+            end
+          end
+        end
+      end.to_not raise_error
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe "finance user" do
+              can :print
+            end
+          end
+        end
+      end.to_not raise_error
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe [:general_user, "finance user"] do
+              can :print
+            end
+          end
+        end
+      end.to_not raise_error
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe :general_user, can: [:print]
+          end
+        end
+      end.to_not raise_error
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe :general_user, :finance_user, [:guess, nil], can: [:show] do
+              can :print
+            end
+          end
+        end
+      end.to_not raise_error
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe :general_user, nil, -> { "finance_user "} do
+              can :print
+            end
+          end
+        end
+      end.to raise_error(Bali::DslError)
     end
 
     it "allows if-decider to be executed in context" do

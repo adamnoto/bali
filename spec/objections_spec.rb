@@ -140,6 +140,9 @@ describe "Model objections" do
               if: proc { |record| record.payment_channel == "CREDIT_CARD" && 
                                   !record.is_settled? }
           end
+          describe :general_user, :finance_user, :monitoring do
+            can :ask
+          end
           describe "general user", can: [:view, :edit, :update], cant: [:delete]
           describe "finance user" do
             can :update, :delete, :edit
@@ -242,6 +245,11 @@ describe "Model objections" do
       end
 
       context "general user" do
+        it "can ask" do
+          txn.can?(:general_user, :ask).should be_truthy
+          txn.cant?("general user", :ask).should be_falsey
+        end
+
         it "can view transaction" do
           txn.can?("general user", :view).should be_truthy
         end
@@ -272,6 +280,11 @@ describe "Model objections" do
       end
 
       context "finance user" do
+        it "can ask" do
+          txn.can?("finance user", :ask).should be_truthy
+          txn.cant?(:finance_user, :ask).should be_falsey
+        end
+
         it "can update and edit transaction" do
           txn.can?(:finance_user, :update).should be_truthy
           txn.can?(:finance_user, :edit).should be_truthy
@@ -339,6 +352,7 @@ describe "Model objections" do
         My::Transaction.can?(:finance_user, :save).should be_falsey
         My::Transaction.can?(:monitoring, :read).should be_falsey
         My::Transaction.can?(:monitoring, :monitor).should be_truthy
+        My::Transaction.can?(:monitoring, :ask).should be_truthy
         My::Transaction.can?(nil, :view).should be_truthy
         My::Transaction.can?(nil, :save).should be_falsey
       end
