@@ -53,7 +53,20 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
 
 You may or may not assign an alias name (`as`). Make sure to keep it unique had you decided to give alias name to your rules group.
 
-### Can and Cannot testing
+It is also possible for a rule to be defined for multiple subtarget at once:
+
+```ruby
+  Bali.map_rules do
+    rules_for My::Transaction do
+      # rules described bellow will affect both :general_user and :finance_user
+      describe :general_user, :finance_user do
+        can :update, :edit
+      end
+    end
+  end
+```
+
+### Can and Cant? testing
 
 Say:
 
@@ -105,7 +118,7 @@ My::Employee.can?(:undefined_subtarget, :new)  # => false, rule class for this i
 
 As we have never define the `rules_for` My::Employee before, any attempt to `can?` for `My::Employee` will return `false`, so does any attempt to object `cant?` on which will only return `true` for any given subtarget and operation.
 
-### Can and cannot testing with multiple-roles subtarget
+### Can and Cant testing with multiple-roles subtarget
 
 A subtarget may have multiple roles. For eg., a user may have a role of `finance_user` and `general_user`. A general user normally by itself cannot `delete`, or `cancel`; but a `finance_user` does can, so long the condition is met. But, if a subtarget has role of both `finance_user` and `general_user`, he/she can perform `delete` or `cancel` (so far that the condition is met.)
 
@@ -171,3 +184,4 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 
 ### Version 1.1.0rc2
 1. Ability to check `can?` and `cant?` for subtarget with multiple roles
+2. Describe multiple rules at once for multiple subtarget
