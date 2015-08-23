@@ -17,4 +17,8 @@ class Bali::MapRulesDsl
       Bali.add_rule_class(self.current_rule_class)
     end
   end
+
+  def describe(*params)
+    raise Bali::DslError, "describe block must be within rules_for block"
+  end
 end

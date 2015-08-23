@@ -38,6 +38,8 @@ class Bali::RuleGroup
   end
 
   def add_rule(rule)
+    raise Bali::DslError, "Rule must be of class Bali::Rule" unless rule.is_a?(Bali::Rule)
+
     # operation cannot be defined twice
     operation = rule.operation.to_sym
 
