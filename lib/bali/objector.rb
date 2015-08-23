@@ -5,17 +5,23 @@ module Bali::Objector
     base.extend Bali::Objector::Statics
   end
 
-  def can?(subtarget, operation) 
-    self.class.can?(subtarget, operation, self)
+  def can?(subtargets, operation) 
+    self.class.can?(subtargets, operation, self)
   end
 
-  def cant?(subtarget, operation)
-    self.class.cant?(subtarget, operation, self)
+  def cant?(subtargets, operation)
+    self.class.cant?(subtargets, operation, self)
   end
 end
 
 module Bali::Objector::Statics
-  def can?(subtarget, operation, record = self, options = {})
+
+  ### options passable to __can__? and __cant__? are:
+  ### cross_action: if set to true wouldn't call its counterpart so as to prevent
+  ###   overflowing stack
+  ###
+
+  def __can__?(subtarget, operation, record = self, options = {})
     # if performed on a class-level, don't call its class or it will return
     # Class. That's not what is expected.
     if self.is_a?(Class)
@@ -67,10 +73,9 @@ module Bali::Objector::Statics
         return true
       end
     end
-
   end
 
-  def cant?(subtarget, operation, record = self, options = {})
+  def __cant__?(subtarget, operation, record = self, options = {})
     if self.is_a?(Class)
       rule_group = Bali.rule_group_for(self, subtarget)
     else
@@ -118,5 +123,25 @@ module Bali::Objector::Statics
         return true # rule is properly defined
       end # if rule has decider
     end # if rule is nil
+  end
+
+  def can?(subtargets, operation, record = self, options = {})
+    subs = (subtargets.is_a?(Array)) ? subtargets : [subtargets]
+
+    subs.each do |subtarget|
+      can_value = __can__?(subtarget, operation, record, options)
+      return true if can_value == true
+    end
+    false
+  end
+
+  def cant?(subtargets, operation, record = self, options = {})
+    subs = (subtargets.is_a?(Array)) ? subtargets : [subtargets]
+
+    subs.each do |subtarget|
+      cant_value = __cant__?(subtarget, operation, record, options)
+      return false if cant_value == false
+    end
+    true
   end
 end

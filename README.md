@@ -24,9 +24,9 @@ And then execute:
 
 ## Usage
 
-### First things first: defining rules
+### Defining access rules
 
-Rule in Bali is the law determining whether a user (called `subtarget`) can do or perform specific operation on a target (which is your resource/model).
+Rule in Bali is the law determining whether a user (called `subtarget`) can do or perform a specific operation on a target (which is your resource/model).
 
 ```ruby
   Bali.map_rules do
@@ -105,6 +105,35 @@ My::Employee.can?(:undefined_subtarget, :new)  # => false, rule class for this i
 
 As we have never define the `rules_for` My::Employee before, any attempt to `can?` for `My::Employee` will return `false`, so does any attempt to object `cant?` on which will only return `true` for any given subtarget and operation.
 
+### Access testing with multiple roles
+
+      describe "general user", can: [:update, :edit], cant: [:delete]
+      describe "finance user" do
+        can :update, :delete, :edit
+        can :delete, if: proc { |record| record.is_settled? }
+        can :cancel, unless: proc { |record| record.is_settled? }
+      end # finance_user description
+
+A subtarget may have multiple roles. For eg., a user may have a role of `finance_user` and `general_user`. A general user normally by itself cannot delete, or cancel. But, if a subtarget has role of both `finance_user` and `general_user`, he/she can perform `delete` or `cancel` so far that the condition is met.
+
+Thus, if we have:
+
+```ruby
+  txn = My::Transaction.new
+  txn.process_transaction(from_user_input)
+  txn.is_settled = true
+  txn.save
+
+  subtarget = User.new
+  subtarget.roles = [:finance_user, :general_user]
+
+  txn.can?(subtarget.roles, :delete)       # => true
+  txn.cant?(subtarget.roles, :delete)      # => false
+  txn.can?(:general_user, :delete)         # => false
+```
+
+That is, `can?` and `cant?` can be used to test access permission with multiple roles.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/saveav/bali. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
@@ -114,21 +143,21 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/saveav
 
 Bali is proudly available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
-### Changelog
+## Changelog
 
-#### Version 1.0.0beta1
+### Version 1.0.0beta1
 1. Initial version
 
-#### Version 1.0.0rc1
+### Version 1.0.0rc1
 1. Fix bug where user can't check on class
 2. Adding new clause: cant_all
 
-#### Version 1.0.0rc2
+### Version 1.0.0rc2
 1. [Fix bug when class's name, as a constant, is reloaded](http://stackoverflow.com/questions/2509350/rails-class-object-id-changes-after-i-make-a-request) (re-allocated to different address in the memory)
 2. Allow describing rule for `nil`, useful if user is not authenticated thus role is probably `nil`
 3. Remove pry from development dependency
 
-#### Version 1.0.0rc3
+### Version 1.0.0rc3
 1. Each target class should includes `Bali::Objector`, for the following reasons:
    - Makes it clear that class do want to include the Bali::Objector
    - Transparant, and thus less confusing as to where "can?" and "cant" come from
@@ -136,11 +165,14 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 2. Return `true` to any `can?` for undefined target/subtarget alike
 3. Return `false` to any `cant?` for undefined target/subtarget alike
 
-#### Version 1.0.0
+### Version 1.0.0
 1. Released the stable version of this gem
 
-#### Version 1.1.0rc1
-1. Ability for rule class to be parsed later by parsing later: true to rule class definition
-2. Add `Bali.parse` and `Bali.parse!` (Bali.parse! executes "later"-tagged rule class, Bali.parse executes automatically after all rules are defined)
+### Version 1.1.0rc1
+1. Ability for rule class to be parsed later by passing `later: true` to rule class definition
+2. Add `Bali.parse` and `Bali.parse!` (`Bali.parse!` executes "later"-tagged rule class, Bali.parse executes automatically after all rules are defined)
 3. Added more thorough testing specs
 4. Proc can be served under `unless` for defining the rule's decider
+
+### Version 1.1.0rc2
+1. Ability to check `can?` and `cant?` for subtarget with multiple roles
