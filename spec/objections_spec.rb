@@ -159,6 +159,77 @@ describe "Model objections" do
     describe My::Transaction do
       it_behaves_like "objector"
 
+      context "multi-role" do
+        it "allows user with role of nil and supreme to be able to do everything" do
+          roles1, roles2 = [nil, :supreme_user], [:supreme_user, nil]
+
+          txn.can?(nil, :monitor).should be_falsey
+          txn.cant?(nil, :monitor).should be_truthy
+          txn.can?(roles1, :monitor).should be_truthy
+          txn.can?(roles2, :monitor).should be_truthy
+          txn.cant?(roles1, :monitor).should be_falsey
+          txn.cant?(roles2, :monitor).should be_falsey
+
+          txn.can?(roles1, :delete).should be_truthy
+          txn.can?(roles2, :delete).should be_truthy
+          txn.can?(roles1, :cancel).should be_truthy
+          txn.can?(roles2, :cancel).should be_truthy
+
+          txn.cant?(roles1, :delete).should be_falsey
+          txn.cant?(roles2, :delete).should be_falsey
+          txn.cant?(roles1, :cancel).should be_falsey
+          txn.cant?(roles2, :cancel).should be_falsey
+        end
+
+        it "allows user with role of admin and finance user to delete regardless whether transaction is settled or not" do
+          roles1, roles2 = [:admin_user, :finance_user], [:finance_user, :admin_user]
+
+          txn.is_settled = false
+          txn.can?(:admin_user, :delete).should be_truthy
+          txn.cant?(:admin_user, :delete).should be_falsey
+          txn.can?(:finance_user, :delete).should be_falsey
+          txn.cant?(:finance_user, :delete).should be_truthy
+
+          [true, false].each do |settlement_status|
+            txn.is_settled = settlement_status
+
+            txn.can?(roles1, :delete).should be_truthy
+            txn.can?(roles2, :delete).should be_truthy
+            txn.cant?(roles1, :delete).should be_falsey
+            txn.cant?(roles2, :delete).should be_falsey
+          end
+        end
+
+        it "allows user with role of general user and finance user to delete settled transaction" do
+          roles1, roles2 = [:general_user, :finance_user], [:finance_user, :general_user]
+
+          txn.is_settled = true
+          txn.can?(roles1, :delete).should be_truthy
+          txn.can?(roles2, :delete).should be_truthy
+          txn.cant?(roles1, :delete).should be_falsey
+          txn.cant?(roles2, :delete).should be_falsey
+
+          txn.is_settled = false
+          txn.can?(roles1, :delete).should be_falsey
+          txn.can?(roles2, :delete).should be_falsey
+          txn.cant?(roles1, :delete).should be_truthy
+          txn.cant?(roles2, :delete).should be_truthy
+        end
+
+        it "allows user with role of finance and monitoring to monitor" do
+          txn.can?(:finance_user, :monitor).should be_falsey
+          txn.can?(:monitoring, :monitor).should be_truthy
+          txn.cant?(:finance_user, :monitor).should be_truthy
+          txn.cant?(:monitoring, :monitor).should be_falsey
+
+          txn.can?([:monitoring, :finance_user], :monitor).should be_truthy
+          txn.can?([:finance_user, :monitoring], :monitor).should be_truthy
+
+          txn.cant?([:monitoring, :finance_user], :monitor).should be_falsey
+          txn.cant?([:finance_user, :monitoring], :monitor).should be_falsey
+        end
+      end
+
       context "unauthenticated/nil-role user" do
         it "can view transaction" do
           txn.can?(nil, :view).should be_truthy
