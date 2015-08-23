@@ -105,7 +105,7 @@ My::Employee.can?(:undefined_subtarget, :new)  # => false, rule class for this i
 
 As we have never define the `rules_for` My::Employee before, any attempt to `can?` for `My::Employee` will return `false`, so does any attempt to object `cant?` on which will only return `true` for any given subtarget and operation.
 
-### Access testing with multiple roles
+### Can and cannot testing with multiple-roles subtarget
 
       describe "general user", can: [:update, :edit], cant: [:delete]
       describe "finance user" do
