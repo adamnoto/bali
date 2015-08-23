@@ -107,20 +107,16 @@ As we have never define the `rules_for` My::Employee before, any attempt to `can
 
 ### Can and cannot testing with multiple-roles subtarget
 
-      describe "general user", can: [:update, :edit], cant: [:delete]
-      describe "finance user" do
-        can :update, :delete, :edit
-        can :delete, if: proc { |record| record.is_settled? }
-        can :cancel, unless: proc { |record| record.is_settled? }
-      end # finance_user description
-
-A subtarget may have multiple roles. For eg., a user may have a role of `finance_user` and `general_user`. A general user normally by itself cannot delete, or cancel. But, if a subtarget has role of both `finance_user` and `general_user`, he/she can perform `delete` or `cancel` so far that the condition is met.
+A subtarget may have multiple roles. For eg., a user may have a role of `finance_user` and `general_user`. A general user normally by itself cannot `delete`, or `cancel`; but a `finance_user` does can, so long the condition is met. But, if a subtarget has role of both `finance_user` and `general_user`, he/she can perform `delete` or `cancel` (so far that the condition is met.)
 
 Thus, if we have:
 
 ```ruby
   txn = My::Transaction.new
   txn.process_transaction(from_user_input)
+
+  # delete or cancel can only happen when a transaction is settled
+  # as per rule definition
   txn.is_settled = true
   txn.save
 
@@ -132,12 +128,11 @@ Thus, if we have:
   txn.can?(:general_user, :delete)         # => false
 ```
 
-That is, `can?` and `cant?` can be used to test access permission with multiple roles.
+That is, we can check `can?` and `cant?` with multiple roles by passing array of roles to it.
 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/saveav/bali. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
-
 
 ## License
 
