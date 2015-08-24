@@ -185,3 +185,6 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 ### Version 1.1.0rc2
 1. Ability to check `can?` and `cant?` for subtarget with multiple roles
 2. Describe multiple rules at once for multiple subtarget
+
+### Version 1.1.0
+1. Respecting precedence; rule that is defined first can be replaced with later-defined rule clause for the same operation

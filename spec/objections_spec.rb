@@ -373,4 +373,31 @@ describe "Model objections" do
 
     end
   end
+
+  it "should respect precedence" do
+    Bali.map_rules do
+      rules_for My::Transaction do
+        describe :user do
+          cant_all
+          can :show
+
+          cant :edit
+          can :edit
+
+          can :update
+          cant :update
+        end
+      end
+    end
+
+    txn = My::Transaction.new
+    txn.can?(:user, :show).should be_truthy
+    txn.cant?(:user, :show).should be_falsey
+
+    txn.can?(:user, :edit).should be_truthy
+    txn.cant?(:user, :edit).should be_falsey
+
+    txn.can?(:user, :update).should be_falsey
+    txn.cant?(:user, :update).should be_truthy
+  end
 end
