@@ -46,9 +46,11 @@ class Bali::RuleGroup
     raise Bali::DslError, "Rule is defined twice for operation #{operation}" if self.cants[operation] && self.cans[operation]
 
     if rule.is_discouragement?
-      self.cants[rule.operation.to_sym] = rule
+      self.cants[operation] = rule
+      self.cans.delete operation
     else
-      self.cans[rule.operation.to_sym] = rule
+      self.cans[operation] = rule
+      self.cants.delete operation
     end
   end
 
