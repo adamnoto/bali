@@ -1,6 +1,7 @@
 describe "Model objections" do
   before(:each) { Bali.clear_rules }
   let(:txn) { My::Transaction.new }
+  let(:me)  { My::Employee.new }
 
   it "should return false to can? for undefined rule class" do
     Bali.rule_class_for(My::Employee).should be_nil
@@ -63,7 +64,6 @@ describe "Model objections" do
         end
       end
 
-      me = My::Employee.new
       me.roles = [:general_user]
 
       txn = My::Transaction.new
@@ -78,6 +78,120 @@ describe "Model objections" do
       txn.can?(me, :delete).should be_truthy
       txn.can?(me, :copy).should be_truthy
       txn.can?(me, :edit).should be_truthy
+    end
+    
+    it "can query rule having if decider" do 
+      Bali.map_rules do 
+        roles_for My::Employee, :roles
+        rules_for My::Transaction do 
+          describe :admin, :general_user do 
+            can :show
+          end
+          describe :general_user do 
+            can :edit, if: proc { |record, user| user.exp_years > 3 }
+            can :cancel, if: proc { |record, user| !record.is_settled? && user.exp_years > 3 }
+          end
+          describe(:admin) { can_all }
+        end
+      end
+
+      txn.is_settled = false
+      me.roles = [:general_user]
+
+      txn.can?(me, :show).should be_truthy
+      txn.cant?(me, :show).should be_falsey
+
+      me.exp_years = 2
+      txn.can?(me, :edit).should be_falsey
+      txn.cant?(me, :edit).should be_truthy
+      me.exp_years = 3
+      txn.can?(me, :edit).should be_falsey
+      txn.cant?(me, :edit).should be_truthy
+      me.exp_years = 4
+      txn.can?(me, :edit).should be_truthy
+      txn.cant?(me, :edit).should be_falsey
+
+      txn.can?(me, :cancel).should be_truthy
+      txn.cant?(me, :cancel).should be_falsey
+      txn.is_settled = true
+      txn.can?(me, :cancel).should be_falsey
+      txn.cant?(me, :cancel).should be_truthy
+
+      me.roles = :admin
+      me.exp_years = 0
+      txn.is_settled = true
+      txn.can?(me, :show).should be_truthy
+      txn.can?(me, :edit).should be_truthy
+      txn.can?(me, :cancel).should be_truthy
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
+
+      me.roles = [:general_user, :admin]
+      txn.can?(me, :show).should be_truthy
+      txn.can?(me, :edit).should be_truthy
+      txn.can?(me, :cancel).should be_truthy
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
+    end
+
+    it "can query rule having unless decider" do 
+      Bali.map_rules do 
+        roles_for My::Employee, :roles
+        rules_for My::Transaction do 
+          describe :general_user do 
+            can :show
+            can :edit, unless: proc { |record, user| 
+              (user.exp_years <= 3)
+            }
+            can :cancel, unless: proc { |record, user| 
+              record.is_settled? && (user.exp_years > 3)
+            }
+          end
+          describe(:admin) { can_all }
+        end
+      end
+
+      txn.is_settled = false
+      me.roles = [:general_user]
+
+      txn.can?(me, :show).should be_truthy
+      txn.cant?(me, :show).should be_falsey
+
+      me.exp_years = 2
+      txn.can?(me, :edit).should be_falsey
+      txn.cant?(me, :edit).should be_truthy
+      me.exp_years = 3
+      txn.can?(me, :edit).should be_falsey
+      txn.cant?(me, :edit).should be_truthy
+      me.exp_years = 4
+      txn.can?(me, :edit).should be_truthy
+      txn.cant?(me, :edit).should be_falsey
+
+      txn.can?(me, :cancel).should be_truthy
+      txn.cant?(me, :cancel).should be_falsey
+      txn.is_settled = true
+      txn.can?(me, :cancel).should be_falsey
+      txn.cant?(me, :cancel).should be_truthy
+
+      me.roles = :admin
+      me.exp_years = 0
+      txn.is_settled = true
+      txn.can?(me, :show).should be_truthy
+      txn.can?(me, :edit).should be_truthy
+      txn.can?(me, :cancel).should be_truthy
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
+
+      me.roles = [:general_user, :admin]
+      txn.can?(me, :show).should be_truthy
+      txn.can?(me, :edit).should be_truthy
+      txn.can?(me, :cancel).should be_truthy
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
     end
   end
 
