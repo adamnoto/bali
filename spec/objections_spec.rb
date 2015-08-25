@@ -46,6 +46,41 @@ describe "Model objections" do
     end
   end
 
+  context "using delegation" do
+    it "can query" do
+      Bali.map_rules do
+        roles_for My::Employee, :roles
+        rules_for My::Transaction do 
+          describe :admin, :general_user do 
+            can :show, :edit, :new
+          end
+          describe :general_user do
+            can :copy
+          end
+          describe :admin do
+            can :delete
+          end
+        end
+      end
+
+      me = My::Employee.new
+      me.roles = [:general_user]
+
+      txn = My::Transaction.new
+      txn.can?(:general_user, :copy).should be_truthy
+      txn.can?(me, :copy).should be_truthy
+
+      me.roles = [:admin]
+      txn.can?(:admin, :delete).should be_truthy
+      txn.can?(me, :delete).should be_truthy
+
+      me.roles = [:admin, :general_user]
+      txn.can?(me, :delete).should be_truthy
+      txn.can?(me, :copy).should be_truthy
+      txn.can?(me, :edit).should be_truthy
+    end
+  end
+
   context "Abstractly defined rules" do 
     before(:each) do 
       Bali.clear_rules
