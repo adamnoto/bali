@@ -8,6 +8,96 @@ describe Bali do
       Bali.clear_rules
     end
 
+    it "disallow calling describe outside of rules_for" do
+      expect do 
+        Bali.map_rules do
+          describe :general_user, can: :show
+        end.to raise_error(Bali::DslError)
+      end
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do 
+            describe :general_user do
+              can :show
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
+    it "disallows calling can outside of describe block" do
+      expect do 
+        Bali.map_rules do 
+          can :show
+        end
+      end.to raise_error(Bali::DslError)
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do 
+            describe :general_user do
+              can :show
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
+    it "disallows calling cant outside of describe block" do 
+      expect do 
+        Bali.map_rules do 
+          cant :show
+        end
+      end.to raise_error(Bali::DslError)
+      
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do 
+            describe :general_user do
+              cant :show
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
+    it "disallows calling can_all outside of describe block" do 
+      expect do 
+        Bali.map_rules do 
+          can_all
+        end
+      end.to raise_error(Bali::DslError)
+
+      expect do 
+        Bali.map_rules do
+          rules_for My::Transaction do 
+            describe :general_user do
+              can_all
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
+    it "disallows calling cant_all outside of describe block" do 
+      expect do 
+        Bali.map_rules do 
+          cant_all
+        end
+      end.to raise_error(Bali::DslError)
+
+      expect do 
+        Bali.map_rules do
+          rules_for My::Transaction do 
+            describe :general_user do
+              cant_all
+            end
+          end
+        end
+      end.to_not raise_error
+    end
+
     it "allows definition of rules per subtarget" do
       expect(Bali.rule_classes.size).to eq(0)
       Bali.map_rules do
@@ -57,6 +147,16 @@ describe Bali do
           describe :general_user, can: [:print]
         end
       end.to raise_error(Bali::DslError)
+    end
+
+    it "doesn't throw error when defining delegation for querying roles" do
+      expect do
+        Bali.map_rules do
+          roles_for My::Employee, :roles
+        end
+      end.to_not raise_error
+
+      Bali::TRANSLATED_SUBTARGET_ROLES["My::Employee"].should == :roles
     end
 
     it "does not allows subtarget definition other than using string, symbol, array and hash" do

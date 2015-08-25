@@ -13,7 +13,9 @@ require_relative "bali/dsl/rules_for_dsl.rb"
 require_relative "bali/objector"
 
 # exception classes
+require_relative "bali/exceptions/bali_error"
 require_relative "bali/exceptions/dsl_error"
+require_relative "bali/exceptions/objection_error"
 
 module Bali
   # mapping class to a RuleClass
@@ -24,6 +26,12 @@ module Bali
 
   # from full class name to symbol
   REVERSE_ALIASED_RULE_CLASS_MAP = {}
+
+  # {
+  #   User: :roles,
+  #   AdminUser: :admin_roles
+  # }
+  TRANSLATED_SUBTARGET_ROLES = {}
 end
 
 module Bali
