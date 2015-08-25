@@ -59,6 +59,16 @@ describe Bali do
       end.to raise_error(Bali::DslError)
     end
 
+    it "doesn't throw error when defining delegation for querying roles" do
+      expect do
+        Bali.map_rules do
+          roles_for My::Employee, :roles
+        end
+      end.to_not raise_error
+
+      Bali::TRANSLATED_SUBTARGET_ROLES["My::Employee"].should == :roles
+    end
+
     it "does not allows subtarget definition other than using string, symbol, array and hash" do
       expect do
         Bali.map_rules do

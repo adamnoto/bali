@@ -15,4 +15,5 @@ class My::Employee
 
   # number of experience in the company
   attr_accessor :exp_years
+  attr_accessor :roles
 end

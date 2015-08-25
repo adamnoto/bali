@@ -16,6 +16,41 @@ end
 
 module Bali::Objector::Statics
 
+  # will return array
+  def __translate_subtarget_roles__(_subtarget_roles)
+    if _subtarget_roles.is_a?(String) || _subtarget_roles.is_a?(Symbol) || _subtarget_roles.is_a?(NilClass)
+      return [_subtarget_roles]
+    elsif _subtarget_roles.is_a?(Array)
+      return _subtarget_roles
+    else
+      # this case, _subtarget_roles is an object but not a symbol or a string
+      # let's try to deduct subtarget's roles
+
+      _subtarget = _subtarget_roles
+      _subtarget_class = _subtarget.class.to_s
+      
+      # variable to hold deducted role of the passed object
+      deducted_roles = nil
+
+      Bali::TRANSLATED_SUBTARGET_ROLES.each do |subtarget_class, roles_field_name|
+        if _subtarget_class == subtarget_class
+          deducted_roles = _subtarget.send(roles_field_name)
+          if deducted_roles.is_a?(String) || deducted_roles.is_a?(Symbol)
+            deducted_roles = [deducted_roles]
+            break
+          elsif deducted_roles.is_a?(Array)
+            break
+          else
+            # keep it nil if _subtarget_roles is not either String, Symbol or Array
+            deducted_roles = nil
+          end
+        end # if matching class
+      end # each TRANSLATED_SUBTARGET_ROLES
+
+      return deducted_roles
+    end # if
+  end
+
   ### options passable to __can__? and __cant__? are:
   ### cross_action: if set to true wouldn't call its counterpart so as to prevent
   ###   overflowing stack
@@ -125,8 +160,8 @@ module Bali::Objector::Statics
     end # if rule is nil
   end
 
-  def can?(subtargets, operation, record = self, options = {})
-    subs = (subtargets.is_a?(Array)) ? subtargets : [subtargets]
+  def can?(subtarget_roles, operation, record = self, options = {})
+    subs = __translate_subtarget_roles__(subtarget_roles)
 
     subs.each do |subtarget|
       can_value = __can__?(subtarget, operation, record, options)
@@ -135,8 +170,8 @@ module Bali::Objector::Statics
     false
   end
 
-  def cant?(subtargets, operation, record = self, options = {})
-    subs = (subtargets.is_a?(Array)) ? subtargets : [subtargets]
+  def cant?(subtarget_roles, operation, record = self, options = {})
+    subs = __translate_subtarget_roles__ subtarget_roles
 
     subs.each do |subtarget|
       cant_value = __cant__?(subtarget, operation, record, options)
