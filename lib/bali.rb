@@ -24,6 +24,12 @@ module Bali
 
   # from full class name to symbol
   REVERSE_ALIASED_RULE_CLASS_MAP = {}
+
+  # {
+  #   User: :roles,
+  #   AdminUser: :admin_roles
+  # }
+  TRANSLATED_SUBTARGET_ROLES = {}
 end
 
 module Bali
