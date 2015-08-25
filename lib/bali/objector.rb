@@ -54,7 +54,8 @@ module Bali::Objector::Statics
   ### options passable to __can__? and __cant__? are:
   ### cross_action: if set to true wouldn't call its counterpart so as to prevent
   ###   overflowing stack
-  ###
+  ### original_subtarget: the original passed to can? and cant? before 
+  ###   processed by  __translate_subtarget_roles__
 
   def __can__?(subtarget, operation, record = self, options = {})
     # if performed on a class-level, don't call its class or it will return
@@ -93,15 +94,56 @@ module Bali::Objector::Statics
       # default if can? for undefined rule is false, after related clause
       # cannot be found in cant?
       return false if options[:cross_check]
-      return !self.cant?(subtarget, operation, record, cross_check: true)
+      options[:cross_check] = true
+      return !self.cant?(subtarget, operation, record, options)
     else
       if rule.has_decider?
         # must test first
         decider = rule.decider
-        if decider.arity == 0
-          return (rule.decider_type == :if) ? decider.() == true : decider.() == false
-        else
-          return (rule.decider_type == :if) ? decider.(record) == true : decider.(record) == false
+        original_subtarget = options.fetch(:original_subtarget)
+        case decider.arity
+        when 0
+          if rule.decider_type == :if
+            if decider.()
+              return true 
+            else 
+              return false
+            end
+          elsif rule.decider_type == :unless
+            unless decider.()
+              return true 
+            else 
+              return false 
+            end
+          end
+        when 1
+          if rule.decider_type == :if
+            if decider.(record)
+              return true 
+            else 
+              return false
+            end
+          elsif rule.decider_type == :unless
+            unless decider.(record)
+              return true 
+            else 
+              return false 
+            end
+          end
+        when 2
+          if rule.decider_type == :if
+            if decider.(record, original_subtarget)
+              return true 
+            else 
+              return false
+            end
+          elsif rule.decider_type == :unless
+            unless decider.(record, original_subtarget)
+              return true 
+            else 
+              return false 
+            end
+          end
         end
       else
         # rule is properly defined
@@ -145,14 +187,55 @@ module Bali::Objector::Statics
     # can? is defined exactly for the same target, and subtarget, and record (if given)
     if rule.nil?
       return true if options[:cross_check]
-      return !self.can?(subtarget, operation, record, cross_check: true)
+      options[:cross_check] = true
+      return !self.can?(subtarget, operation, record, options)
     else
       if rule.has_decider?
         decider = rule.decider
-        if decider.arity == 0
-          return (rule.decider_type == :if) ? decider.() == true : decider.() == false
-        else
-          return (rule.decider_type == :if) ? decider.(record) == true : decider.(record) == false
+        original_subtarget = options.fetch(:original_subtarget)
+        case decider.arity
+        when 0
+          if rule.decider_type == :if
+            if decider.()
+              return true 
+            else 
+              return false
+            end
+          elsif rule.decider_type == :unless
+            unless decider.()
+              return true 
+            else 
+              return false 
+            end
+          end
+        when 1
+          if rule.decider_type == :if
+            if decider.(record)
+              return true 
+            else 
+              return false
+            end
+          elsif rule.decider_type == :unless
+            unless decider.(record)
+              return true 
+            else 
+              return false 
+            end
+          end
+        when 2
+          if rule.decider_type == :if
+            if decider.(record, original_subtarget)
+              return true 
+            else 
+              return false
+            end
+          elsif rule.decider_type == :unless
+            unless decider.(record, original_subtarget)
+              return true 
+            else 
+              return false 
+            end
+          end
         end
       else
         return true # rule is properly defined
@@ -162,21 +245,28 @@ module Bali::Objector::Statics
 
   def can?(subtarget_roles, operation, record = self, options = {})
     subs = __translate_subtarget_roles__(subtarget_roles)
+    # well, it is largely not used unless decider's is 2 arity
+    options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
     subs.each do |subtarget|
       can_value = __can__?(subtarget, operation, record, options)
       return true if can_value == true
     end
     false
+  rescue => e
+    raise Bali::ObjectionError, e.message
   end
 
   def cant?(subtarget_roles, operation, record = self, options = {})
     subs = __translate_subtarget_roles__ subtarget_roles
+    options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
     subs.each do |subtarget|
       cant_value = __cant__?(subtarget, operation, record, options)
       return false if cant_value == false
     end
     true
+  rescue => e 
+    raise Bali::ObjectionError, e.message
   end
 end

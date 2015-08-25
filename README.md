@@ -186,5 +186,6 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 1. Ability to check `can?` and `cant?` for subtarget with multiple roles
 2. Describe multiple rules at once for multiple subtarget
 
-### Version 1.1.0
-1. Respecting precedence; rule that is defined first can be replaced with later-defined rule clause for the same operation
+### Version 1.2.0
+1. Passing real object as subtarget's role, instead of symbol or array of symbol
+2. Clause can also yielding user, along with the object in question
