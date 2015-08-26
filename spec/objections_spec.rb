@@ -4,12 +4,12 @@ describe "Model objections" do
   let(:me)  { My::Employee.new }
 
   it "should return false to can? for undefined rule class" do
-    Bali.rule_class_for(My::Employee).should be_nil
+    Bali::Integrators::Rule.rule_class_for(My::Employee).should be_nil
     My::Employee.can?(:undefined_subtarget, :new).should be_falsey
   end
 
   it "should return true to cant? for undefined rule class" do 
-    Bali.rule_class_for(My::Employee).should be_nil
+    Bali::Integrators::Rule.rule_class_for(My::Employee).should be_nil
     My::Employee.cant?(:undefined_subtarget, :new).should be_truthy
   end
 
@@ -19,8 +19,8 @@ describe "Model objections" do
       end
     end
 
-    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
-    Bali.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
+    Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    Bali::Integrators::Rule.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
     My::Transaction.can?(:undefined_subtarget, :new).should be_falsey
   end
 
@@ -30,8 +30,8 @@ describe "Model objections" do
       end
     end
 
-    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
-    Bali.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
+    Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    Bali::Integrators::Rule.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
     My::Transaction.cant?(:undefined_subtarget, :new).should be_truthy
   end
 
@@ -413,7 +413,7 @@ describe "Model objections" do
 
         it "cannot delete transaction" do
           txn.can?("general user", :delete).should be_falsey
-          Bali.rule_group_for(txn.class, "general user").get_rule(:cant, :delete)
+          Bali::Integrators::Rule.rule_group_for(txn.class, "general user").get_rule(:cant, :delete)
             .class.should == Bali::Rule
         end
 

@@ -61,9 +61,9 @@ module Bali::Objector::Statics
     # if performed on a class-level, don't call its class or it will return
     # Class. That's not what is expected.
     if self.is_a?(Class)
-      rule_group = Bali.rule_group_for(self, subtarget)
+      rule_group = Bali::Integrators::Rule.rule_group_for(self, subtarget)
     else
-      rule_group = Bali.rule_group_for(self.class, subtarget)
+      rule_group = Bali::Integrators::Rule.rule_group_for(self.class, subtarget)
     end
 
     # default of can? is false whenever RuleClass for that class is undefined
@@ -154,9 +154,9 @@ module Bali::Objector::Statics
 
   def __cant__?(subtarget, operation, record = self, options = {})
     if self.is_a?(Class)
-      rule_group = Bali.rule_group_for(self, subtarget)
+      rule_group = Bali::Integrators::Rule.rule_group_for(self, subtarget)
     else
-      rule_group = Bali.rule_group_for(self.class, subtarget)
+      rule_group = Bali::Integrators::Rule.rule_group_for(self.class, subtarget)
     end
 
     # default of cant? is true whenever RuleClass for that class is undefined

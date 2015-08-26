@@ -1,21 +1,13 @@
 require_relative "bali/version"
 
-# foundations, onto which good-purposed gem is developed upon
-require_relative "bali/foundations/bali_statics"
-require_relative "bali/foundations/rule_class"
-require_relative "bali/foundations/rule_group"
-require_relative "bali/foundations/rule"
-
 # load the DSL syntax maker definition, ordered by proper order of invocation
-require_relative "bali/dsl/map_rules_dsl.rb"
-require_relative "bali/dsl/rules_for_dsl.rb"
+require_relative "bali/dsl/map_rules_dsl"
+require_relative "bali/dsl/rules_for_dsl"
 
 require_relative "bali/objector"
 
-# exception classes
-require_relative "bali/exceptions/bali_error"
-require_relative "bali/exceptions/dsl_error"
-require_relative "bali/exceptions/objection_error"
+require_relative "bali/foundations/all_foundations"
+require_relative "bali/integrators/all_integrators"
 
 module Bali
   # mapping class to a RuleClass
@@ -32,6 +24,9 @@ module Bali
   #   AdminUser: :admin_roles
   # }
   TRANSLATED_SUBTARGET_ROLES = {}
+
+  # pub/sub for plugin that extend bali
+  LISTENABLE_EVENTS = {}
 end
 
 module Bali
