@@ -99,7 +99,7 @@ describe Bali do
     end
 
     it "allows definition of rules per subtarget" do
-      expect(Bali.rule_classes.size).to eq(0)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
           describe :general_user, can: :show
@@ -109,12 +109,12 @@ describe Bali do
           end
         end
       end
-      Bali.rule_classes.size.should == 1
-      Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrators::Rule.rule_classes.size.should == 1
+      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
     end
 
     it "allows definition of rules per multiple subtarget" do
-      expect(Bali.rule_classes.size).to eq(0)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           describe(:general_user, :finance_user, can: [:show])
@@ -127,11 +127,11 @@ describe Bali do
         end
       end
 
-      Bali.rule_classes.size.should == 1
-      Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrators::Rule.rule_classes.size.should == 1
+      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
       
-      rule_group_gu = Bali.rule_group_for(My::Transaction, :general_user)
-      rule_group_fu = Bali.rule_group_for(My::Transaction, :finance_user)
+      rule_group_gu = Bali::Integrators::Rule.rule_group_for(My::Transaction, :general_user)
+      rule_group_fu = Bali::Integrators::Rule.rule_group_for(My::Transaction, :finance_user)
 
       rule_group_gu.get_rule(:can, :show).class.should == Bali::Rule
       rule_group_gu.get_rule(:can, :print).class.should == Bali::Rule
@@ -220,7 +220,7 @@ describe Bali do
     end
 
     it "allows if-decider to be executed in context" do
-      expect(Bali.rule_classes.size).to eq(0)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           describe :finance_user do
@@ -265,7 +265,7 @@ describe Bali do
     end
 
     it "allows unless-decider to be executed in context" do
-      expect(Bali.rule_classes.size).to eq(0)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           describe :finance_user do
@@ -304,7 +304,7 @@ describe Bali do
     end
 
     it "can define nil rule group" do
-      expect(Bali.rule_classes.size).to eq(0)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
           describe nil do
@@ -312,8 +312,8 @@ describe Bali do
           end
         end
       end
-      Bali.rule_classes.size.should == 1
-      Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrators::Rule.rule_classes.size.should == 1
+      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
     end
 
     it "should allow rule group to be defined with or without alias" do
@@ -322,35 +322,36 @@ describe Bali do
           describe :general_user, can: :show
         end
       end
-      Bali.rule_classes.size.should == 1
-      rc = Bali.rule_class_for(My::Transaction)
+      Bali::Integrators::Rule.rule_classes.size.should == 1
+      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
       rc.class.should == Bali::RuleClass
       rc.rules_for(:general_user).class.should == Bali::RuleGroup
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
-      Bali.rule_class_for(:transaction).should be_nil
+      Bali::Integrators::Rule.rule_class_for(:transaction).should be_nil
 
       Bali.map_rules do 
         rules_for My::Transaction, as: :transaction do
           describe :general_user, can: :show
         end
       end
-      Bali.rule_classes.size.should == 1
-      rc = Bali.rule_class_for(My::Transaction)
+      Bali::Integrators::Rule.rule_classes.size.should == 1
+      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
       rc.class.should == Bali::RuleClass
       rc.rules_for(:general_user).class.should == Bali::RuleGroup
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
-      Bali.rule_class_for(My::Transaction).should == rc
+      Bali::Integrators::Rule.rule_class_for(My::Transaction).should == rc
     end
 
     it "should redefine rule class if map_rules is called" do 
-      expect(Bali.rule_classes.size).to eq(0)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
           describe :general_user, can: [:update, :delete, :edit]
         end
       end
-      expect(Bali.rule_classes.size).to eq(1)
-      expect(Bali.rule_class_for(My::Transaction).rules_for(:general_user)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(1)
+      expect(Bali::Integrators::Rule.rule_class_for(My::Transaction)
+        .rules_for(:general_user)
         .rules.size).to eq(3)
 
       Bali.map_rules do
@@ -359,14 +360,14 @@ describe Bali do
           describe :finance_user, can: [:update, :delete, :edit]
         end
       end
-      expect(Bali.rule_classes.size).to eq(1)
-      rc = Bali.rule_class_for(:transaction)
+      expect(Bali::Integrators::Rule.rule_classes.size).to eq(1)
+      rc = Bali::Integrators::Rule.rule_class_for(:transaction)
       expect(rc.rules_for(:general_user).rules.size).to eq(1)
       expect(rc.rules_for(:finance_user).rules.size).to eq(3)
     end
 
     it "should redefine rule if same operation is re-defined" do
-      Bali.rule_classes.size.should == 0
+      Bali::Integrators::Rule.rule_classes.size.should == 0
 
       Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
@@ -377,7 +378,7 @@ describe Bali do
         end
       end
 
-      rc = Bali.rule_class_for(:transaction)
+      rc = Bali::Integrators::Rule.rule_class_for(:transaction)
       expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
         .to eq(true)
     end
