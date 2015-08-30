@@ -69,15 +69,22 @@ describe "Model objections" do
       txn = My::Transaction.new
       txn.can?(:general_user, :copy).should be_truthy
       txn.can?(me, :copy).should be_truthy
+      expect { txn.can!(:general_user, :copy) }.to_not raise_error
+      expect { txn.can!(me, :copy) }.to_not raise_error
 
       me.roles = [:admin]
       txn.can?(:admin, :delete).should be_truthy
       txn.can?(me, :delete).should be_truthy
+      expect { txn.can!(:admin, :delete) }.to_not raise_error
+      expect { txn.can!(me, :delete) }.to_not raise_error 
 
       me.roles = [:admin, :general_user]
       txn.can?(me, :delete).should be_truthy
       txn.can?(me, :copy).should be_truthy
       txn.can?(me, :edit).should be_truthy
+      expect { txn.can!(me, :delete) }.to_not raise_error
+      expect { txn.can!(me, :copy) }.to_not raise_error
+      expect { txn.can!(me, :edit) }.to_not raise_error
     end
     
     it "can query rule having if decider" do 
@@ -100,22 +107,37 @@ describe "Model objections" do
 
       txn.can?(me, :show).should be_truthy
       txn.cant?(me, :show).should be_falsey
+      expect { txn.can!(me, :show) }.to_not raise_error
+      expect { txn.cant!(me, :show) }.to raise_error
 
       me.exp_years = 2
       txn.can?(me, :edit).should be_falsey
       txn.cant?(me, :edit).should be_truthy
+      expect { txn.can!(me, :edit) }.to raise_error
+      expect { txn.cant!(me, :edit) }.to_not raise_error
+
       me.exp_years = 3
       txn.can?(me, :edit).should be_falsey
       txn.cant?(me, :edit).should be_truthy
+      expect { txn.can!(me, :edit) }.to raise_error
+      expect { txn.cant!(me, :edit) }.to_not raise_error
+
       me.exp_years = 4
       txn.can?(me, :edit).should be_truthy
       txn.cant?(me, :edit).should be_falsey
+      expect { txn.can!(me, :edit) }.to_not raise_error
+      expect { txn.cant!(me, :edit) }.to raise_error
 
       txn.can?(me, :cancel).should be_truthy
       txn.cant?(me, :cancel).should be_falsey
+      expect { txn.can!(me, :cancel) }.to_not raise_error
+      expect { txn.cant!(me, :cancel) }.to raise_error
+
       txn.is_settled = true
       txn.can?(me, :cancel).should be_falsey
+      expect { txn.can!(me, :cancel) }.to raise_error
       txn.cant?(me, :cancel).should be_truthy
+      expect { txn.cant!(me, :cancel) }.to_not raise_error
 
       me.roles = :admin
       me.exp_years = 0
@@ -127,6 +149,14 @@ describe "Model objections" do
       txn.cant?(me, :edit).should be_falsey
       txn.cant?(me, :cancel).should be_falsey
 
+      expect { txn.can!(me, :show) }.to_not raise_error 
+      expect { txn.can!(me, :edit) }.to_not raise_error 
+      expect { txn.can!(me, :cancel) }.to_not raise_error 
+      expect { txn.cant!(me, :show) }.to raise_error 
+      expect { txn.cant!(me, :edit) }.to raise_error 
+      expect { txn.cant!(me, :cancel) }.to raise_error 
+
+
       me.roles = [:general_user, :admin]
       txn.can?(me, :show).should be_truthy
       txn.can?(me, :edit).should be_truthy
@@ -134,6 +164,13 @@ describe "Model objections" do
       txn.cant?(me, :show).should be_falsey
       txn.cant?(me, :edit).should be_falsey
       txn.cant?(me, :cancel).should be_falsey
+
+      expect { txn.can!(me, :show) }.to_not raise_error 
+      expect { txn.can!(me, :edit) }.to_not raise_error 
+      expect { txn.can!(me, :cancel) }.to_not raise_error 
+      expect { txn.cant!(me, :show) }.to raise_error 
+      expect { txn.cant!(me, :edit) }.to raise_error 
+      expect { txn.cant!(me, :cancel) }.to raise_error 
     end
 
     it "can query rule having unless decider" do 
@@ -506,6 +543,21 @@ describe "Model objections" do
         My::Transaction.can?(nil, :save).should be_falsey
       end
 
+      it "can answer to can!" do
+        expect { My::Transaction.can!(:supreme_user, :delete) }.not_to raise_error
+        expect { My::Transaction.can!(:admin_user, :delete) }.not_to raise_error
+        expect { My::Transaction.can!(:general_user, :view) }.not_to raise_error
+        expect { My::Transaction.can!(:general_user, :delete) }.to raise_error
+        expect { My::Transaction.can!(:general_user, :do_something_undefined) }.to raise_error
+        expect { My::Transaction.can!(:finance_user, :update) }.not_to raise_error
+        expect { My::Transaction.can!(:finance_user, :save) }.to raise_error
+        expect { My::Transaction.can!(:monitoring, :read) }.to raise_error
+        expect { My::Transaction.can!(:monitoring, :monitor) }.not_to raise_error
+        expect { My::Transaction.can!(:monitoring, :ask) }.not_to raise_error
+        expect { My::Transaction.can!(nil, :view) }.not_to raise_error
+        expect { My::Transaction.can!(nil, :save) }.to raise_error
+      end
+
       it "can answer to cant?" do
         My::Transaction.cant?(:supreme_user, :delete).should be_falsey
         My::Transaction.cant?(:admin_user, :delete).should be_falsey
@@ -520,6 +572,71 @@ describe "Model objections" do
         My::Transaction.cant?(nil, :save).should be_truthy
       end
 
+      it "can answer to cant!" do
+        expect { My::Transaction.cant!(:supreme_user, :delete) }.to raise_error
+        expect { My::Transaction.cant!(:admin_user, :delete) }.to raise_error
+        expect { My::Transaction.cant!(:general_user, :edit) }.to raise_error
+        expect { My::Transaction.cant!(:general_user, :view) }.to raise_error
+        expect { My::Transaction.cant!(:general_user, :delete) }.to_not raise_error
+        expect { My::Transaction.cant!(:finance_user, :update) }.to raise_error
+        expect { My::Transaction.cant!(:finance_user, :new) }.to_not raise_error
+        expect { My::Transaction.cant!(:monitoring, :read) }.to_not raise_error
+        expect { My::Transaction.cant!(:monitoring, :monitor) }.to raise_error
+        expect { My::Transaction.cant!(nil, :view) }.to raise_error
+        expect { My::Transaction.cant!(nil, :save) }.to_not raise_error        
+      end
+
+      it "raises exception with information on can! on an unauthorized access" do
+        begin
+          My::Transaction.can!(:general_user, :delete)
+        rescue => e
+          e.class.should == Bali::AuthorizationError
+          e.auth_level.should == :can
+          e.role.should == :general_user
+          e.subtarget.should == :general_user
+          e.operation.should == :delete
+          e.target.should == My::Transaction
+        end
+
+        user = My::Employee.new
+        user.roles = [:general_user]
+        begin
+          txn.can!(user, :delete)
+        rescue => e 
+          e.class.should == Bali::AuthorizationError
+          e.auth_level.should == :can
+          e.role.should == :general_user
+          e.subtarget.should == user
+          e.operation.should == :delete
+          e.target.should == txn
+        end
+      end
+
+      it "raises exception with information on cant! on an unauthorized access" do
+        begin
+          My::Transaction.cant!(:monitoring, :monitor)
+        rescue => e 
+          e.class.should == Bali::AuthorizationError
+          e.auth_level.should == :cant
+          e.role.should == :monitoring
+          e.subtarget.should == :monitoring
+          e.operation.should == :monitor
+          e.target.should == My::Transaction
+        end
+
+        user = My::Employee.new
+        user.roles = [:general_user]
+        begin
+          txn.cant!(user, :delete)
+        rescue => e 
+          e.class.should == Bali::AuthorizationError
+          e.auth_level.should == :cant
+          e.role.should == :monitoring_user
+          e.subtarget.should == user
+          e.operation.should == :monitor
+          e.target.should == txn
+        end
+      end
     end
   end
 
