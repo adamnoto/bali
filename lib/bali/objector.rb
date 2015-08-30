@@ -5,19 +5,35 @@ module Bali::Objector
     base.extend Bali::Objector::Statics
   end
 
+  # check whether user can/cant perform an operation, return true when positive
+  # or false otherwise
   def can?(subtargets, operation) 
     self.class.can?(subtargets, operation, self)
   end
 
+  # check whether user can/cant perform an operation, raise an error when access
+  # is denied
+  def can!(subtargets, operation)
+    self.class.can!(subtargets, operation, self)
+  end
+
+  # check whether user can/cant perform an operation, return true when negative
+  # or false otherwise
   def cant?(subtargets, operation)
     self.class.cant?(subtargets, operation, self)
+  end
+
+  # check whether user can/cant perform an operation, raise an error when access
+  # is given
+  def cant!(subtargets, operation)
+    self.class.cant!(subtargets, operation, self)
   end
 end
 
 module Bali::Objector::Statics
 
   # will return array
-  def __translate_subtarget_roles__(_subtarget_roles)
+  def bali_translate_subtarget_roles(_subtarget_roles)
     if _subtarget_roles.is_a?(String) || _subtarget_roles.is_a?(Symbol) || _subtarget_roles.is_a?(NilClass)
       return [_subtarget_roles]
     elsif _subtarget_roles.is_a?(Array)
@@ -51,13 +67,13 @@ module Bali::Objector::Statics
     end # if
   end
 
-  ### options passable to __can__? and __cant__? are:
+  ### options passable to bali_can? and bali_cant? are:
   ### cross_action: if set to true wouldn't call its counterpart so as to prevent
   ###   overflowing stack
   ### original_subtarget: the original passed to can? and cant? before 
-  ###   processed by  __translate_subtarget_roles__
+  ###   processed by bali_translate_subtarget_roles
 
-  def __can__?(subtarget, operation, record = self, options = {})
+  def bali_can?(subtarget, operation, record = self, options = {})
     # if performed on a class-level, don't call its class or it will return
     # Class. That's not what is expected.
     if self.is_a?(Class)
@@ -152,7 +168,7 @@ module Bali::Objector::Statics
     end
   end
 
-  def __cant__?(subtarget, operation, record = self, options = {})
+  def bali_cant?(subtarget, operation, record = self, options = {})
     if self.is_a?(Class)
       rule_group = Bali::Integrators::Rule.rule_group_for(self, subtarget)
     else
@@ -244,29 +260,89 @@ module Bali::Objector::Statics
   end
 
   def can?(subtarget_roles, operation, record = self, options = {})
-    subs = __translate_subtarget_roles__(subtarget_roles)
+    subs = bali_translate_subtarget_roles(subtarget_roles)
     # well, it is largely not used unless decider's is 2 arity
     options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
+    can_value = false
+    role = nil
+
     subs.each do |subtarget|
-      can_value = __can__?(subtarget, operation, record, options)
-      return true if can_value == true
+      next if can_value
+      role = subtarget
+      can_value = bali_can?(role, operation, record, options)
     end
-    false
+
+    yield options[:original_subtarget], role, can_value if can_value == false && block_given?
+    can_value
   rescue => e
-    raise Bali::ObjectionError, e.message
+    if e.is_a?(Bali::AuthorizationError)
+      raise e
+    else
+      raise Bali::ObjectionError, e.message
+    end
   end
 
   def cant?(subtarget_roles, operation, record = self, options = {})
-    subs = __translate_subtarget_roles__ subtarget_roles
+    subs = bali_translate_subtarget_roles subtarget_roles
     options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
     subs.each do |subtarget|
-      cant_value = __cant__?(subtarget, operation, record, options)
-      return false if cant_value == false
+      cant_value = bali_cant?(subtarget, operation, record, options)
+      if cant_value == false
+        role = subtarget
+        if block_given?
+          yield options[:original_subtarget], role, false 
+        else
+          return false
+        end
+      end
     end
+    
     true
   rescue => e 
-    raise Bali::ObjectionError, e.message
+    if e.is_a?(Bali::AuthorizationError)
+      raise e
+    else
+      raise Bali::ObjectionError, e.message
+    end
+  end
+
+  def can!(subtarget_roles, operation, record = self, options = {})
+    can?(subtarget_roles, operation, record, options) do |original_subtarget, role, can_value|
+      if !can_value
+        auth_error = Bali::AuthorizationError.new
+        auth_error.auth_level = :can
+        auth_error.operation = operation
+        auth_error.role = role
+        auth_error.target = record
+        auth_error.subtarget = original_subtarget 
+
+        if role
+          auth_error.subtarget = original_subtarget if !(original_subtarget.is_a?(Symbol) || original_subtarget.is_a?(String) || original_subtarget.is_a?(Array))
+        end
+
+        raise auth_error
+      end
+    end
+  end
+
+  def cant!(subtarget_roles, operation, record = self, options = {})
+    cant?(subtarget_roles, operation, record, options) do |original_subtarget, role, cant_value|
+      if cant_value == false
+        auth_error = Bali::AuthorizationError.new
+        auth_error.auth_level = :cant
+        auth_error.operation = operation
+        auth_error.role = role
+        auth_error.target = record
+        auth_error.subtarget = original_subtarget 
+
+        if role
+          auth_error.subtarget = original_subtarget if !(original_subtarget.is_a?(Symbol) || original_subtarget.is_a?(String) || original_subtarget.is_a?(Array))
+        end
+        
+        raise auth_error
+      end
+    end
   end
 end

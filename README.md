@@ -173,6 +173,22 @@ By doing so, we can now perform authorisation testing as follow:
   txn.can?(current_employee, :print)
 ```
 
+### Raises error on unauthorized access
+
+`can?` and `cant?` just return boolean values on whether access is granted or not. If you want to raise an exception when an operation is inappropriate, use its variant: `can!` and `cant!`
+
+When `can!` result in denied operation, it will raise `Bali::AuthorizationError`. In the other hand, `cant!` will raise `Bali::AuthorizationError` if it allows an operation.
+
+`can!` and `cant` are invoked with a similar fashion as you would invoke `can?` and `cant?`
+
+`Bali::AuthorizationError` is more than an exception, it also store information regarding:
+
+1. `auth_level`: whether it is can, or cant testing.
+2. `role`: the role under which authorisation is performed
+3. `subtarget`: the object (if passing an object), or string/symbol representing the role
+4. `operation`: the action
+5. `target`: targeted object/class of the authorization
+
 ### Rule clause if/unless
 
 Rule clause may contain `if` and `unless` (decider) proc as already seen before. This `if` and `unless` `proc` have three variants that can be used to express your rule in sufficient detail:
