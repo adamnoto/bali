@@ -108,34 +108,34 @@ describe "Model objections" do
       txn.can?(me, :show).should be_truthy
       txn.cant?(me, :show).should be_falsey
       expect { txn.can!(me, :show) }.to_not raise_error
-      expect { txn.cant!(me, :show) }.to raise_error
+      expect { txn.cant!(me, :show) }.to raise_error(Bali::AuthorizationError)
 
       me.exp_years = 2
       txn.can?(me, :edit).should be_falsey
       txn.cant?(me, :edit).should be_truthy
-      expect { txn.can!(me, :edit) }.to raise_error
+      expect { txn.can!(me, :edit) }.to raise_error(Bali::AuthorizationError)
       expect { txn.cant!(me, :edit) }.to_not raise_error
 
       me.exp_years = 3
       txn.can?(me, :edit).should be_falsey
       txn.cant?(me, :edit).should be_truthy
-      expect { txn.can!(me, :edit) }.to raise_error
+      expect { txn.can!(me, :edit) }.to raise_error(Bali::AuthorizationError)
       expect { txn.cant!(me, :edit) }.to_not raise_error
 
       me.exp_years = 4
       txn.can?(me, :edit).should be_truthy
       txn.cant?(me, :edit).should be_falsey
       expect { txn.can!(me, :edit) }.to_not raise_error
-      expect { txn.cant!(me, :edit) }.to raise_error
+      expect { txn.cant!(me, :edit) }.to raise_error(Bali::AuthorizationError)
 
       txn.can?(me, :cancel).should be_truthy
       txn.cant?(me, :cancel).should be_falsey
       expect { txn.can!(me, :cancel) }.to_not raise_error
-      expect { txn.cant!(me, :cancel) }.to raise_error
+      expect { txn.cant!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
 
       txn.is_settled = true
       txn.can?(me, :cancel).should be_falsey
-      expect { txn.can!(me, :cancel) }.to raise_error
+      expect { txn.can!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
       txn.cant?(me, :cancel).should be_truthy
       expect { txn.cant!(me, :cancel) }.to_not raise_error
 
@@ -152,9 +152,9 @@ describe "Model objections" do
       expect { txn.can!(me, :show) }.to_not raise_error 
       expect { txn.can!(me, :edit) }.to_not raise_error 
       expect { txn.can!(me, :cancel) }.to_not raise_error 
-      expect { txn.cant!(me, :show) }.to raise_error 
-      expect { txn.cant!(me, :edit) }.to raise_error 
-      expect { txn.cant!(me, :cancel) }.to raise_error 
+      expect { txn.cant!(me, :show) }.to raise_error(Bali::AuthorizationError)
+      expect { txn.cant!(me, :edit) }.to raise_error(Bali::AuthorizationError) 
+      expect { txn.cant!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
 
 
       me.roles = [:general_user, :admin]
@@ -168,9 +168,9 @@ describe "Model objections" do
       expect { txn.can!(me, :show) }.to_not raise_error 
       expect { txn.can!(me, :edit) }.to_not raise_error 
       expect { txn.can!(me, :cancel) }.to_not raise_error 
-      expect { txn.cant!(me, :show) }.to raise_error 
-      expect { txn.cant!(me, :edit) }.to raise_error 
-      expect { txn.cant!(me, :cancel) }.to raise_error 
+      expect { txn.cant!(me, :show) }.to raise_error(Bali::AuthorizationError) 
+      expect { txn.cant!(me, :edit) }.to raise_error(Bali::AuthorizationError) 
+      expect { txn.cant!(me, :cancel) }.to raise_error(Bali::AuthorizationError) 
     end
 
     it "can query rule having unless decider" do 
@@ -547,15 +547,15 @@ describe "Model objections" do
         expect { My::Transaction.can!(:supreme_user, :delete) }.not_to raise_error
         expect { My::Transaction.can!(:admin_user, :delete) }.not_to raise_error
         expect { My::Transaction.can!(:general_user, :view) }.not_to raise_error
-        expect { My::Transaction.can!(:general_user, :delete) }.to raise_error
-        expect { My::Transaction.can!(:general_user, :do_something_undefined) }.to raise_error
+        expect { My::Transaction.can!(:general_user, :delete) }.to raise_error(Bali::AuthorizationError)
+        expect { My::Transaction.can!(:general_user, :do_something_undefined) }.to raise_error(Bali::AuthorizationError)
         expect { My::Transaction.can!(:finance_user, :update) }.not_to raise_error
-        expect { My::Transaction.can!(:finance_user, :save) }.to raise_error
-        expect { My::Transaction.can!(:monitoring, :read) }.to raise_error
+        expect { My::Transaction.can!(:finance_user, :save) }.to raise_error(Bali::AuthorizationError)
+        expect { My::Transaction.can!(:monitoring, :read) }.to raise_error(Bali::AuthorizationError)
         expect { My::Transaction.can!(:monitoring, :monitor) }.not_to raise_error
         expect { My::Transaction.can!(:monitoring, :ask) }.not_to raise_error
         expect { My::Transaction.can!(nil, :view) }.not_to raise_error
-        expect { My::Transaction.can!(nil, :save) }.to raise_error
+        expect { My::Transaction.can!(nil, :save) }.to raise_error(Bali::AuthorizationError)
       end
 
       it "can answer to cant?" do
@@ -573,16 +573,16 @@ describe "Model objections" do
       end
 
       it "can answer to cant!" do
-        expect { My::Transaction.cant!(:supreme_user, :delete) }.to raise_error
-        expect { My::Transaction.cant!(:admin_user, :delete) }.to raise_error
-        expect { My::Transaction.cant!(:general_user, :edit) }.to raise_error
-        expect { My::Transaction.cant!(:general_user, :view) }.to raise_error
+        expect { My::Transaction.cant!(:supreme_user, :delete) }.to raise_error(Bali::AuthorizationError)
+        expect { My::Transaction.cant!(:admin_user, :delete) }.to raise_error(Bali::AuthorizationError)
+        expect { My::Transaction.cant!(:general_user, :edit) }.to raise_error(Bali::AuthorizationError)
+        expect { My::Transaction.cant!(:general_user, :view) }.to raise_error(Bali::AuthorizationError)
         expect { My::Transaction.cant!(:general_user, :delete) }.to_not raise_error
-        expect { My::Transaction.cant!(:finance_user, :update) }.to raise_error
+        expect { My::Transaction.cant!(:finance_user, :update) }.to raise_error(Bali::AuthorizationError)
         expect { My::Transaction.cant!(:finance_user, :new) }.to_not raise_error
         expect { My::Transaction.cant!(:monitoring, :read) }.to_not raise_error
-        expect { My::Transaction.cant!(:monitoring, :monitor) }.to raise_error
-        expect { My::Transaction.cant!(nil, :view) }.to raise_error
+        expect { My::Transaction.cant!(:monitoring, :monitor) }.to raise_error(Bali::AuthorizationError)
+        expect { My::Transaction.cant!(nil, :view) }.to raise_error(Bali::AuthorizationError)
         expect { My::Transaction.cant!(nil, :save) }.to_not raise_error        
       end
 

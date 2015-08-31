@@ -282,3 +282,7 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 
 1. Passing real object as subtarget's role, instead of symbol or array of symbol
 2. Clause can also yielding user, along with the object in question
+
+== Version 2.0.0
+
+1. new objectors `can!` and `cant!` to raise error on inappropriate access
