@@ -1,4 +1,4 @@
-module Bali
+module Bali::Integrators::Rule
   extend self
 
   def rule_classes
@@ -18,7 +18,7 @@ module Bali
 
   # attempt to search the rule group, but if not exist, will return nil
   def rule_group_for(target_class, subtarget)
-    rule_class = Bali.rule_class_for(target_class)
+    rule_class = rule_class_for(target_class)
     if rule_class
       rule_group = rule_class.rules_for(subtarget)
       return rule_group
@@ -35,7 +35,7 @@ module Bali
       raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
 
       # remove any previous association of rule
-      begin 
+      begin
         last_associated_alias = Bali::REVERSE_ALIASED_RULE_CLASS_MAP[target]
         if last_associated_alias
           Bali::ALIASED_RULE_CLASS_MAP.delete(last_associated_alias)

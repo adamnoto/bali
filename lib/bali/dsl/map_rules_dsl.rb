@@ -15,7 +15,7 @@ class Bali::MapRulesDsl
       Bali::RulesForDsl.new(self).instance_eval(&block)
 
       # done processing the block, now add the rule class
-      Bali.add_rule_class(self.current_rule_class)
+      Bali::Integrators::Rule.add_rule_class(self.current_rule_class)
     end
   end
 
