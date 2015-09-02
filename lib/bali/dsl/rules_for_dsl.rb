@@ -103,8 +103,13 @@ class Bali::RulesForDsl
     process_auth_rules(:can, operations)
   end
 
-  def cant(*operations)
+  def cannot(*operations)
     process_auth_rules(:cant, operations)
+  end
+
+  def cant(*operations)
+    puts "Deprecation Warning: declaring rules with cant will be deprecated on major release 3.0, use cannot instead"
+    cannot(*operations)
   end
 
   def can_all
@@ -112,8 +117,13 @@ class Bali::RulesForDsl
     self.current_rule_group.plant = false
   end
 
-  def cant_all
+  def cannot_all
     self.current_rule_group.plant = true
     self.current_rule_group.zeus = false
+  end
+
+  def cant_all
+    puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot_all instead"
+    cannot_all
   end
 end # class

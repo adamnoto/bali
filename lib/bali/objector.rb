@@ -19,14 +19,24 @@ module Bali::Objector
 
   # check whether user can/cant perform an operation, return true when negative
   # or false otherwise
-  def cant?(subtargets, operation)
-    self.class.cant?(subtargets, operation, self)
+  def cannot?(subtargets, operation)
+    self.class.cannot?(subtargets, operation, self)
   end
 
   # check whether user can/cant perform an operation, raise an error when access
   # is given
+  def cannot!(subtargets, operation)
+    self.class.cannot!(subtargets, operation, self)
+  end
+
+  def cant?(subtargets, operation)
+    puts "Deprecation Warning: please use cannot? instead, cant? will be deprecated on major release 3.0"
+    cannot?(subtargets, operation)
+  end
+
   def cant!(subtargets, operation)
-    self.class.cant!(subtargets, operation, self)
+    puts "Deprecation Warning: please use cannot! instead, cant! will be deprecated on major release 3.0"
+    cannot!(subtargets, operation)
   end
 end
 
@@ -67,7 +77,7 @@ module Bali::Objector::Statics
     end # if
   end
 
-  ### options passable to bali_can? and bali_cant? are:
+  ### options passable to bali_can? and bali_cannot? are:
   ### cross_action: if set to true wouldn't call its counterpart so as to prevent
   ###   overflowing stack
   ### original_subtarget: the original passed to can? and cant? before 
@@ -168,7 +178,7 @@ module Bali::Objector::Statics
     end
   end
 
-  def bali_cant?(subtarget, operation, record = self, options = {})
+  def bali_cannot?(subtarget, operation, record = self, options = {})
     if self.is_a?(Class)
       rule_group = Bali::Integrators::Rule.rule_group_for(self, subtarget)
     else
@@ -284,11 +294,16 @@ module Bali::Objector::Statics
   end
 
   def cant?(subtarget_roles, operation, record = self, options = {})
+    puts "Deprecation Warning: please use cannot? instead, cant? will be deprecated on major release 3.0"
+    cannot?(subtarget_roles, operation, record, options)
+  end
+
+  def cannot?(subtarget_roles, operation, record = self, options = {})
     subs = bali_translate_subtarget_roles subtarget_roles
     options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
     subs.each do |subtarget|
-      cant_value = bali_cant?(subtarget, operation, record, options)
+      cant_value = bali_cannot?(subtarget, operation, record, options)
       if cant_value == false
         role = subtarget
         if block_given?
@@ -328,7 +343,12 @@ module Bali::Objector::Statics
   end
 
   def cant!(subtarget_roles, operation, record = self, options = {})
-    cant?(subtarget_roles, operation, record, options) do |original_subtarget, role, cant_value|
+    puts "Deprecation Warning: please use cannot! instead, cant! will be deprecated on major release 3.0"
+    cannot!(subtarget_roles, operation, record, options)
+  end
+
+  def cannot!(subtarget_roles, operation, record = self, options = {})
+    cannot?(subtarget_roles, operation, record, options) do |original_subtarget, role, cant_value|
       if cant_value == false
         auth_error = Bali::AuthorizationError.new
         auth_error.auth_level = :cant
