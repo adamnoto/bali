@@ -22,6 +22,11 @@ And then execute:
 
     $ bundle
 
+## Deprecation notice
+
+1. `cant` and `cant_all` which are used to declare rules will be deprecated on version 3.0, in favor of `cannot` and `cannot_all`. The reason behind this is that `can` and `cant` only differ by 1 letter, it is thought to be better to make it less ambiguous.
+2. `cant?` and subsequently new-introduced `cant!` will be deprecated on version 3.0, in favor of `cannot?` and `cannot!` for the same reason as above.
+
 ## Usage
 
 ### Defining access rules
@@ -282,3 +287,8 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 
 1. Passing real object as subtarget's role, instead of symbol or array of symbol
 2. Clause can also yielding user, along with the object in question
+
+== Version 2.0.0
+
+1. Deprecating `cant`, `cant?`, `cant!` and `cant_all` in favor of `cannot`, `cannot?`, `cannot!` and `cannot_all`
+2. new objectors `can!` and `cannot!` to raise error on inappropriate access
