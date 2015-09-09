@@ -7,7 +7,7 @@ module Bali::Objector
 
   # check whether user can/cant perform an operation, return true when positive
   # or false otherwise
-  def can?(subtargets, operation) 
+  def can?(subtargets, operation)
     self.class.can?(subtargets, operation, self)
   end
 
@@ -54,7 +54,7 @@ module Bali::Objector::Statics
 
       _subtarget = _subtarget_roles
       _subtarget_class = _subtarget.class.to_s
-      
+
       # variable to hold deducted role of the passed object
       deducted_roles = nil
 
@@ -80,7 +80,7 @@ module Bali::Objector::Statics
   ### options passable to bali_can? and bali_cannot? are:
   ### cross_action: if set to true wouldn't call its counterpart so as to prevent
   ###   overflowing stack
-  ### original_subtarget: the original passed to can? and cant? before 
+  ### original_subtarget: the original passed to can? and cannot? before
   ###   processed by bali_translate_subtarget_roles
 
   def bali_can?(subtarget, operation, record = self, options = {})
@@ -108,20 +108,20 @@ module Bali::Objector::Statics
     if rule_group.zeus?
       if rule.nil?
         # check further whether cant is defined to overwrite this can_all
-        if self.cant?(subtarget, operation, record, cross_check: true)
+        if self.cannot?(subtarget, operation, record, cross_check: true)
           return false
         else
           return true
         end
       end
     end
-    
+
     if rule.nil?
       # default if can? for undefined rule is false, after related clause
-      # cannot be found in cant?
+      # cannot be found in cannot?
       return false if options[:cross_check]
       options[:cross_check] = true
-      return !self.cant?(subtarget, operation, record, options)
+      return !self.cannot?(subtarget, operation, record, options)
     else
       if rule.has_decider?
         # must test first
@@ -131,43 +131,43 @@ module Bali::Objector::Statics
         when 0
           if rule.decider_type == :if
             if decider.()
-              return true 
-            else 
+              return true
+            else
               return false
             end
           elsif rule.decider_type == :unless
             unless decider.()
-              return true 
-            else 
-              return false 
+              return true
+            else
+              return false
             end
           end
         when 1
           if rule.decider_type == :if
             if decider.(record)
-              return true 
-            else 
+              return true
+            else
               return false
             end
           elsif rule.decider_type == :unless
             unless decider.(record)
-              return true 
-            else 
-              return false 
+              return true
+            else
+              return false
             end
           end
         when 2
           if rule.decider_type == :if
             if decider.(record, original_subtarget)
-              return true 
-            else 
+              return true
+            else
               return false
             end
           elsif rule.decider_type == :unless
             unless decider.(record, original_subtarget)
-              return true 
-            else 
-              return false 
+              return true
+            else
+              return false
             end
           end
         end
@@ -185,11 +185,11 @@ module Bali::Objector::Statics
       rule_group = Bali::Integrators::Rule.rule_group_for(self.class, subtarget)
     end
 
-    # default of cant? is true whenever RuleClass for that class is undefined
+    # default of cannot? is true whenever RuleClass for that class is undefined
     # or RuleGroup for that subtarget is not defined
     return true if rule_group.nil?
 
-    rule = rule_group.get_rule(:cant, operation)
+    rule = rule_group.get_rule(:cannot, operation)
 
     # godly subtarget is not to be prohibited in his endeavours
     # so long that no specific rule about this operation is defined
@@ -209,7 +209,7 @@ module Bali::Objector::Statics
       end
     end
 
-    # if rule cannot be found, then true is returned for cant? unless 
+    # if rule cannot be found, then true is returned for cannot? unless
     # can? is defined exactly for the same target, and subtarget, and record (if given)
     if rule.nil?
       return true if options[:cross_check]
@@ -223,43 +223,43 @@ module Bali::Objector::Statics
         when 0
           if rule.decider_type == :if
             if decider.()
-              return true 
-            else 
+              return true
+            else
               return false
             end
           elsif rule.decider_type == :unless
             unless decider.()
-              return true 
-            else 
-              return false 
+              return true
+            else
+              return false
             end
           end
         when 1
           if rule.decider_type == :if
             if decider.(record)
-              return true 
-            else 
+              return true
+            else
               return false
             end
           elsif rule.decider_type == :unless
             unless decider.(record)
-              return true 
-            else 
-              return false 
+              return true
+            else
+              return false
             end
           end
         when 2
           if rule.decider_type == :if
             if decider.(record, original_subtarget)
-              return true 
-            else 
+              return true
+            else
               return false
             end
           elsif rule.decider_type == :unless
             unless decider.(record, original_subtarget)
-              return true 
-            else 
-              return false 
+              return true
+            else
+              return false
             end
           end
         end
@@ -307,15 +307,15 @@ module Bali::Objector::Statics
       if cant_value == false
         role = subtarget
         if block_given?
-          yield options[:original_subtarget], role, false 
+          yield options[:original_subtarget], role, false
         else
           return false
         end
       end
     end
-    
+
     true
-  rescue => e 
+  rescue => e
     if e.is_a?(Bali::AuthorizationError)
       raise e
     else
@@ -331,7 +331,7 @@ module Bali::Objector::Statics
         auth_error.operation = operation
         auth_error.role = role
         auth_error.target = record
-        auth_error.subtarget = original_subtarget 
+        auth_error.subtarget = original_subtarget
 
         if role
           auth_error.subtarget = original_subtarget if !(original_subtarget.is_a?(Symbol) || original_subtarget.is_a?(String) || original_subtarget.is_a?(Array))
@@ -351,16 +351,16 @@ module Bali::Objector::Statics
     cannot?(subtarget_roles, operation, record, options) do |original_subtarget, role, cant_value|
       if cant_value == false
         auth_error = Bali::AuthorizationError.new
-        auth_error.auth_level = :cant
+        auth_error.auth_level = :cannot
         auth_error.operation = operation
         auth_error.role = role
         auth_error.target = record
-        auth_error.subtarget = original_subtarget 
+        auth_error.subtarget = original_subtarget
 
         if role
           auth_error.subtarget = original_subtarget if !(original_subtarget.is_a?(Symbol) || original_subtarget.is_a?(String) || original_subtarget.is_a?(Array))
         end
-        
+
         raise auth_error
       end
     end
