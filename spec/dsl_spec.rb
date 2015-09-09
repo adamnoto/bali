@@ -9,7 +9,7 @@ describe Bali do
     end
 
     it "disallow calling describe outside of rules_for" do
-      expect do 
+      expect do
         Bali.map_rules do
           describe :general_user, can: :show
         end.to raise_error(Bali::DslError)
@@ -17,7 +17,7 @@ describe Bali do
 
       expect do
         Bali.map_rules do
-          rules_for My::Transaction do 
+          rules_for My::Transaction do
             describe :general_user do
               can :show
             end
@@ -27,15 +27,15 @@ describe Bali do
     end
 
     it "disallows calling can outside of describe block" do
-      expect do 
-        Bali.map_rules do 
+      expect do
+        Bali.map_rules do
           can :show
         end
       end.to raise_error(Bali::DslError)
 
       expect do
         Bali.map_rules do
-          rules_for My::Transaction do 
+          rules_for My::Transaction do
             describe :general_user do
               can :show
             end
@@ -44,34 +44,34 @@ describe Bali do
       end.to_not raise_error
     end
 
-    it "disallows calling cant outside of describe block" do 
-      expect do 
-        Bali.map_rules do 
-          cant :show
-        end
-      end.to raise_error(Bali::DslError)
-      
+    it "disallows calling cannot outside of describe block" do
       expect do
         Bali.map_rules do
-          rules_for My::Transaction do 
+          cannot :show
+        end
+      end.to raise_error(Bali::DslError)
+
+      expect do
+        Bali.map_rules do
+          rules_for My::Transaction do
             describe :general_user do
-              cant :show
+              cannot :show
             end
           end
         end
       end.to_not raise_error
     end
 
-    it "disallows calling can_all outside of describe block" do 
-      expect do 
-        Bali.map_rules do 
+    it "disallows calling can_all outside of describe block" do
+      expect do
+        Bali.map_rules do
           can_all
         end
       end.to raise_error(Bali::DslError)
 
-      expect do 
+      expect do
         Bali.map_rules do
-          rules_for My::Transaction do 
+          rules_for My::Transaction do
             describe :general_user do
               can_all
             end
@@ -80,18 +80,18 @@ describe Bali do
       end.to_not raise_error
     end
 
-    it "disallows calling cant_all outside of describe block" do 
-      expect do 
-        Bali.map_rules do 
-          cant_all
+    it "disallows calling cannot_all outside of describe block" do
+      expect do
+        Bali.map_rules do
+          cannot_all
         end
       end.to raise_error(Bali::DslError)
 
-      expect do 
+      expect do
         Bali.map_rules do
-          rules_for My::Transaction do 
+          rules_for My::Transaction do
             describe :general_user do
-              cant_all
+              cannot_all
             end
           end
         end
@@ -129,7 +129,7 @@ describe Bali do
 
       Bali::Integrators::Rule.rule_classes.size.should == 1
       Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
-      
+
       rule_group_gu = Bali::Integrators::Rule.rule_group_for(My::Transaction, :general_user)
       rule_group_fu = Bali::Integrators::Rule.rule_group_for(My::Transaction, :finance_user)
 
@@ -162,7 +162,7 @@ describe Bali do
     it "does not allows subtarget definition other than using string, symbol, array and hash" do
       expect do
         Bali.map_rules do
-          rules_for My::Transaction do 
+          rules_for My::Transaction do
             describe :general_user do
               can :print
             end
@@ -225,7 +225,7 @@ describe Bali do
         rules_for My::Transaction do
           describe :finance_user do
             can :delete, if: proc { |record| record.is_settled? }
-            cant :payout, if: proc { |record| !record.is_settled? }
+            cannot :payout, if: proc { |record| !record.is_settled? }
           end
         end
       end
@@ -233,22 +233,22 @@ describe Bali do
       txn = My::Transaction.new
       txn.is_settled = false
       txn.can?(:finance_user, :delete).should be_falsey
-      txn.cant?(:finance_user, :delete).should be_truthy
+      txn.cannot?(:finance_user, :delete).should be_truthy
       txn.can?(:finance_user, :payout).should be_falsey
-      txn.cant?(:finance_user, :payout).should be_truthy
+      txn.cannot?(:finance_user, :payout).should be_truthy
 
       txn.is_settled = true
       txn.can?(:finance_user, :delete).should be_truthy
-      txn.cant?(:finance_user, :delete).should be_falsey
+      txn.cannot?(:finance_user, :delete).should be_falsey
       txn.can?(:finance_user, :payout).should be_truthy
-      txn.cant?(:finance_user, :payout).should be_falsey
+      txn.cannot?(:finance_user, :payout).should be_falsey
 
       # reverse meaning of the above, should return the same
       Bali.clear_rules
       Bali.map_rules do
         rules_for My::Transaction do
           describe :finance_user do
-            cant :delete, unless: proc { |record| record.is_settled? }
+            cannot :delete, unless: proc { |record| record.is_settled? }
             can :payout, unless: proc { |record| !record.is_settled? }
           end
         end
@@ -257,11 +257,11 @@ describe Bali do
       txn = My::Transaction.new
       txn.is_settled = false
       txn.can?(:finance_user, :delete).should be_falsey
-      txn.cant?(:finance_user, :delete).should be_truthy
+      txn.cannot?(:finance_user, :delete).should be_truthy
 
       txn.is_settled = true
       txn.can?(:finance_user, :delete).should be_truthy
-      txn.cant?(:finance_user, :delete).should be_falsey
+      txn.cannot?(:finance_user, :delete).should be_falsey
     end
 
     it "allows unless-decider to be executed in context" do
@@ -269,18 +269,18 @@ describe Bali do
       Bali.map_rules do
         rules_for My::Transaction do
           describe :finance_user do
-            cant :chargeback, unless: proc { |record| record.is_settled? }
+            cannot :chargeback, unless: proc { |record| record.is_settled? }
           end
         end
       end
 
       txn = My::Transaction.new
       txn.is_settled = false
-      txn.cant?(:finance_user, :chargeback).should be_truthy
+      txn.cannot?(:finance_user, :chargeback).should be_truthy
       txn.can?(:finance_user, :chargeback).should be_falsey
-      
+
       txn.is_settled = true
-      txn.cant?(:finance_user, :chargeback).should be_falsey
+      txn.cannot?(:finance_user, :chargeback).should be_falsey
       txn.can?(:finance_user, :chargeback).should be_truthy
 
       # reverse meaning of the above, should return the same
@@ -295,11 +295,11 @@ describe Bali do
 
       txn = My::Transaction.new
       txn.is_settled = false
-      txn.cant?(:finance_user, :chargeback).should be_truthy
+      txn.cannot?(:finance_user, :chargeback).should be_truthy
       txn.can?(:finance_user, :chargeback).should be_falsey
-      
+
       txn.is_settled = true
-      txn.cant?(:finance_user, :chargeback).should be_falsey
+      txn.cannot?(:finance_user, :chargeback).should be_falsey
       txn.can?(:finance_user, :chargeback).should be_truthy
     end
 
@@ -329,7 +329,7 @@ describe Bali do
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
       Bali::Integrators::Rule.rule_class_for(:transaction).should be_nil
 
-      Bali.map_rules do 
+      Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
           describe :general_user, can: :show
         end
@@ -342,7 +342,7 @@ describe Bali do
       Bali::Integrators::Rule.rule_class_for(My::Transaction).should == rc
     end
 
-    it "should redefine rule class if map_rules is called" do 
+    it "should redefine rule class if map_rules is called" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction, as: :transaction do
@@ -355,7 +355,7 @@ describe Bali do
         .rules.size).to eq(3)
 
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do 
+        rules_for My::Transaction, as: :transaction do
           describe :general_user, can: :show
           describe :finance_user, can: [:update, :delete, :edit]
         end
@@ -382,5 +382,5 @@ describe Bali do
       expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
         .to eq(true)
     end
-  end # main module 
+  end # main module
 end
