@@ -22,6 +22,11 @@ And then execute:
 
     $ bundle
 
+## Deprecation notice
+
+1. `cant` and `cant_all` which are used to declare rules will be deprecated on version 3.0, in favor of `cannot` and `cannot_all`. The reason behind this is that `can` and `cant` only differ by 1 letter, it is thought to be better to make it less ambiguous.
+2. `cant?` and subsequently new-introduced `cant!` will be deprecated on version 3.0, in favor of `cannot?` and `cannot!` for the same reason as above.
+
 ## Usage
 
 ### Defining access rules
@@ -173,6 +178,22 @@ By doing so, we can now perform authorisation testing as follow:
   txn.can?(current_employee, :print)
 ```
 
+### Raises error on unauthorized access
+
+`can?` and `cant?` just return boolean values on whether access is granted or not. If you want to raise an exception when an operation is inappropriate, use its variant: `can!` and `cant!`
+
+When `can!` result in denied operation, it will raise `Bali::AuthorizationError`. In the other hand, `cant!` will raise `Bali::AuthorizationError` if it allows an operation.
+
+`can!` and `cant` are invoked with a similar fashion as you would invoke `can?` and `cant?`
+
+`Bali::AuthorizationError` is more than an exception, it also store information regarding:
+
+1. `auth_level`: whether it is can, or cant testing.
+2. `role`: the role under which authorisation is performed
+3. `subtarget`: the object (if passing an object), or string/symbol representing the role
+4. `operation`: the action
+5. `target`: targeted object/class of the authorization
+
 ### Rule clause if/unless
 
 Rule clause may contain `if` and `unless` (decider) proc as already seen before. This `if` and `unless` `proc` have three variants that can be used to express your rule in sufficient detail:
@@ -266,3 +287,8 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 
 1. Passing real object as subtarget's role, instead of symbol or array of symbol
 2. Clause can also yielding user, along with the object in question
+
+== Version 2.0.0
+
+1. Deprecating `cant`, `cant?`, `cant!` and `cant_all` in favor of `cannot`, `cannot?`, `cannot!` and `cannot_all`
+2. new objectors `can!` and `cannot!` to raise error on inappropriate access

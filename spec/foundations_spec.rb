@@ -1,37 +1,37 @@
-describe Bali do 
+describe Bali do
   before(:each) { Bali.clear_rules }
 
   it "cannot add rule class other than of class Bali::RuleClass" do
-    expect { Bali.add_rule_class(nil) }.to raise_error(Bali::DslError)
-    expect { Bali.add_rule_class("adam") }.to raise_error(Bali::DslError)
-    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction)).should_not be_nil
+    expect { Bali::Integrators::Rule.add_rule_class(nil) }.to raise_error(Bali::DslError)
+    expect { Bali::Integrators::Rule.add_rule_class("adam") }.to raise_error(Bali::DslError)
+    Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction)).should_not be_nil
   end
 
   it "rule class for is only defined for a Class" do
-    expect { Bali.rule_class_for("adam") }.to raise_error(Bali::DslError)
+    expect { Bali::Integrators::Rule.rule_class_for("adam") }.to raise_error(Bali::DslError)
 
-    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
-    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
   end
 
   it "should return nil whenever trying to search for inexistent rule class" do
-    Bali.rule_class_for(My::Transaction).should be_nil
+    Bali::Integrators::Rule.rule_class_for(My::Transaction).should be_nil
   end
 
   it "should return Bali::RuleClass if rule class is defined" do
-    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
-    Bali.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+    Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
   end
 
   it "should return nil whenever trying to search for inexistent rule group" do
-    Bali.rule_group_for(My::Transaction, :basic_user).should be_nil
+    Bali::Integrators::Rule.rule_group_for(My::Transaction, :basic_user).should be_nil
   end
 
   it "should return Bali::RuleGroup if rule group is defined" do
-    Bali.add_rule_class(Bali::RuleClass.new(My::Transaction))
-    rule_class = Bali.rule_class_for(My::Transaction)
+    Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
+    rule_class = Bali::Integrators::Rule.rule_class_for(My::Transaction)
     rule_class.add_rule_group(Bali::RuleGroup.new(My::Transaction, :transaction, :basic))
-    Bali.rule_group_for(My::Transaction, :basic).class.should == Bali::RuleGroup
+    Bali::Integrators::Rule.rule_group_for(My::Transaction, :basic).class.should == Bali::RuleGroup
   end
 end
 
@@ -73,15 +73,15 @@ describe Bali::RuleGroup do
       it "can responds to can?" do
         transaction = My::Transaction.new
         expect(transaction.respond_to?(:can?)).to eq true
-        transaction.class.ancestors.include?(Bali::Objector).should be_truthy 
+        transaction.class.ancestors.include?(Bali::Objector).should be_truthy
 
         # class-level question too
         My::Transaction.respond_to?(:can?).should == true
       end
 
-      it "can responds to cant?" do
+      it "can responds to cannot?" do
         transaction = My::Transaction.new
-        expect(transaction.respond_to?(:cant?)).to eq true
+        expect(transaction.respond_to?(:cannot?)).to eq true
         transaction.class.ancestors.include?(Bali::Objector).should be_truthy
 
         # class-level question too
@@ -114,13 +114,13 @@ describe Bali::RuleGroup do
 
   context "for :user" do
     let(:rule_group) { Bali::RuleGroup.new(My::Transaction, :transaction, :user) }
-    
+
     it "is creatable" do
       rule_group.target.should == My::Transaction
       rule_group.alias_tgt.should == :transaction
       rule_group.subtarget.should == :user
     end
-    
+
     it_behaves_like "rule"
   end # context for :user
 
@@ -138,14 +138,14 @@ describe Bali::RuleGroup do
 end # RuleObject
 
 describe Bali::Rule do
-  it "is creatable" do 
+  it "is creatable" do
     rule = Bali::Rule.new(:can, :delete)
     rule.auth_val.should == :can
     rule.operation.should == :delete
     rule.decider.should be_nil
 
-    rule = Bali::Rule.new(:cant, :delete)
-    rule.auth_val.should == :cant
+    rule = Bali::Rule.new(:cannot, :delete)
+    rule.auth_val.should == :cannot
     rule.operation.should == :delete
     rule.decider.should be_nil
   end
@@ -171,11 +171,11 @@ describe Bali::Rule do
     it "can only be either can or cant type" do
       expect {Bali::Rule.new(:xyz, :delete) }.to raise_error(Bali::DslError)
       expect {Bali::Rule.new(:can, :delete) }.to_not raise_error
-      expect {Bali::Rule.new(:cant, :delete)}.to_not raise_error
+      expect {Bali::Rule.new(:cannot, :delete)}.to_not raise_error
     end
     context "cant-type rule" do
       let(:rule) { Bali::Rule.new(:cant, :delete) }
-      
+
       it "is a discouragement" do
         expect(rule.is_discouragement?).to be_truthy
       end

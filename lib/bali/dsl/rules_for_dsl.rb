@@ -27,7 +27,7 @@ class Bali::RulesForDsl
         subtargets += passed_argument
       elsif passed_argument.is_a?(Hash)
         rules = passed_argument
-      else 
+      else
         raise Bali::DslError, "Allowed argument: symbol, string, nil and hash"
       end
     end
@@ -56,7 +56,7 @@ class Bali::RulesForDsl
               end
             else
               operation = operations # well, basically is 1 only
-              rule = Bali::Rule.new(auth_val, operation) 
+              rule = Bali::Rule.new(auth_val, operation)
               self.current_rule_group.add_rule(rule)
             end
           end # each rules
@@ -71,7 +71,7 @@ class Bali::RulesForDsl
   # to define can and cant is basically using this method
   def process_auth_rules(auth_val, operations)
     conditional_hash = nil
-    
+
     # scan operations for options
     operations.each do |elm|
       if elm.is_a?(Hash)
@@ -103,8 +103,13 @@ class Bali::RulesForDsl
     process_auth_rules(:can, operations)
   end
 
+  def cannot(*operations)
+    process_auth_rules(:cannot, operations)
+  end
+
   def cant(*operations)
-    process_auth_rules(:cant, operations)
+    puts "Deprecation Warning: declaring rules with cant will be deprecated on major release 3.0, use cannot instead"
+    cannot(*operations)
   end
 
   def can_all
@@ -112,8 +117,13 @@ class Bali::RulesForDsl
     self.current_rule_group.plant = false
   end
 
-  def cant_all
+  def cannot_all
     self.current_rule_group.plant = true
     self.current_rule_group.zeus = false
+  end
+
+  def cant_all
+    puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot_all instead"
+    cannot_all
   end
 end # class

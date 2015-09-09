@@ -15,7 +15,7 @@ class Bali::MapRulesDsl
       Bali::RulesForDsl.new(self).instance_eval(&block)
 
       # done processing the block, now add the rule class
-      Bali.add_rule_class(self.current_rule_class)
+      Bali::Integrators::Rule.add_rule_class(self.current_rule_class)
     end
   end
 
@@ -25,7 +25,7 @@ class Bali::MapRulesDsl
     raise Bali::DslError, "Subtarget must be a class" unless subtarget_class.is_a?(Class)
     raise Bali::DslError, "Field name must be a symbol/string" if !(field_name.is_a?(Symbol) || field_name.is_a?(String))
 
-    Bali::TRANSLATED_SUBTARGET_ROLES[subtarget_class.to_s] = field_name 
+    Bali::TRANSLATED_SUBTARGET_ROLES[subtarget_class.to_s] = field_name
     nil
   end
 
@@ -38,6 +38,11 @@ class Bali::MapRulesDsl
   end
 
   def cant(*params)
+    puts "Deprecation Warning: declaring rules with cant will be deprecated on major release 3.0, use cannot instead"
+    cannot *params
+  end
+
+  def cannot(*params)
     raise Bali::DslError, "cant block must be within describe block"
   end
 
@@ -46,6 +51,11 @@ class Bali::MapRulesDsl
   end
 
   def cant_all(*params)
+    puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot instead"
+    cannot_all *params
+  end
+
+  def cannot_all(*params)
     raise Bali::DslError, "cant_all block must be within describe block"
   end
 end
