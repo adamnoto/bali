@@ -1,6 +1,6 @@
 # for internal use, representing one, single, atomic rule
 class Bali::Rule
-  # auth_val is either :can or :cant
+  # auth_val is either :can or :cannot
   attr_reader :auth_val
 
   # what is the operation: create, update, delete, or any other
@@ -18,10 +18,13 @@ class Bali::Rule
   end
 
   def auth_val=(aval)
-    if aval == :can || aval == :cant
+    # TODO: in version 3 remove :cant
+    if aval == :can || aval == :cannot
       @auth_val = aval
+    elsif aval == :cant
+      @auth_val = :cannot
     else
-      raise Bali::DslError, "auth_val can only either be :can or :cant"
+      raise Bali::DslError, "auth_val can only either be :can or :cannot"
     end
   end
 
@@ -34,7 +37,8 @@ class Bali::Rule
   end
 
   def is_discouragement?
-    self.auth_val == :cant
+    # TODO: in version 3.0 remove :cant
+    self.auth_val == :cannot || self.auth_val == :cant
   end
 
   def has_decider?

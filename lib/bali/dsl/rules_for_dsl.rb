@@ -27,7 +27,7 @@ class Bali::RulesForDsl
         subtargets += passed_argument
       elsif passed_argument.is_a?(Hash)
         rules = passed_argument
-      else 
+      else
         raise Bali::DslError, "Allowed argument: symbol, string, nil and hash"
       end
     end
@@ -56,7 +56,7 @@ class Bali::RulesForDsl
               end
             else
               operation = operations # well, basically is 1 only
-              rule = Bali::Rule.new(auth_val, operation) 
+              rule = Bali::Rule.new(auth_val, operation)
               self.current_rule_group.add_rule(rule)
             end
           end # each rules
@@ -71,7 +71,7 @@ class Bali::RulesForDsl
   # to define can and cant is basically using this method
   def process_auth_rules(auth_val, operations)
     conditional_hash = nil
-    
+
     # scan operations for options
     operations.each do |elm|
       if elm.is_a?(Hash)
@@ -104,7 +104,7 @@ class Bali::RulesForDsl
   end
 
   def cannot(*operations)
-    process_auth_rules(:cant, operations)
+    process_auth_rules(:cannot, operations)
   end
 
   def cant(*operations)
