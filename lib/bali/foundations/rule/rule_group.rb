@@ -59,7 +59,7 @@ class Bali::RuleGroup
     case auth_val
     when :can, "can"
       rule = self.cans[operation.to_sym]
-    when :cant, "cant"
+    when :cannot, "cannot"
       rule = self.cants[operation.to_sym]
     else
       raise Bali::DslError, "Undefined operation: #{auth_val}"
