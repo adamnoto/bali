@@ -40,8 +40,8 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
       describe :admin_user do
         can_all
         # a more specific rule would be executed even if can_all is present
-        can :cancel, 
-          if: proc { |record| record.payment_channel == "CREDIT_CARD" && 
+        can :cancel,
+          if: proc { |record| record.payment_channel == "CREDIT_CARD" &&
                               !record.is_settled? }
       end
       describe "general user", can: [:update, :edit], cant: [:delete]
@@ -153,16 +153,16 @@ That is, we can check `can?` and `cant?` with multiple roles by passing array of
 
 ### Using subtarget's instance for Can and Cant testing
 
-You may pass in real subtarget instance rather than (1) a symbol, (2) string or (3) array of string/symbol for can/cant testing. 
+You may pass in real subtarget instance rather than (1) a symbol, (2) string or (3) array of string/symbol for can/cant testing.
 
 In order to do so, you need to specify the field/method in the subtarget that will be used to evaluating the subtarget's role(s). To do that, we define `roles_for` as follow inside `Bali.map_rules` block:
 
 ```ruby
-Bali.map_rules do 
+Bali.map_rules do
   roles_for My::Employee, :roles
   roles_for My::AdminUser, :admin_roles
   roles_for My::BankUser, :roles
-  
+
   # rules definition
   # may follow
 end
@@ -205,7 +205,7 @@ Rule clause may contain `if` and `unless` (decider) proc as already seen before.
 When rule is very brief, use zero-arity rule clause as below:
 
 ```ruby
-Bali.map_rules do 
+Bali.map_rules do
   rules_for My::Transaction do
     describe(:staff) { can :cancel }
     describe(:finance) { can :cancel }
@@ -221,7 +221,7 @@ describe :staff do
 end
 ```
 
-Good, but, in addition to that, how to allow transaction cancellation only to staff who has 3 years or so experience in working with the company? 
+Good, but, in addition to that, how to allow transaction cancellation only to staff who has 3 years or so experience in working with the company?
 
 In order to do that, we need to resort to 2-arity decider, as follow:
 
@@ -288,7 +288,8 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 1. Passing real object as subtarget's role, instead of symbol or array of symbol
 2. Clause can also yielding user, along with the object in question
 
-== Version 2.0.0
+== Version 2.0.0rc1
 
-1. Deprecating `cant`, `cant?`, `cant!` and `cant_all` in favor of `cannot`, `cannot?`, `cannot!` and `cannot_all`
-2. new objectors `can!` and `cannot!` to raise error on inappropriate access
+1. `Bali::AuthorizationError` subclass of `StandardError` tailored for raising error regarding with authorisation
+2. Deprecating `cant`, `cant?`, and `cant_all` in favor of `cannot`, `cannot?` and `cannot_all`
+3. new objectors `can!` and `cannot!` to raise error on inappropriate access
