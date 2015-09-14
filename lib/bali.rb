@@ -24,9 +24,6 @@ module Bali
   #   AdminUser: :admin_roles
   # }
   TRANSLATED_SUBTARGET_ROLES = {}
-
-  # pub/sub for plugin that extend bali
-  LISTENABLE_EVENTS = {}
 end
 
 module Bali
