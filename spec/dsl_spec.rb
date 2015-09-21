@@ -101,7 +101,7 @@ describe Bali do
     it "allows definition of rules per subtarget" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe :general_user, can: :show
           describe :finance_user do
             can :update, :delete, :edit
@@ -306,7 +306,7 @@ describe Bali do
     it "can define nil rule group" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe nil do
             can :view
           end
@@ -316,7 +316,7 @@ describe Bali do
       Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
     end
 
-    it "should allow rule group to be defined with or without alias" do
+    it "should allow rule group to be defined" do
       Bali.map_rules do
         rules_for My::Transaction do
           describe :general_user, can: :show
@@ -327,10 +327,10 @@ describe Bali do
       rc.class.should == Bali::RuleClass
       rc.rules_for(:general_user).class.should == Bali::RuleGroup
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
-      Bali::Integrators::Rule.rule_class_for(:transaction).should be_nil
+      expect(Bali::Integrators::Rule.rule_class_for(My::Transaction)).to_not be_nil
 
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe :general_user, can: :show
         end
       end
@@ -345,7 +345,7 @@ describe Bali do
     it "should redefine rule class if map_rules is called" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe :general_user, can: [:update, :delete, :edit]
         end
       end
@@ -355,7 +355,7 @@ describe Bali do
         .rules.size).to eq(3)
 
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe :general_user, can: :show
           describe :finance_user, can: [:update, :delete, :edit]
         end
@@ -370,7 +370,7 @@ describe Bali do
       Bali::Integrators::Rule.rule_classes.size.should == 0
 
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe :general_user do |record|
             can :update, :delete
             can :delete, if: -> { record.is_settled? }
