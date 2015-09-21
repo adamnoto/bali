@@ -35,7 +35,7 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
 
 ```ruby
   Bali.map_rules do
-    rules_for My::Transaction, as: :transaction do
+    rules_for My::Transaction do
       describe(:supreme_user) { can_all }
       describe :admin_user do
         can_all
@@ -55,8 +55,6 @@ Rule in Bali is the law determining whether a user (called `subtarget`) can do o
     end # rules_for
   end
 ```
-
-You may or may not assign an alias name (`as`). Make sure to keep it unique had you decided to give alias name to your rules group.
 
 It is also possible for a rule to be defined for multiple subtarget at once:
 

@@ -30,7 +30,7 @@ describe Bali do
   it "should return Bali::RuleGroup if rule group is defined" do
     Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
     rule_class = Bali::Integrators::Rule.rule_class_for(My::Transaction)
-    rule_class.add_rule_group(Bali::RuleGroup.new(My::Transaction, :transaction, :basic))
+    rule_class.add_rule_group(Bali::RuleGroup.new(My::Transaction, :basic))
     Bali::Integrators::Rule.rule_group_for(My::Transaction, :basic).class.should == Bali::RuleGroup
   end
 end
@@ -47,7 +47,7 @@ describe Bali::RuleClass do
   # non-nil rule group is rule group that is defined with proper-named group
   # such as :user, :admin, :supreme, etc
   it "can add non-nil rule group" do
-    rule_group = Bali::RuleGroup.new(My::Transaction, :transaction, :user)
+    rule_group = Bali::RuleGroup.new(My::Transaction, :user)
     rule_class = Bali::RuleClass.new(My::Transaction)
     expect { rule_class.add_rule_group(rule_group) }.to_not raise_error
     rule_class.rules_for(:user).class.should == Bali::RuleGroup
@@ -56,7 +56,7 @@ describe Bali::RuleClass do
   # nil rule group is for rule group that rules is targeting nil/un-authorized
   # un-authenticated or other un-available group for that matter: nil
   it "can add nil rule group" do
-    rule_group = Bali::RuleGroup.new(My::Transaction, :transaction, nil)
+    rule_group = Bali::RuleGroup.new(My::Transaction, nil)
     rule_class = Bali::RuleClass.new(My::Transaction)
     expect { rule_class.add_rule_group(rule_group) }.to_not raise_error
     rule_class.rules_for(nil).class.should == Bali::RuleGroup
@@ -113,11 +113,10 @@ describe Bali::RuleGroup do
   end # shared examples
 
   context "for :user" do
-    let(:rule_group) { Bali::RuleGroup.new(My::Transaction, :transaction, :user) }
+    let(:rule_group) { Bali::RuleGroup.new(My::Transaction, :user) }
 
     it "is creatable" do
       rule_group.target.should == My::Transaction
-      rule_group.alias_tgt.should == :transaction
       rule_group.subtarget.should == :user
     end
 
@@ -125,11 +124,10 @@ describe Bali::RuleGroup do
   end # context for :user
 
   context "for nil" do
-    let(:rule_group) { Bali::RuleGroup.new(My::Transaction, :transaction, nil) }
+    let(:rule_group) { Bali::RuleGroup.new(My::Transaction, nil) }
 
     it "is creatable" do
       rule_group.target.should == My::Transaction
-      rule_group.alias_tgt.should == :transaction
       rule_group.subtarget.should == nil
     end
 

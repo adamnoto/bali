@@ -33,13 +33,12 @@ class Bali::RulesForDsl
     end
 
     target_class = self.map_rules_dsl.current_rule_class.target_class
-    target_alias = self.map_rules_dsl.current_rule_class.alias_name
 
     subtargets.each do |subtarget|
       @@lock.synchronize do
         rule_group = self.current_rule_class.rules_for(subtarget)
         if rule_group.nil?
-          rule_group = Bali::RuleGroup.new(target_class, target_alias, subtarget)
+          rule_group = Bali::RuleGroup.new(target_class, subtarget)
         end
 
         self.current_rule_group = rule_group

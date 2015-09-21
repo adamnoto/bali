@@ -236,7 +236,7 @@ describe "Model objections" do
     before(:each) do
       Bali.clear_rules
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe(:supreme_user) { can_all }
           describe(:admin_user) do
             can_all
@@ -318,7 +318,7 @@ describe "Model objections" do
   context "Well defined rules" do
     before(:each) do
       Bali.map_rules do
-        rules_for My::Transaction, as: :transaction do
+        rules_for My::Transaction do
           describe(:supreme_user) { can_all }
           describe :admin_user do
             can_all

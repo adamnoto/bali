@@ -13,12 +13,6 @@ module Bali
   # mapping class to a RuleClass
   RULE_CLASS_MAP = {}
 
-  # from symbol to full class name
-  ALIASED_RULE_CLASS_MAP = {}
-
-  # from full class name to symbol
-  REVERSE_ALIASED_RULE_CLASS_MAP = {}
-
   # {
   #   User: :roles,
   #   AdminUser: :admin_roles
@@ -38,8 +32,6 @@ module Bali
 
   def clear_rules
     Bali::RULE_CLASS_MAP.clear
-    Bali::REVERSE_ALIASED_RULE_CLASS_MAP.clear
-    Bali::ALIASED_RULE_CLASS_MAP.clear
     true
   end
 end
