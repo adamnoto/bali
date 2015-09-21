@@ -293,3 +293,7 @@ Bali is proudly available as open source under the terms of the [MIT License](ht
 1. `Bali::AuthorizationError` subclass of `StandardError` tailored for raising error regarding with authorisation
 2. Deprecating `cant`, `cant?`, and `cant_all` in favor of `cannot`, `cannot?` and `cannot_all`
 3. new objectors `can!` and `cannot!` to raise error on inappropriate access
+
+== Version 2.0.0
+
+1. Release!
