@@ -361,7 +361,7 @@ describe Bali do
         end
       end
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(1)
-      rc = Bali::Integrators::Rule.rule_class_for(:transaction)
+      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
       expect(rc.rules_for(:general_user).rules.size).to eq(1)
       expect(rc.rules_for(:finance_user).rules.size).to eq(3)
     end
@@ -378,7 +378,7 @@ describe Bali do
         end
       end
 
-      rc = Bali::Integrators::Rule.rule_class_for(:transaction)
+      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
       expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
         .to eq(true)
     end

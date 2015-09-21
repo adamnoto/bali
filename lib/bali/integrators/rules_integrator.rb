@@ -30,7 +30,6 @@ module Bali::Integrators::Rule
   def add_rule_class(rule_class)
     if rule_class.is_a?(Bali::RuleClass)
       target = rule_class.target_class
-      alias_target = rule_class.alias_name
 
       raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
 
@@ -42,12 +41,6 @@ module Bali::Integrators::Rule
           Bali::REVERSE_ALIASED_RULE_CLASS_MAP.delete(target)
           Bali::RULE_CLASS_MAP.delete(target)
         end
-      end
-
-      # if "as" is present
-      if alias_target.is_a?(Symbol)
-        Bali::ALIASED_RULE_CLASS_MAP[alias_target] = target
-        Bali::REVERSE_ALIASED_RULE_CLASS_MAP[target] = alias_target
       end
 
       Bali::RULE_CLASS_MAP[target.to_s] = rule_class

@@ -2,9 +2,6 @@ class Bali::RuleGroup
   # the target class
   attr_accessor :target
 
-  # the alias name for the target
-  attr_accessor :alias_tgt
-
   # the user to which this rule group is applied
   attr_accessor :subtarget
 
@@ -28,9 +25,8 @@ class Bali::RuleGroup
     end
   end
 
-  def initialize(target, alias_tgt, subtarget)
+  def initialize(target, subtarget)
     self.target = target
-    self.alias_tgt = alias_tgt
     self.subtarget = Bali::RuleGroup.canon_name(subtarget)
 
     self.cans = {}
