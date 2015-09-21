@@ -1,7 +1,6 @@
 # the parent of all Bali::RuleGroup.
 class Bali::RuleClass
   attr_reader :target_class
-  attr_accessor :alias_name
 
   attr_accessor :rule_groups
 
