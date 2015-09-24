@@ -40,6 +40,14 @@ describe Bali::RuleClass do
     rule_class = Bali::RuleClass.new(My::Transaction)
   end
 
+  it "does not allow defining rule group for __*__" do
+    expect do
+      rule_group = Bali::RuleGroup.new(My::Transaction, "__*__")
+      rule_class = Bali::RuleClass.new(My::Transaction)
+      rule_class.add_rule_group(rule_group)
+    end.to raise_error Bali::DslError
+  end
+
   it "does not allow creation of instance for target other than class" do
     expect { Bali::RuleClass.new(Object.new) }.to raise_error(Bali::DslError)
   end

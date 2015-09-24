@@ -8,6 +8,7 @@ class My::Transaction
   attr_accessor :payment_channel
 
   alias :is_settled? :is_settled
+  alias :settled= :is_settled=
 end
 
 class My::Employee

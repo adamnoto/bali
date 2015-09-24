@@ -41,6 +41,38 @@ module Bali::Objector
 end
 
 module Bali::Objector::Statics
+  # FUZY-ed value is happen when it is not really clear, need further cross checking,
+  # whether it is really allowed or not. It happens for example in block with others, such as this:
+  # 
+  # describe :finance do
+  #   cannot :view
+  # end
+  # others do
+  #   can :view
+  #   can :index
+  # end
+  #
+  # In the example above, objecting cannot view on finance will result in STRONG_FALSE, but
+  # objecting can index on finance will result in FUZY_TRUE.
+  #
+  # Eventually, all FUZY value will be normal TRUE or FALSE if no definite counterpart 
+  # is found/defined
+  BALI_FUZY_FALSE = -2
+  BALI_FUZY_TRUE = 2
+  BALI_FALSE = -1
+  BALI_TRUE = 1
+
+  # translate response for value above to traditional true/false
+  def bali_translate_response(bali_bool_value)
+    raise Bali::Error, "Expect bali value to be an integer" unless bali_bool_value.is_a?(Integer)
+    if bali_bool_value < 0
+      return false
+    elsif bali_bool_value > 0
+      return true
+    else 
+      raise Bali::Error, "Bali bool value can either be negative or positive integer"
+    end
+  end
 
   # will return array
   def bali_translate_subtarget_roles(_subtarget_roles)
@@ -87,31 +119,48 @@ module Bali::Objector::Statics
     # if performed on a class-level, don't call its class or it will return
     # Class. That's not what is expected.
     if self.is_a?(Class)
-      rule_group = Bali::Integrators::Rule.rule_group_for(self, subtarget)
+      klass = self
     else
-      rule_group = Bali::Integrators::Rule.rule_group_for(self.class, subtarget)
+      klass = self.class
     end
+
+    rule_group = Bali::Integrators::Rule.rule_group_for(klass, subtarget)
+    other_rule_group = Bali::Integrators::Rule.rule_group_for(klass, "__*__") 
+
+    rule = nil 
 
     # default of can? is false whenever RuleClass for that class is undefined
     # or RuleGroup for that subtarget is not defined
-    return false if rule_group.nil?
+    if rule_group.nil?
+      # no more chance for checking
+      return BALI_FALSE if other_rule_group.nil?
+    else
+      # get the specific rule from its own describe block
+      rule = rule_group.get_rule(:can, operation)
+    end
 
-    # get the specific rule
-    rule = rule_group.get_rule(:can, operation)
+    # retrieve rule from others group
+    otherly_rule = other_rule_group.get_rule(:can, operation)
 
     # plan subtarget is not allowed unless spesificly defined
-    return false if rule_group.plant? && rule.nil?
+    return BALI_FALSE if rule_group && rule_group.plant? && rule.nil? && otherly_rule.nil?
 
     # godly subtarget is allowed to do as he wishes
     # so long that the rule is not specificly defined
     # or overwritten by subsequent rule
-    if rule_group.zeus?
+    if rule_group && rule_group.zeus?
       if rule.nil?
+        _options = options.dup
+        _options[:cross_check] = true
+        _options[:original_subtarget] = original_subtarget if _options[:original_subtarget].nil?
+
+        check_val = self.bali_cannot?(subtarget, operation, record, _options)
+
         # check further whether cant is defined to overwrite this can_all
-        if self.cannot?(subtarget, operation, record, cross_check: true)
-          return false
+        if check_val == BALI_TRUE 
+          return BALI_FALSE
         else
-          return true
+          return BALI_TRUE
         end
       end
     end
@@ -119,10 +168,40 @@ module Bali::Objector::Statics
     if rule.nil?
       # default if can? for undefined rule is false, after related clause
       # cannot be found in cannot?
-      return false if options[:cross_check]
-      options[:cross_check] = true
-      return !self.cannot?(subtarget, operation, record, options)
-    else
+
+      unless options[:cross_check] 
+        options[:cross_check] = true
+        cross_check_value = self.bali_cannot?(subtarget, operation, record, options)
+      end
+
+      # either if rule from others block is defined, and the result so far is fuzy
+      # or, otherly rule is defined, and it is still a cross check
+      # plus, the result is not a definite BALI_TRUE/BALI_FALSE
+      #
+      # rationalisation:
+      # 1. Definite answer such as BALI_TRUE and BALI_FALSE is to be prioritised over
+      #    FUZY answer, because definite answer is not gathered from others block where
+      #    FUZY answer is. Therefore, it is an intended result
+      # 2. If the answer is FUZY, otherly_rule only be considered if the result 
+      #    is either FUZY TRUE or FUZY FALSE, or
+      # 3. Or, when already in cross check mode, we cannot retrieve cross_check_value
+      #    what we can is instead, if otherly rule is available, just to try the odd 
+      if (otherly_rule && cross_check_value && !(cross_check_value == BALI_TRUE || cross_check_value == BALI_FALSE)) ||
+          (otherly_rule && (cross_check_value == BALI_FUZY_FALSE || cross_check_value == BALI_FUZY_TRUE)) ||
+          (otherly_rule && options[:cross_check] && cross_check_value.nil?)
+        # give chance to check at the others block
+        rule = otherly_rule
+      else
+        # either the return is not fuzy, or otherly rule is undefined
+        if cross_check_value == BALI_TRUE
+          return BALI_FALSE
+        elsif cross_check_value == BALI_FALSE
+          return BALI_TRUE
+        end
+      end
+    end
+
+    if rule
       if rule.has_decider?
         # must test first
         decider = rule.decider
@@ -130,161 +209,185 @@ module Bali::Objector::Statics
         case decider.arity
         when 0
           if rule.decider_type == :if
-            if decider.()
-              return true
-            else
-              return false
-            end
+            return decider.() ? BALI_TRUE : BALI_FALSE
           elsif rule.decider_type == :unless
             unless decider.()
-              return true
+              return BALI_TRUE
             else
-              return false
+              return BALI_FALSE
             end
           end
         when 1
           if rule.decider_type == :if
-            if decider.(record)
-              return true
-            else
-              return false
-            end
+            return decider.(record) ? BALI_TRUE : BALI_FALSE
           elsif rule.decider_type == :unless
             unless decider.(record)
-              return true
+              return BALI_TRUE
             else
-              return false
+              return BALI_FALSE
             end
           end
         when 2
           if rule.decider_type == :if
-            if decider.(record, original_subtarget)
-              return true
-            else
-              return false
-            end
+            return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
           elsif rule.decider_type == :unless
             unless decider.(record, original_subtarget)
-              return true
+              return BALI_TRUE
             else
-              return false
+              return BALI_FALSE
             end
           end
         end
       else
         # rule is properly defined
-        return true
+        return BALI_TRUE
       end
+    end
+
+    # return fuzy if otherly rule defines contrary to this (can)
+    if other_rule_group.get_rule(:cannot, operation)
+      return BALI_FUZY_FALSE
+    else
+      return BALI_FALSE
     end
   end
 
   def bali_cannot?(subtarget, operation, record = self, options = {})
     if self.is_a?(Class)
-      rule_group = Bali::Integrators::Rule.rule_group_for(self, subtarget)
+      klass = self
     else
-      rule_group = Bali::Integrators::Rule.rule_group_for(self.class, subtarget)
+      klass = self.class
     end
+
+    rule_group = Bali::Integrators::Rule.rule_group_for(klass, subtarget)
+    other_rule_group = Bali::Integrators::Rule.rule_group_for(klass, "__*__")
+
+    rule = nil
 
     # default of cannot? is true whenever RuleClass for that class is undefined
     # or RuleGroup for that subtarget is not defined
-    return true if rule_group.nil?
+    if rule_group.nil?
+      return BALI_TRUE if other_rule_group.nil?
+    else
+      # get the specific rule from its own describe block
+      rule = rule_group.get_rule(:cannot, operation)
+    end
 
-    rule = rule_group.get_rule(:cannot, operation)
+    otherly_rule = other_rule_group.get_rule(:cannot, operation)
 
     # godly subtarget is not to be prohibited in his endeavours
     # so long that no specific rule about this operation is defined
-    return false if rule_group.zeus? && rule.nil?
+    return BALI_FALSE if rule_group && rule_group.zeus? && rule.nil? && otherly_rule.nil?
 
     # plant subtarget is not allowed to do things unless specificly defined
-    if rule_group.plant?
+    if rule_group && rule_group.plant?
       if rule.nil?
+        _options = options.dup
+        _options[:cross_check] = true
+        _options[:original_subtarget] = original_subtarget if _options[:original_subtarget].nil?
+        
         # check further whether defined in can?
-        if self.can?(subtarget, operation, record, cross_check: true)
-          return false # well, it is defined in can, so it must overwrite this cant_all rule
+        check_val = self.bali_can?(subtarget, operation, record, _options)
+
+        if check_val == BALI_TRUE
+          return BALI_FALSE # well, it is defined in can, so it must overwrite this cant_all rule
         else
           # plant, and then rule is not defined for further inspection. stright
           # is not allowed to do this thing
-          return true
+          return BALI_TRUE
         end
       end
     end
 
-    # if rule cannot be found, then true is returned for cannot? unless
-    # can? is defined exactly for the same target, and subtarget, and record (if given)
     if rule.nil?
-      return true if options[:cross_check]
-      options[:cross_check] = true
-      return !self.can?(subtarget, operation, record, options)
-    else
+      unless options[:cross_check]
+        options[:cross_check] = true
+        cross_check_value = self.bali_can?(subtarget, operation, record, options)
+      end
+
+      if (otherly_rule && cross_check_value && !(cross_check_value == BALI_TRUE || cross_check_value == BALI_FALSE)) ||
+          (otherly_rule && (cross_check_value == BALI_FUZY_FALSE || cross_check_value == BALI_FUZY_TRUE)) ||
+          (otherly_rule && options[:cross_check] && cross_check_value.nil?)
+        rule = otherly_rule
+      else
+        if cross_check_value == BALI_TRUE
+          # from can? because of cross check, then it should be false
+          return BALI_FALSE
+        elsif cross_check_value == BALI_FALSE
+          # from can? because of cross check returning false
+          # then it should be true, that is, cannot
+          return BALI_TRUE
+        end
+      end
+    end
+
+    if rule
       if rule.has_decider?
         decider = rule.decider
         original_subtarget = options.fetch(:original_subtarget)
         case decider.arity
         when 0
           if rule.decider_type == :if
-            if decider.()
-              return true
-            else
-              return false
-            end
+            return decider.() ? BALI_TRUE : BALI_FALSE
           elsif rule.decider_type == :unless
             unless decider.()
-              return true
+              return BALI_TRUE
             else
-              return false
+              return BALI_FALSE
             end
           end
         when 1
           if rule.decider_type == :if
-            if decider.(record)
-              return true
-            else
-              return false
-            end
+            return decider.(record) ? BALI_TRUE : BALI_FALSE
           elsif rule.decider_type == :unless
             unless decider.(record)
-              return true
+              return BALI_TRUE
             else
-              return false
+              return BALI_FALSE
             end
           end
         when 2
           if rule.decider_type == :if
-            if decider.(record, original_subtarget)
-              return true
-            else
-              return false
-            end
+            return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
           elsif rule.decider_type == :unless
             unless decider.(record, original_subtarget)
-              return true
+              return BALI_TRUE
             else
-              return false
+              return BALI_FALSE
             end
           end
         end
       else
-        return true # rule is properly defined
+        return BALI_TRUE # rule is properly defined
       end # if rule has decider
     end # if rule is nil
-  end
+
+    # return fuzy if otherly rule defines contrary to this cannot rule
+    if other_rule_group.get_rule(:can, operation)
+      return BALI_FUZY_TRUE
+    else
+      BALI_TRUE
+    end
+  end # bali cannot
 
   def can?(subtarget_roles, operation, record = self, options = {})
     subs = bali_translate_subtarget_roles(subtarget_roles)
     # well, it is largely not used unless decider's is 2 arity
     options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
-    can_value = false
+    can_value = BALI_FALSE 
     role = nil
 
     subs.each do |subtarget|
-      next if can_value
+      next if can_value == BALI_TRUE
       role = subtarget
       can_value = bali_can?(role, operation, record, options)
     end
 
-    yield options[:original_subtarget], role, can_value if can_value == false && block_given?
-    can_value
+    if can_value == BALI_FALSE && block_given?
+      yield options[:original_subtarget], role, bali_translate_response(can_value)
+    end
+    bali_translate_response can_value
   rescue => e
     if e.is_a?(Bali::AuthorizationError)
       raise e
@@ -302,19 +405,20 @@ module Bali::Objector::Statics
     subs = bali_translate_subtarget_roles subtarget_roles
     options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
+    cant_value = BALI_TRUE
+
     subs.each do |subtarget|
+      next if cant_value == BALI_FALSE
       cant_value = bali_cannot?(subtarget, operation, record, options)
-      if cant_value == false
+      if cant_value == BALI_FALSE
         role = subtarget
         if block_given?
-          yield options[:original_subtarget], role, false
-        else
-          return false
+          yield options[:original_subtarget], role, bali_translate_response(cant_value) 
         end
       end
     end
 
-    true
+    bali_translate_response cant_value
   rescue => e
     if e.is_a?(Bali::AuthorizationError)
       raise e
