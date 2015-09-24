@@ -486,7 +486,7 @@ describe Bali do
                 can_all
               end
               others do
-                cant_all
+                cannot_all
                 can :read
               end
             end

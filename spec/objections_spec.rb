@@ -267,6 +267,11 @@ describe "Model objections" do
         expect(txn.can?(:supreme_user, :print)).to be_truthy
         expect(txn.cannot?(:supreme_user, :print)).to be_falsey
       end
+
+      it "should allow to index transaction" do
+        expect(txn.can?(:supreme_user, :index)).to be_truthy
+        expect(txn.cannot?(:supreme_user, :index)).to be_falsey
+      end
     end # supreme user
 
     describe "admin user" do
@@ -316,6 +321,13 @@ describe "Model objections" do
         expect(txn.cannot?(:finance, :index)).to be_falsey
       end
     end # finance_user
+
+    context "when on undefined class" do
+      it "should not allow employee to be created" do
+        expect(My::Employee.can?(:finance, :create)).to be_falsey
+        expect(My::Employee.cannot?(:finance, :create)).to be_truthy
+      end
+    end
   end
 
   context "When having abstractly defined rules" do
