@@ -8,95 +8,189 @@ describe Bali do
       Bali.clear_rules
     end
 
-    it "disallow calling describe outside of rules_for" do
-      expect do
-        Bali.map_rules do
-          describe :general_user, can: :show
-        end.to raise_error(Bali::DslError)
+    context "describe" do
+      it "disallow calling describe outside of rules_for" do
+        expect do
+          Bali.map_rules do
+            describe :general_user, can: :show
+          end.to raise_error(Bali::DslError)
+        end
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user do
+                can :show
+              end
+            end
+          end
+        end.to_not raise_error
       end
 
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user do
-              can :show
+      it "disallows calling can outside of describe block" do
+        expect do
+          Bali.map_rules do
+            can :show
+          end
+        end.to raise_error(Bali::DslError)
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user do
+                can :show
+              end
             end
           end
-        end
-      end.to_not raise_error
-    end
+        end.to_not raise_error
+      end
 
-    it "disallows calling can outside of describe block" do
-      expect do
-        Bali.map_rules do
-          can :show
-        end
-      end.to raise_error(Bali::DslError)
+      it "disallows calling cannot outside of describe block" do
+        expect do
+          Bali.map_rules do
+            cannot :show
+          end
+        end.to raise_error(Bali::DslError)
 
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user do
-              can :show
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user do
+                cannot :show
+              end
             end
           end
-        end
-      end.to_not raise_error
-    end
+        end.to_not raise_error
+      end
 
-    it "disallows calling cannot outside of describe block" do
-      expect do
-        Bali.map_rules do
-          cannot :show
-        end
-      end.to raise_error(Bali::DslError)
+      it "disallows calling can_all outside of describe block" do
+        expect do
+          Bali.map_rules do
+            can_all
+          end
+        end.to raise_error(Bali::DslError)
 
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user do
-              cannot :show
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user do
+                can_all
+              end
             end
           end
-        end
-      end.to_not raise_error
-    end
+        end.to_not raise_error
+      end
 
-    it "disallows calling can_all outside of describe block" do
-      expect do
-        Bali.map_rules do
-          can_all
-        end
-      end.to raise_error(Bali::DslError)
+      it "disallows calling cannot_all outside of describe block" do
+        expect do
+          Bali.map_rules do
+            cannot_all
+          end
+        end.to raise_error(Bali::DslError)
 
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user do
-              can_all
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user do
+                cannot_all
+              end
             end
           end
-        end
-      end.to_not raise_error
-    end
+        end.to_not raise_error
+      end
+    end # context describe
 
-    it "disallows calling cannot_all outside of describe block" do
-      expect do
-        Bali.map_rules do
-          cannot_all
+    context "others" do
+      it "disallow calling others outside of rules_for" do
+        expect do
+          Bali.map_rules do
+            others can: :show
+          end.to raise_error(Bali::DslError)
         end
-      end.to raise_error(Bali::DslError)
 
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user do
-              cannot_all
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              others do
+                can :show
+              end
             end
           end
-        end
-      end.to_not raise_error
-    end
+        end.to_not raise_error
+      end
+
+      it "disallows calling can outside of others block" do
+        expect do
+          Bali.map_rules do
+            can :show
+          end
+        end.to raise_error(Bali::DslError)
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              others do
+                can :show
+              end
+            end
+          end
+        end.to_not raise_error
+      end
+
+      it "disallows calling cannot outside of others block" do
+        expect do
+          Bali.map_rules do
+            cannot :show
+          end
+        end.to raise_error(Bali::DslError)
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              others do
+                cannot :show
+              end
+            end
+          end
+        end.to_not raise_error
+      end
+
+      it "disallows calling can_all outside of describe block" do
+        expect do
+          Bali.map_rules do
+            can_all
+          end
+        end.to raise_error(Bali::DslError)
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              others do
+                can_all
+              end
+            end
+          end
+        end.to_not raise_error
+      end
+
+      it "disallows calling cannot_all outside of describe block" do
+        expect do
+          Bali.map_rules do
+            cannot_all
+          end
+        end.to raise_error(Bali::DslError)
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              others do
+                cannot_all
+              end
+            end
+          end
+        end.to_not raise_error
+      end
+    end # context others
 
     it "allows definition of rules per subtarget" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
@@ -382,5 +476,39 @@ describe Bali do
       expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
         .to eq(true)
     end
-  end # main module
+
+    context "when with others" do
+      it "can define others block" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :admin_user do
+                can_all
+              end
+              others do
+                cant_all
+                can :read
+              end
+            end
+          end # map rules
+        end.to_not raise_error
+
+        rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+        expect(rc.rules_for("__*__").get_rule(:can, :read)).to_not be_nil
+      end
+
+      it "can define others by passing array to it" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :admin_user do
+                can_all
+              end
+              others can: [:view]
+            end # rules for
+          end # map rules
+        end.to_not raise_error
+      end
+    end
+  end # main module context DSL
 end
