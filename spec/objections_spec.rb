@@ -238,6 +238,104 @@ describe "Model objections" do
       Bali.map_rules do
         rules_for My::Transaction do
           describe(:supreme_user) { can_all }
+          describe :admin do
+            can_all
+            cannot :delete
+          end
+          describe :finance do
+            cannot :view
+            can :print
+          end
+          others do
+            can :view, if: proc { |txn| txn.is_settled? }
+            can :print, if: proc { |txn| txn.is_settled? }
+            can :index
+          end # others
+        end # rules_for
+      end # map rules
+    end # before
+
+    let(:txn) { My::Transaction.new }
+
+    describe "supreme user" do
+      it "should allow to delete transaction" do
+        expect(txn.can?(:supreme_user, :delete)).to be_truthy
+        expect(txn.cannot?(:supreme_user, :delete)).to be_falsey
+      end
+      
+      it "should allow to print transaction" do
+        expect(txn.can?(:supreme_user, :print)).to be_truthy
+        expect(txn.cannot?(:supreme_user, :print)).to be_falsey
+      end
+
+      it "should allow to index transaction" do
+        expect(txn.can?(:supreme_user, :index)).to be_truthy
+        expect(txn.cannot?(:supreme_user, :index)).to be_falsey
+      end
+    end # supreme user
+
+    describe "admin user" do
+      it "should not allow to delete transaction" do
+        expect(txn.can?(:admin, :delete)).to be_falsey
+        expect(txn.cannot?(:admin, :delete)).to be_truthy
+      end
+
+      it "should allow to print transaction" do
+        expect(txn.can?(:admin, :print)).to be_truthy
+        expect(txn.cannot?(:admin, :print)).to be_falsey
+      end
+    end # admin user
+
+    describe "finance user" do
+      it "should not allow to view" do
+        expect(txn.can?(:finance, :view)).to be_falsey
+        expect(txn.cannot?(:finance, :view)).to be_truthy
+      end
+
+      it "should allow finance to print" do
+        txn.settled = true
+        expect(txn.is_settled?).to be_truthy
+        expect(txn.can?(:finance, :print)).to be_truthy
+        expect(txn.cannot?(:finance, :print)).to be_falsey
+
+        txn.settled = false
+        expect(txn.is_settled?).to be_falsey
+        expect(txn.can?(:finance, :print)).to be_truthy
+        expect(txn.cannot?(:finance, :print)).to be_falsey
+      end
+
+      it "should not allow finance to view even if transaction is settled" do
+        txn.settled = true
+        expect(txn.is_settled).to be_truthy
+        expect(txn.can?(:finance, :view)).to be_falsey
+        expect(txn.cannot?(:finance, :view)).to be_truthy
+
+        txn.settled = false
+        expect(txn.is_settled).to be_falsey
+        expect(txn.can?(:finance, :view)).to be_falsey
+        expect(txn.cannot?(:finance, :view)).to be_truthy
+      end
+
+      it "should allow finance to index transaction" do
+        expect(txn.can?(:finance, :index)).to be_truthy
+        expect(txn.cannot?(:finance, :index)).to be_falsey
+      end
+    end # finance_user
+
+    context "when on undefined class" do
+      it "should not allow employee to be created" do
+        expect(My::Employee.can?(:finance, :create)).to be_falsey
+        expect(My::Employee.cannot?(:finance, :create)).to be_truthy
+      end
+    end
+  end
+
+  context "When having abstractly defined rules" do
+    before(:each) do
+      Bali.clear_rules
+      Bali.map_rules do
+        rules_for My::Transaction do
+          describe(:supreme_user) { can_all }
           describe(:admin_user) do
             can_all
             cannot :delete
