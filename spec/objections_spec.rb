@@ -869,6 +869,48 @@ describe "Model objections" do
       end
     end
 
+    context "when clearing rules" do 
+      before do
+        Bali.map_rules do
+          rules_for My::SecuredTransaction, inherits: My::Transaction do
+            describe :general_user do
+              clear_rules
+              can :view
+            end
+          end
+        end
+      end
+
+      let(:stxn) { My::SecuredTransaction.new }
+
+      context "general user" do
+        it "can view transaction" do
+          expect(stxn.can?(:general_user, :view)).to be_truthy
+          expect(stxn.cannot?(:general_user, :view)).to be_falsey
+        end
+
+        it "canot ask" do
+          expect(stxn.can?(:general_user, :ask)).to be_falsey
+          expect(stxn.cannot?(:general_user, :ask)).to be_truthy
+        end
+
+        it "cannot edit" do
+          expect(stxn.can?(:general_user, :edit)).to be_falsey
+          expect(stxn.cannot?(:general_user, :edit)).to be_truthy
+        end
+
+        it "cannot delete" do
+          expect(stxn.can?(:general_user, :delete)).to be_falsey
+          expect(stxn.cannot?(:general_user, :delete)).to be_truthy
+        end
+
+        it "cannot edit" do
+          expect(stxn.can?(:general_user, :edit)).to be_falsey
+          expect(stxn.cannot?(:general_user, :edit)).to be_truthy
+        end
+      end
+    end
+
     context "cloned for My::SecuredTransaction" do
       before(:each) do
         Bali.map_rules do
