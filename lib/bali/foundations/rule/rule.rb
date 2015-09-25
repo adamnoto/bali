@@ -17,6 +17,14 @@ class Bali::Rule
     self
   end
 
+  def clone
+    cloned_rule = Bali::Rule.new(auth_val, operation)
+    cloned_rule.decider = decider if decider
+    cloned_rule.decider_type = decider_type if decider_type
+
+    cloned_rule
+  end
+
   def auth_val=(aval)
     # TODO: in version 3 remove :cant
     if aval == :can || aval == :cannot
@@ -32,7 +40,7 @@ class Bali::Rule
     if dectype == :if || dectype == :unless
       @decider_type = dectype
     else
-      raise Bali::DslError, "decider type can only be either if or unless"
+      raise Bali::DslError, "decider type can only be either if or unless, got: #{dectype}"
     end
   end
 

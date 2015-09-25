@@ -93,7 +93,7 @@ module Bali::Objector::Statics
       Bali::TRANSLATED_SUBTARGET_ROLES.each do |subtarget_class, roles_field_name|
         if _subtarget_class == subtarget_class
           deducted_roles = _subtarget.send(roles_field_name)
-          if deducted_roles.is_a?(String) || deducted_roles.is_a?(Symbol)
+          if deducted_roles.is_a?(String) || deducted_roles.is_a?(Symbol) || deducted_roles.is_a?(NilClass)
             deducted_roles = [deducted_roles]
             break
           elsif deducted_roles.is_a?(Array)
@@ -142,9 +142,6 @@ module Bali::Objector::Statics
     # retrieve rule from others group
     otherly_rule = other_rule_group.get_rule(:can, operation)
 
-    # plan subtarget is not allowed unless spesificly defined
-    return BALI_FALSE if rule_group && rule_group.plant? && rule.nil? && otherly_rule.nil?
-
     # godly subtarget is allowed to do as he wishes
     # so long that the rule is not specificly defined
     # or overwritten by subsequent rule
@@ -164,6 +161,10 @@ module Bali::Objector::Statics
         end
       end
     end
+
+    # do after crosscheck
+    # plan subtarget is not allowed unless spesificly defined
+    return BALI_FALSE if rule_group && rule_group.plant? && rule.nil? && otherly_rule.nil?
 
     if rule.nil?
       # default if can? for undefined rule is false, after related clause
@@ -274,11 +275,6 @@ module Bali::Objector::Statics
     end
 
     otherly_rule = other_rule_group.get_rule(:cannot, operation)
-
-    # godly subtarget is not to be prohibited in his endeavours
-    # so long that no specific rule about this operation is defined
-    return BALI_FALSE if rule_group && rule_group.zeus? && rule.nil? && otherly_rule.nil?
-
     # plant subtarget is not allowed to do things unless specificly defined
     if rule_group && rule_group.plant?
       if rule.nil?
@@ -320,6 +316,11 @@ module Bali::Objector::Statics
         end
       end
     end
+
+    # do after cross check
+    # godly subtarget is not to be prohibited in his endeavours
+    # so long that no specific rule about this operation is defined
+    return BALI_FALSE if rule_group && rule_group.zeus? && rule.nil? && otherly_rule.nil?
 
     if rule
       if rule.has_decider?

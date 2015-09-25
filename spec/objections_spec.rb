@@ -48,7 +48,7 @@ describe "Model objections" do
   end
 
   context "when using delegation" do
-    it "can query" do
+    before do
       Bali.map_rules do
         roles_for My::Employee, :roles
         rules_for My::Transaction do
@@ -61,12 +61,46 @@ describe "Model objections" do
           describe :admin do
             can :delete
           end
+          describe nil, can: [:show]
         end
       end
+    end
 
+    let(:txn) { My::Transaction.new }
+
+    it "can query when role is a symbol" do
+      me.roles = :general_user
+      expect(txn.can?(me, :copy)).to be_truthy
+      expect(txn.cannot?(me, :copy)).to be_falsey
+
+      expect(txn.can?(me, :delete)).to be_falsey
+      expect(txn.cannot?(me, :delete)).to be_truthy
+    end
+
+    it "can query when role is a string" do
+      me.roles = "general user"
+      expect(txn.can?(me, :copy)).to be_truthy
+      expect(txn.cannot?(me, :copy)).to be_falsey
+
+      expect(txn.can?(me, :delete)).to be_falsey
+      expect(txn.cannot?(me, :delete)).to be_truthy
+    end
+
+    it "can query when role is nil" do
+      me.roles = nil
+      expect(txn.can?(me, :copy)).to be_falsey
+      expect(txn.cannot?(me, :copy)).to be_truthy
+
+      expect(txn.can?(me, :delete)).to be_falsey
+      expect(txn.cannot?(me, :delete)).to be_truthy
+
+      expect(txn.can?(me, :show)).to be_truthy
+      expect(txn.cannot?(me, :show)).to be_falsey
+    end
+
+    it "can query when role is an array" do
       me.roles = [:general_user]
 
-      txn = My::Transaction.new
       txn.can?(:general_user, :copy).should be_truthy
       txn.can?(me, :copy).should be_truthy
       expect { txn.can!(:general_user, :copy) }.to_not raise_error
@@ -831,6 +865,112 @@ describe "Model objections" do
           e.subtarget.should == user
           e.operation.should == :monitor
           e.target.should == txn
+        end
+      end
+    end
+
+    context "cloned for My::SecuredTransaction" do
+      before(:each) do
+        Bali.map_rules do
+          roles_for My::Employee, :roles
+          rules_for My::SecuredTransaction, inherits: My::Transaction do
+            describe :admin_user do
+              can :cancel, if: proc { |record, user|
+                record.payment_channel == "CREDIT_CARD" && !record.is_settled &&
+                  user.exp_years >= 3
+              }
+            end
+            describe :general_user do
+              cannot :update, :edit
+            end
+            describe :finance_user do
+              cannot :delete
+            end
+            describe(nil) { cannot_all }
+          end
+        end # map_rules
+      end # before
+
+      let(:stxn) { My::SecuredTransaction.new }
+
+      context "admin user" do
+        it "can edit" do
+          expect(stxn.can?(:admin_user, :edit)).to be_truthy
+          expect(stxn.cannot?(:admin_user, :edit)).to be_falsey
+        end
+
+        it "can cancel only if payment channel is credit card, and it is not settled, and admin have had 3 years experience" do
+          emp = My::Employee.new
+          emp.roles = [:admin_user]
+          emp.exp_years = 3
+          stxn.payment_channel = "CREDIT_CARD"
+          stxn.is_settled = false
+
+          expect(stxn.can?(emp, :cancel)).to be_truthy
+          expect(stxn.cannot?(emp, :cancel)).to be_falsey
+
+          emp.exp_years = 2
+          expect(stxn.can?(emp, :cancel)).to be_falsey
+          expect(stxn.cannot?(emp, :cancel)).to be_truthy
+          emp.exp_years = 3
+
+          stxn.payment_channel = "VIRTUAL_ACCOUNT"
+          expect(stxn.can?(emp, :cancel)).to be_falsey
+          expect(stxn.cannot?(emp, :cancel)).to be_truthy
+          stxn.payment_channel = "CREDIT_CARD"
+
+          stxn.is_settled = true
+          expect(stxn.can?(emp, :cancel)).to be_falsey
+          expect(stxn.cannot?(emp, :cancel)).to be_truthy
+          stxn.is_settled = false
+
+          expect(stxn.can?(emp, :cancel)).to be_truthy
+        end
+      end
+
+      context "general user" do
+        it "cannot update" do
+          expect(stxn.can?(:general_user, :update)).to be_falsey
+          expect(stxn.cannot?(:general_user, :update)).to be_truthy
+        end
+
+        it "cannot edit" do
+          expect(stxn.can?(:general_user, :edit)).to be_falsey
+          expect(stxn.cannot?(:general_user, :edit)).to be_truthy
+        end
+
+        it "can view" do
+          expect(stxn.can?(:general_user, :view)).to be_truthy
+          expect(stxn.cannot?(:general_user, :view)).to be_falsey
+        end
+
+        it "can ask" do
+          expect(stxn.can?(:general_user, :ask)).to be_truthy
+          expect(stxn.cannot?(:general_user, :ask)).to be_falsey
+        end
+      end
+
+      context "monitoring" do
+        it "can monitor" do
+          expect(stxn.can?(:monitoring, :monitor)).to be_truthy
+          expect(stxn.cannot?(:monitoring, :monitor)).to be_falsey
+        end
+      end
+
+      context "finance user" do
+        it "can update" do
+          expect(stxn.can?(:finance_user, :update)).to be_truthy
+          expect(stxn.cannot?(:finance_user, :update)).to be_falsey
+        end
+
+        it "can edit" do
+          expect(stxn.can?(:finance_user, :edit)).to be_truthy
+          expect(stxn.cannot?(:finance_user, :edit)).to be_falsey
+        end
+
+        it "cannot delete" do
+          expect(stxn.can?(:finance_user, :delete)).to be_falsey
+          expect(stxn.cannot?(:finance_user, :delete)).to be_truthy
         end
       end
     end
