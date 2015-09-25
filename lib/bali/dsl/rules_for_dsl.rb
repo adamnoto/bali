@@ -101,7 +101,7 @@ class Bali::RulesForDsl
   end # others
 
   # to define can and cant is basically using this method
-  def process_auth_rules(auth_val, operations)
+  def bali_process_auth_rules(auth_val, operations)
     conditional_hash = nil
 
     # scan operations for options
@@ -129,14 +129,21 @@ class Bali::RulesForDsl
         self.current_rule_group.add_rule(rule)
       end
     end
-  end # process_auth_rules
+  end # bali_process_auth_rules
+
+  # clear all defined rules
+  def clear_rules
+    self.current_rule_group.clear_rules
+    self.current_rule_class.others_rule_group.clear_rules
+    true
+  end
 
   def can(*operations)
-    process_auth_rules(:can, operations)
+    bali_process_auth_rules(:can, operations)
   end
 
   def cannot(*operations)
-    process_auth_rules(:cannot, operations)
+    bali_process_auth_rules(:cannot, operations)
   end
 
   def cant(*operations)

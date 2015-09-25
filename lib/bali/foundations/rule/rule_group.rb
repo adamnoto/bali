@@ -60,6 +60,11 @@ class Bali::RuleGroup
     end
   end
 
+  def clear_rules
+    self.cans = {}
+    self.cants = {}
+  end
+
   def get_rule(auth_val, operation)
     rule = nil
     case auth_val

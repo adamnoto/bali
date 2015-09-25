@@ -59,6 +59,10 @@ class Bali::MapRulesDsl
     raise Bali::DslError, "can_all block must be within describe block"
   end
 
+  def clear_rules
+    raise Bali::DslError, "clear_rules must be called within describe block"
+  end
+
   def cant_all(*params)
     puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot instead"
     cannot_all *params
