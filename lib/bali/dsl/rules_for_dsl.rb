@@ -79,7 +79,6 @@ class Bali::RulesForDsl
         end
       end
 
-
       self.current_rule_group  = self.map_rules_dsl.current_rule_class.others_rule_group
 
       if block_given?
