@@ -11,6 +11,9 @@ class My::Transaction
   alias :settled= :is_settled=
 end
 
+class My::SecuredTransaction < My::Transaction
+end
+
 class My::Employee
   include Bali::Objector
 
