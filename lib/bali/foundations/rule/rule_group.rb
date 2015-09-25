@@ -33,8 +33,18 @@ class Bali::RuleGroup
     self.cants = {}
   end
 
+  def clone
+    cloned_rg = Bali::RuleGroup.new(target, subtarget)
+    cans.each_value { |can_rule| cloned_rg.add_rule(can_rule.clone) }
+    cants.each_value { |cant_rule| cloned_rg.add_rule(cant_rule.clone) }
+    cloned_rg.zeus = zeus
+    cloned_rg.plant = plant
+
+    cloned_rg
+  end
+
   def add_rule(rule)
-    raise Bali::DslError, "Rule must be of class Bali::Rule" unless rule.is_a?(Bali::Rule)
+    raise Bali::DslError, "Rule must be of class Bali::Rule, got: #{rule.class.name}" unless rule.is_a?(Bali::Rule)
 
     # operation cannot be defined twice
     operation = rule.operation.to_sym
