@@ -2,6 +2,8 @@
 
 [ ![Codeship Status for saveav/bali](https://codeship.com/projects/d2f3ded0-20cf-0133-e425-0eade5a669ff/status?branch=release)](https://codeship.com/projects/95727)
 
+[![Code Climate](https://codeclimate.com/github/saveav/bali/badges/gpa.svg)](https://codeclimate.com/github/saveav/bali)
+
 Bali is a powerful, framework-agnostic, thread-safe Ruby language authorization library. It is a universal authorization library, in the sense that it does not assume you to use specific Ruby library/gem/framework in order for successful use of this gem.
 
 Bali is short for Bulwark Authorization Library.
@@ -29,7 +31,7 @@ And then execute:
 
 ## Usage
 
-Please access [wiki pages](https://github.com/saveav/bali/wiki) for a more detailed, guided explanation.
+Please access [wiki pages](https://github.com/saveav/bali/wiki) for a more detailed, guided explanation, and see what Bali can do. This usage is a simple demonstration what average, standard use of Bali would looks like.
 
 Say:
 
