@@ -8,8 +8,152 @@ describe Bali do
       Bali.clear_rules
     end
 
-    context "describe" do
-      it "disallow calling describe outside of rules_for" do
+    context "delegating way to obtain roles with roles_for" do
+      it "doesn't throw error when defining delegation for querying roles" do
+        expect do
+          Bali.map_rules do
+            roles_for My::Employee, :roles
+          end
+        end.to_not raise_error
+
+        Bali::TRANSLATED_SUBTARGET_ROLES["My::Employee"].should == :roles
+      end
+    end
+
+    context "when describing rules_for" do
+      it "throws error when rules_for is used for other than a class" do
+        expect do
+          Bali.map_rules do
+            rules_for "my string" do
+            end
+          end.to raise_error(Bali::DslError)
+        end
+      end
+
+      it "does not throw an error when rules_for is used with a class" do
+        expect do
+          Bali.map_rules do
+            rules_for My::String do
+            end
+          end.to_not raise_error
+        end
+      end
+
+      it "should redefine rule if same operation is re-described" do
+        Bali::Integrators::Rule.rule_classes.size.should == 0
+
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe :general_user do |record|
+              can :update, :delete
+              can :delete, if: -> { record.is_settled? }
+            end
+          end
+        end
+
+        rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+        expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
+          .to eq(true)
+      end
+
+      it "does not allow subtarget definition other than using string, symbol, array and hash" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user do
+                can :print
+              end
+            end
+          end
+        end.to_not raise_error
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe "finance user" do
+                can :print
+              end
+            end
+          end
+        end.to_not raise_error
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe [:general_user, "finance user"] do
+                can :print
+              end
+            end
+          end
+        end.to_not raise_error
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user, can: [:print]
+            end
+          end
+        end.to_not raise_error
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user, :finance_user, [:guess, nil], can: [:show] do
+                can :print
+              end
+            end
+          end
+        end.to_not raise_error
+
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              describe :general_user, nil, -> { "finance_user "} do
+                can :print
+              end
+            end
+          end
+        end.to raise_error(Bali::DslError)
+      end
+
+      context "when inheriting" do
+        it "throws error when inheriting undefined rule class" do
+          expect do
+            Bali.map_rules do
+              rules_for My::Transaction, inherits: My::SecuredTransaction do
+              end 
+            end
+          end.to raise_error(Bali::DslError)
+        end
+
+        it "does not throw an error when inheriting defined rule class" do
+          expect do
+            Bali.map_rules do
+              rules_for My::Transaction do
+              end
+              rules_for My::SecuredTransaction do
+              end
+            end
+          end.to_not raise_error
+        end
+      end
+    end
+
+    context "when describing each rules using describe" do
+      it "can define nil rule group" do
+        expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe nil do
+              can :view
+            end
+          end
+        end
+        Bali::Integrators::Rule.rule_classes.size.should == 1
+        Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      end
+
+      it "disallows calling describe outside of rules_for" do
         expect do
           Bali.map_rules do
             describe :general_user, can: :show
@@ -243,75 +387,7 @@ describe Bali do
       end.to raise_error(Bali::DslError)
     end
 
-    it "doesn't throw error when defining delegation for querying roles" do
-      expect do
-        Bali.map_rules do
-          roles_for My::Employee, :roles
-        end
-      end.to_not raise_error
 
-      Bali::TRANSLATED_SUBTARGET_ROLES["My::Employee"].should == :roles
-    end
-
-    it "does not allows subtarget definition other than using string, symbol, array and hash" do
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user do
-              can :print
-            end
-          end
-        end
-      end.to_not raise_error
-
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe "finance user" do
-              can :print
-            end
-          end
-        end
-      end.to_not raise_error
-
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe [:general_user, "finance user"] do
-              can :print
-            end
-          end
-        end
-      end.to_not raise_error
-
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user, can: [:print]
-          end
-        end
-      end.to_not raise_error
-
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user, :finance_user, [:guess, nil], can: [:show] do
-              can :print
-            end
-          end
-        end
-      end.to_not raise_error
-
-      expect do
-        Bali.map_rules do
-          rules_for My::Transaction do
-            describe :general_user, nil, -> { "finance_user "} do
-              can :print
-            end
-          end
-        end
-      end.to raise_error(Bali::DslError)
-    end
 
     it "allows if-decider to be executed in context" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
@@ -397,19 +473,6 @@ describe Bali do
       txn.can?(:finance_user, :chargeback).should be_truthy
     end
 
-    it "can define nil rule group" do
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
-      Bali.map_rules do
-        rules_for My::Transaction do
-          describe nil do
-            can :view
-          end
-        end
-      end
-      Bali::Integrators::Rule.rule_classes.size.should == 1
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
-    end
-
     it "should allow rule group to be defined" do
       Bali.map_rules do
         rules_for My::Transaction do
@@ -436,7 +499,7 @@ describe Bali do
       Bali::Integrators::Rule.rule_class_for(My::Transaction).should == rc
     end
 
-    it "should redefine rule class if map_rules is called" do
+    it "should redefine rule class if Bali.map_rules is called" do
       expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
@@ -460,22 +523,6 @@ describe Bali do
       expect(rc.rules_for(:finance_user).rules.size).to eq(3)
     end
 
-    it "should redefine rule if same operation is re-defined" do
-      Bali::Integrators::Rule.rule_classes.size.should == 0
-
-      Bali.map_rules do
-        rules_for My::Transaction do
-          describe :general_user do |record|
-            can :update, :delete
-            can :delete, if: -> { record.is_settled? }
-          end
-        end
-      end
-
-      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
-      expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
-        .to eq(true)
-    end
 
     context "when with others" do
       it "can define others block" do
