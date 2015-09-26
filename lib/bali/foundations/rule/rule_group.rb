@@ -2,9 +2,6 @@ class Bali::RuleGroup
   # the target class
   attr_accessor :target
 
-  # the alias name for the target
-  attr_accessor :alias_tgt
-
   # the user to which this rule group is applied
   attr_accessor :subtarget
 
@@ -28,17 +25,30 @@ class Bali::RuleGroup
     end
   end
 
-  def initialize(target, alias_tgt, subtarget)
+  def initialize(target, subtarget)
     self.target = target
-    self.alias_tgt = alias_tgt
     self.subtarget = Bali::RuleGroup.canon_name(subtarget)
 
     self.cans = {}
     self.cants = {}
+
+    # by default, rule group is neither zeus nor plant
+    self.zeus = false
+    self.plant = false
+  end
+
+  def clone
+    cloned_rg = Bali::RuleGroup.new(target, subtarget)
+    cans.each_value { |can_rule| cloned_rg.add_rule(can_rule.clone) }
+    cants.each_value { |cant_rule| cloned_rg.add_rule(cant_rule.clone) }
+    cloned_rg.zeus = zeus
+    cloned_rg.plant = plant
+
+    cloned_rg
   end
 
   def add_rule(rule)
-    raise Bali::DslError, "Rule must be of class Bali::Rule" unless rule.is_a?(Bali::Rule)
+    raise Bali::DslError, "Rule must be of class Bali::Rule, got: #{rule.class.name}" unless rule.is_a?(Bali::Rule)
 
     # operation cannot be defined twice
     operation = rule.operation.to_sym
@@ -52,6 +62,11 @@ class Bali::RuleGroup
       self.cans[operation] = rule
       self.cants.delete operation
     end
+  end
+
+  def clear_rules
+    self.cans = {}
+    self.cants = {}
   end
 
   def get_rule(auth_val, operation)

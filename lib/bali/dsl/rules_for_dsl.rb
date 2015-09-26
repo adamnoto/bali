@@ -14,32 +14,30 @@ class Bali::RulesForDsl
   end
 
   def describe(*params)
+    @@lock.synchronize do
+      subtargets = []
+      rules = {}
 
-    subtargets = []
-    rules = {}
-
-    params.each do |passed_argument|
-      if passed_argument.is_a?(Symbol) || passed_argument.is_a?(String)
-        subtargets << passed_argument
-      elsif passed_argument.is_a?(NilClass)
-        subtargets << passed_argument
-      elsif passed_argument.is_a?(Array)
-        subtargets += passed_argument
-      elsif passed_argument.is_a?(Hash)
-        rules = passed_argument
-      else
-        raise Bali::DslError, "Allowed argument: symbol, string, nil and hash"
+      params.each do |passed_argument|
+        if passed_argument.is_a?(Symbol) || passed_argument.is_a?(String)
+          subtargets << passed_argument
+        elsif passed_argument.is_a?(NilClass)
+          subtargets << passed_argument
+        elsif passed_argument.is_a?(Array)
+          subtargets += passed_argument
+        elsif passed_argument.is_a?(Hash)
+          rules = passed_argument
+        else
+          raise Bali::DslError, "Allowed argument for describe: symbol, string, nil and hash"
+        end
       end
-    end
 
-    target_class = self.map_rules_dsl.current_rule_class.target_class
-    target_alias = self.map_rules_dsl.current_rule_class.alias_name
+      target_class = self.map_rules_dsl.current_rule_class.target_class
 
-    subtargets.each do |subtarget|
-      @@lock.synchronize do
+      subtargets.each do |subtarget|
         rule_group = self.current_rule_class.rules_for(subtarget)
         if rule_group.nil?
-          rule_group = Bali::RuleGroup.new(target_class, target_alias, subtarget)
+          rule_group = Bali::RuleGroup.new(target_class, subtarget)
         end
 
         self.current_rule_group = rule_group
@@ -64,12 +62,46 @@ class Bali::RulesForDsl
 
         # add current_rule_group
         self.map_rules_dsl.current_rule_class.add_rule_group(self.current_rule_group)
-      end # mutex synchronize
-    end # each subtarget
+      end # each subtarget
+    end # sync block
   end # describe
 
+  # others block
+  def others(*params)
+    @@lock.synchronize do
+      rules = {}
+
+      params.each do |passed_argument|
+        if passed_argument.is_a?(Hash)
+          rules = passed_argument
+        else
+          raise Bali::DslError, "Allowed argument for others: hash"
+        end
+      end
+
+      self.current_rule_group  = self.map_rules_dsl.current_rule_class.others_rule_group
+
+      if block_given?
+        yield
+      else
+        rules.each do |auth_val, operations|
+          if operations.is_a?(Array)
+            operations.each do |op|
+              rule = Bali::Rule.new(auth_val, op)
+              self.current_rule_group.add_rule(rule)
+            end
+          else
+            operation = operations
+            rule = Bali::Rule.new(auth_val, operation)
+            self.current_rule_group.add_rule(rule)
+          end
+        end # each rules
+      end # block_given?
+    end # synchronize
+  end # others
+
   # to define can and cant is basically using this method
-  def process_auth_rules(auth_val, operations)
+  def bali_process_auth_rules(auth_val, operations)
     conditional_hash = nil
 
     # scan operations for options
@@ -97,14 +129,21 @@ class Bali::RulesForDsl
         self.current_rule_group.add_rule(rule)
       end
     end
-  end # process_auth_rules
+  end # bali_process_auth_rules
+
+  # clear all defined rules
+  def clear_rules
+    self.current_rule_group.clear_rules
+    self.current_rule_class.others_rule_group.clear_rules
+    true
+  end
 
   def can(*operations)
-    process_auth_rules(:can, operations)
+    bali_process_auth_rules(:can, operations)
   end
 
   def cannot(*operations)
-    process_auth_rules(:cannot, operations)
+    bali_process_auth_rules(:cannot, operations)
   end
 
   def cant(*operations)

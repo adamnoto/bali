@@ -7,10 +7,19 @@ class Bali::MapRulesDsl
   end
 
   # defining rules
-  def rules_for(target_class, target_alias_hash = {}, &block)
+  def rules_for(target_class, options_hash = {}, &block)
     @@lock.synchronize do
+      raise Bali::DslError "rules_for must describe a target which is a class" unless target_class.is_a?(Class)
       self.current_rule_class = Bali::RuleClass.new(target_class)
-      self.current_rule_class.alias_name = target_alias_hash[:as] || target_alias_hash["as"]
+
+      parent_class = options_hash[:inherits] || options_hash["inherits"]
+      if parent_class 
+        # in case there is inherits specification
+        raise Bali::DslError, "inherits must take a class" unless parent_class.is_a?(Class)
+        rule_class_from_parent = Bali::Integrators::Rule.rule_class_for(parent_class)
+        raise Bali::DslError, "not yet defined a rule class for #{parent_class}" if rule_class_from_parent.nil?
+        self.current_rule_class = rule_class_from_parent.clone(target_class: target_class)
+      end
 
       Bali::RulesForDsl.new(self).instance_eval(&block)
 
@@ -48,6 +57,10 @@ class Bali::MapRulesDsl
 
   def can_all(*params)
     raise Bali::DslError, "can_all block must be within describe block"
+  end
+
+  def clear_rules
+    raise Bali::DslError, "clear_rules must be called within describe block"
   end
 
   def cant_all(*params)
