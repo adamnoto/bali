@@ -26,6 +26,7 @@ describe "Printing Bali Rules" do
         end
       end # rules for My::SecuredTransaction
     end # map rules
+
     output = %Q{===== My::Transaction =====
 
       Supreme_user, can all: true, cannot all: false
@@ -59,18 +60,22 @@ describe "Printing Bali Rules" do
       Admin, can all: true, cannot all: false
       --------------------------------------------------------------------------------
         1. Admin can do anything except if explicitly stated otherwise
-        2. Admin cannot delete My::Transaction
+        2. Admin cannot delete My::SecuredTransaction
 
       Finance, can all: false, cannot all: false
       --------------------------------------------------------------------------------
-        1. Finance can view My::Transaction
+        1. Finance can view My::SecuredTransaction
+
+      Others, can all: false, cannot all: false
+      --------------------------------------------------------------------------------
+        1. Others can view My::SecuredTransaction, with condition
 
 
 
 
 
-Printed at 26-09-2015 12:09PM +07:00}
-
+Printed at 26-09-2015 12:58PM +07:00}
+    
     expected_output_without_printed_at = output.gsub(/Printed.*/i, "")
     bali_output = Bali::Printer.pretty_print 
     bali_output_without_printed_at = bali_output.gsub(/Printed.*/, "")
@@ -90,7 +95,7 @@ Printed at 26-09-2015 12:09PM +07:00}
       end
     end
 
-    expected_output = "===== My::Transaction =====\n\n      General_user, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. General_user can edit My::Transaction\n        2. General_user can save My::Transaction\n\n      Others, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Others can view My::Transaction\n\n\n\n===== My::SecuredTransaction =====\n\n      Supreme_user, can all: true, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Supreme_user can do anything except if explicitly stated otherwise\n\n      Admin, can all: true, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Admin can do anything except if explicitly stated otherwise\n        2. Admin cannot delete My::Transaction\n\n      Finance, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Finance can view My::Transaction\n\n\n\n\n\nPrinted at 26-09-2015 12:19PM +07:00"
+    expected_output = "===== My::Transaction =====\n\n      General_user, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. General_user can edit My::Transaction\n        2. General_user can save My::Transaction\n\n      Others, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Others can view My::Transaction\n\n\n\n===== My::SecuredTransaction =====\n\n      Supreme_user, can all: true, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Supreme_user can do anything except if explicitly stated otherwise\n\n      Admin, can all: true, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Admin can do anything except if explicitly stated otherwise\n        2. Admin cannot delete My::SecuredTransaction\n\n      Finance, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Finance can view My::SecuredTransaction\n\n      Others, can all: false, cannot all: false\n      --------------------------------------------------------------------------------\n        1. Others can view My::SecuredTransaction, with condition\n\n\n\n\n\n"
     bali_output = Bali::Printer.pretty_print
 
     # remove date

@@ -134,7 +134,6 @@ class Bali::RulesForDsl
   # clear all defined rules
   def clear_rules
     self.current_rule_group.clear_rules
-    self.current_rule_class.others_rule_group.clear_rules
     true
   end
 
