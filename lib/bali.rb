@@ -5,6 +5,7 @@ require_relative "bali/dsl/map_rules_dsl"
 require_relative "bali/dsl/rules_for_dsl"
 
 require_relative "bali/objector"
+require_relative "bali/printer"
 
 require_relative "bali/foundations/all_foundations"
 require_relative "bali/integrators/all_integrators"
