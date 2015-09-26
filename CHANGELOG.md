@@ -61,3 +61,4 @@
 2. Fixing bug when roles_for of a user object retrieves `nil` as the user's role, it won't acknowledge that the user is indeed having `nil`-role and raising an error instead.
 3. Inherits rules by passing `:inherits` option when defining `rules_for`
 4. `clear_rules` within `describe` or `others` block to remove all inherited rules (or any rules previously defined) for that subtarget
+5. Adding `Bali::Printer` that would enable for rules to be printed by calling `.pretty_print` on it
