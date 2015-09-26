@@ -31,6 +31,10 @@ class Bali::RuleGroup
 
     self.cans = {}
     self.cants = {}
+
+    # by default, rule group is neither zeus nor plant
+    self.zeus = false
+    self.plant = false
   end
 
   def clone
