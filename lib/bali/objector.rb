@@ -1,4 +1,4 @@
-# class that will be included in each instantiated target classes as defined
+# module that will be included in each instantiated target classes as defined
 # in map_rules
 module Bali::Objector
   def self.included(base)
