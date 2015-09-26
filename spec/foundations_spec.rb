@@ -90,6 +90,75 @@ describe "Bali foundations" do
         end
       end
     end
+
+    context "when clearing rules" do
+      before do
+        Bali.clear_rules
+        Bali.map_rules do
+          rules_for My::Transaction do
+            describe :general_user, :finance do
+              can :print
+            end
+            describe :finance do
+              can :edit, :update, :view, :save
+            end
+            others do
+              can :view
+              cannot :delete, :update
+            end
+          end
+        end
+      end
+
+      it "clears only rules from others" do
+        txn_others_rg = Bali::Integrators::Rule.rule_group_for(My::Transaction, "__*__")
+        expect(txn_others_rg.cans.length).to eq(1)
+        expect(txn_others_rg.cants.length).to eq(2)
+
+        Bali.map_rules do
+          rules_for My::SecuredTransaction, inherits: My::Transaction do
+            others do
+              clear_rules
+            end
+          end
+        end
+
+        stxn_others_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, "__*__")
+
+        expect(stxn_others_rg.cans.length).to eq(0)
+        expect(stxn_others_rg.cants.length).to eq(0)
+
+        stxn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, "finance")
+
+        expect(stxn_finance_rg.cans.length).to eq(5)
+        expect(stxn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
+        expect(stxn_finance_rg.cants.length).to eq(0)
+      end 
+
+      it "clears only rules from finance" do
+        txn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::Transaction, "finance")
+
+        Bali.map_rules do
+          rules_for My::SecuredTransaction, inherits: My::Transaction do
+            describe :finance do
+              clear_rules
+              can :view, :print
+            end
+          end
+        end
+
+        stxn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, "finance")
+
+        expect(txn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
+        expect(stxn_finance_rg.cans.keys).to include(:view, :print)
+
+        # check general user is not affected
+        stxn_general_user_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, :general_user)
+        stxn = My::SecuredTransaction.new
+        stxn.can?(:general_user, :view).should be_truthy
+        stxn.can?(:general_user, :print).should be_truthy
+      end
+    end
   end
 
   describe "Bali::RuleGroup" do
