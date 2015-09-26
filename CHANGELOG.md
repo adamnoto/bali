@@ -62,3 +62,8 @@
 3. Inherits rules by passing `:inherits` option when defining `rules_for`
 4. `clear_rules` within `describe` or `others` block to remove all inherited rules (or any rules previously defined) for that subtarget
 5. Adding `Bali::Printer` that would enable for rules to be printed by calling `.pretty_print` on it
+
+== Version 2.1.1
+
+1. Bug fixes on `clear_rules` which it clear rules defined in `others` even when not asked to
+2. Bug fixes on `Bali::Printer` where inherited rules print the wrong target class due to another bug in an internal file (but doesn't hamper rules-checking logic)

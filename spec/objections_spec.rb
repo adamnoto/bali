@@ -286,6 +286,12 @@ describe "Model objections" do
             can :index
           end # others
         end # rules_for
+
+        rules_for My::SecuredTransaction, inherits: My::Transaction do
+          describe :finance do
+            cannot_all
+          end
+        end
       end # map rules
     end # before
 
@@ -321,9 +327,16 @@ describe "Model objections" do
     end # admin user
 
     describe "finance user" do
-      it "should not allow to view" do
+      it "should not allow to view transaction" do
         expect(txn.can?(:finance, :view)).to be_falsey
         expect(txn.cannot?(:finance, :view)).to be_truthy
+      end
+
+      it "should not allow finance to view secured transaction" do
+        stxn = My::SecuredTransaction.new
+        stxn.is_settled = true
+        expect(stxn.can?(:finance, :view)).to be_falsey
+        expect(stxn.cannot?(:finance, :view)).to be_truthy
       end
 
       it "should allow finance to print" do

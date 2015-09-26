@@ -48,10 +48,14 @@ class Bali::RuleClass
     cloned_rc = Bali::RuleClass.new(target_class)
 
     rule_groups.each do |subtarget, rule_group|
-      cloned_rc.add_rule_group(rule_group.clone)
+      rule_group_clone = rule_group.clone
+      rule_group_clone.target = target_class
+      cloned_rc.add_rule_group(rule_group_clone)
     end
 
-    cloned_rc.others_rule_group = others_rule_group.clone
+    others_rule_group_clone = others_rule_group.clone
+    others_rule_group_clone.target = target_class
+    cloned_rc.others_rule_group = others_rule_group_clone
 
     cloned_rc
   end
