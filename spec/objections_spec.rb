@@ -670,6 +670,9 @@ describe "Model objections" do
         it "can't edit or update transaction" do
           txn.can?(nil, :edit).should be_falsey
           txn.can?(nil, :update).should be_falsey
+          expect do
+            txn.can!(nil, :update)
+          end.to raise_error(Bali::Error, "Role <nil> is performing update using precedence can")
         end
       end
 
