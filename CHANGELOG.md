@@ -71,4 +71,4 @@
 == Version 2.1.2
 
 1. `nil` will be printed <nil> when objecting with can! or cannot! for better readability.
-2. Bug fixes on declaring multiple rules with decider, only the first rule is defined, the others are ignored.
+2. Bug fixes on declaring multiple rules with decider. Previously, others were ignored--now, every single rule will get defined whether decider is present or not.
