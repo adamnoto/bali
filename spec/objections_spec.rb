@@ -575,7 +575,7 @@ describe "Model objections" do
           describe "general user", can: [:view, :edit, :update], cannot: [:delete]
           describe "finance user" do
             can :update, :delete, :edit
-            can :delete, if: proc { |record| record.is_settled? }
+            can :delete, :undelete, if: proc { |record| record.is_settled? }
           end # finance_user description
           describe :monitoring do
             cannot_all
@@ -660,6 +660,15 @@ describe "Model objections" do
           txn.cannot?([:monitoring, :finance_user], :monitor).should be_falsey
           txn.cannot?([:finance_user, :monitoring], :monitor).should be_falsey
         end
+
+        # this also test that rules with decider described simultaneously 
+        # is also working as expected
+        it "allows undeleting with role of finance" do
+          txn.is_settled = false
+          expect(txn.can?(:finance_user, :undelete)).to be_falsey
+          txn.is_settled = true
+          expect(txn.can?(:finance_user, :undelete)).to be_truthy
+        end
       end
 
       context "unauthenticated/nil-role user" do
@@ -670,6 +679,9 @@ describe "Model objections" do
         it "can't edit or update transaction" do
           txn.can?(nil, :edit).should be_falsey
           txn.can?(nil, :update).should be_falsey
+          expect do
+            txn.can!(nil, :update)
+          end.to raise_error(Bali::Error, "Role <nil> is performing update using precedence can")
         end
       end
 
