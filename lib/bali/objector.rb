@@ -98,12 +98,13 @@ module Bali::Objector::Statics
             break
           elsif deducted_roles.is_a?(Array)
             break
-          else
-            # keep it nil if _subtarget_roles is not either String, Symbol or Array
-            deducted_roles = nil
           end
         end # if matching class
       end # each TRANSLATED_SUBTARGET_ROLES
+
+      if deducted_roles.nil?
+        raise Bali::AuthorizationError, "Bali does not know how to process roles: #{_subtarget_roles}"
+      end
 
       return deducted_roles
     end # if
