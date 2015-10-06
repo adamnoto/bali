@@ -101,33 +101,32 @@ class Bali::RulesForDsl
   end # others
 
   # to define can and cant is basically using this method
-  def bali_process_auth_rules(auth_val, operations)
+  def bali_process_auth_rules(auth_val, args)
     conditional_hash = nil
+    operations = []
 
-    # scan operations for options
-    operations.each do |elm|
+    # scan args for options
+    args.each do |elm|
       if elm.is_a?(Hash)
         conditional_hash = elm
+      else
+        operations << elm
       end
     end
 
-    if conditional_hash
-      op = operations[0]
+    # add operation one by one
+    operations.each do |op|
       rule = Bali::Rule.new(auth_val, op)
-      if conditional_hash[:if] || conditional_hash["if"]
-        rule.decider = conditional_hash[:if] || conditional_hash["if"]
-        rule.decider_type = :if
-      elsif conditional_hash[:unless] || conditional_hash[:unless]
-        rule.decider = conditional_hash[:unless] || conditional_hash["unless"]
-        rule.decider_type = :unless
+      if conditional_hash
+        if conditional_hash[:if] || conditional_hash["if"]
+          rule.decider = conditional_hash[:if] || conditional_hash["if"]
+          rule.decider_type = :if
+        elsif conditional_hash[:unless] || conditional_hash[:unless]
+          rule.decider = conditional_hash[:unless] || conditional_hash["unless"]
+          rule.decider_type = :unless
+        end
       end
       self.current_rule_group.add_rule(rule)
-    else
-      # no conditional hash, proceed adding operations one by one
-      operations.each do |op|
-        rule = Bali::Rule.new(auth_val, op)
-        self.current_rule_group.add_rule(rule)
-      end
     end
   end # bali_process_auth_rules
 
