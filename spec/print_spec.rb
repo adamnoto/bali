@@ -5,12 +5,12 @@ describe "Printing Bali Rules" do
   it "doesn't print others if unnecessary" do
     Bali.map_rules do
       rules_for My::Transaction do
-        describe(:supreme_user) { can_all }
-        describe(:admin) do
+        role(:supreme_user) { can_all }
+        role(:admin) do
           can_all
           cannot :delete
         end
-        describe :finance do
+        role :finance do
           can :view, :print
           can :edit, :save
         end
@@ -20,7 +20,7 @@ describe "Printing Bali Rules" do
       end
 
       rules_for My::SecuredTransaction, inherits: My::Transaction do
-        describe :finance do
+        role :finance do
           clear_rules
           can :view
         end
@@ -75,9 +75,9 @@ describe "Printing Bali Rules" do
 
 
 Printed at 26-09-2015 12:58PM +07:00}
-    
+
     expected_output_without_printed_at = output.gsub(/Printed.*/i, "")
-    bali_output = Bali::Printer.pretty_print 
+    bali_output = Bali::Printer.pretty_print
     bali_output_without_printed_at = bali_output.gsub(/Printed.*/, "")
 
     expect(expected_output_without_printed_at).to eq(bali_output_without_printed_at)
@@ -86,7 +86,7 @@ Printed at 26-09-2015 12:58PM +07:00}
   it "print others if necessary" do
     Bali.map_rules do
       rules_for My::Transaction do
-        describe :general_user do
+        role :general_user do
           can :edit, :save
         end
         others do
@@ -108,9 +108,9 @@ Printed at 26-09-2015 12:58PM +07:00}
   it "has 'printed at' date" do
     Bali.map_rules do
       rules_for My::Transaction do
-        describe(:general_user) do
+        role(:general_user) do
           can :edit
-        end # describe
+        end # role
       end # rules_for
     end # map_rules
 
