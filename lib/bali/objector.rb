@@ -43,8 +43,8 @@ end
 module Bali::Objector::Statics
   # FUZY-ed value is happen when it is not really clear, need further cross checking,
   # whether it is really allowed or not. It happens for example in block with others, such as this:
-  # 
-  # describe :finance do
+  #
+  # role :finance do
   #   cannot :view
   # end
   # others do
@@ -55,7 +55,7 @@ module Bali::Objector::Statics
   # In the example above, objecting cannot view on finance will result in STRONG_FALSE, but
   # objecting can index on finance will result in FUZY_TRUE.
   #
-  # Eventually, all FUZY value will be normal TRUE or FALSE if no definite counterpart 
+  # Eventually, all FUZY value will be normal TRUE or FALSE if no definite counterpart
   # is found/defined
   BALI_FUZY_FALSE = -2
   BALI_FUZY_TRUE = 2
@@ -69,7 +69,7 @@ module Bali::Objector::Statics
       return false
     elsif bali_bool_value > 0
       return true
-    else 
+    else
       raise Bali::Error, "Bali bool value can either be negative or positive integer"
     end
   end
@@ -126,9 +126,9 @@ module Bali::Objector::Statics
     end
 
     rule_group = Bali::Integrators::Rule.rule_group_for(klass, subtarget)
-    other_rule_group = Bali::Integrators::Rule.rule_group_for(klass, "__*__") 
+    other_rule_group = Bali::Integrators::Rule.rule_group_for(klass, "__*__")
 
-    rule = nil 
+    rule = nil
 
     # default of can? is false whenever RuleClass for that class is undefined
     # or RuleGroup for that subtarget is not defined
@@ -136,7 +136,7 @@ module Bali::Objector::Statics
       # no more chance for checking
       return BALI_FALSE if other_rule_group.nil?
     else
-      # get the specific rule from its own describe block
+      # get the specific rule from its own role block
       rule = rule_group.get_rule(:can, operation)
     end
 
@@ -155,7 +155,7 @@ module Bali::Objector::Statics
         check_val = self.bali_cannot?(subtarget, operation, record, _options)
 
         # check further whether cant is defined to overwrite this can_all
-        if check_val == BALI_TRUE 
+        if check_val == BALI_TRUE
           return BALI_FALSE
         else
           return BALI_TRUE
@@ -171,7 +171,7 @@ module Bali::Objector::Statics
       # default if can? for undefined rule is false, after related clause
       # cannot be found in cannot?
 
-      unless options[:cross_check] 
+      unless options[:cross_check]
         options[:cross_check] = true
         cross_check_value = self.bali_cannot?(subtarget, operation, record, options)
       end
@@ -184,10 +184,10 @@ module Bali::Objector::Statics
       # 1. Definite answer such as BALI_TRUE and BALI_FALSE is to be prioritised over
       #    FUZY answer, because definite answer is not gathered from others block where
       #    FUZY answer is. Therefore, it is an intended result
-      # 2. If the answer is FUZY, otherly_rule only be considered if the result 
+      # 2. If the answer is FUZY, otherly_rule only be considered if the result
       #    is either FUZY TRUE or FUZY FALSE, or
       # 3. Or, when already in cross check mode, we cannot retrieve cross_check_value
-      #    what we can is instead, if otherly rule is available, just to try the odd 
+      #    what we can is instead, if otherly rule is available, just to try the odd
       if (otherly_rule && cross_check_value && !(cross_check_value == BALI_TRUE || cross_check_value == BALI_FALSE)) ||
           (otherly_rule && (cross_check_value == BALI_FUZY_FALSE || cross_check_value == BALI_FUZY_TRUE)) ||
           (otherly_rule && options[:cross_check] && cross_check_value.nil?)
@@ -271,7 +271,7 @@ module Bali::Objector::Statics
     if rule_group.nil?
       return BALI_TRUE if other_rule_group.nil?
     else
-      # get the specific rule from its own describe block
+      # get the specific rule from its own role block
       rule = rule_group.get_rule(:cannot, operation)
     end
 
@@ -282,7 +282,7 @@ module Bali::Objector::Statics
         _options = options.dup
         _options[:cross_check] = true
         _options[:original_subtarget] = original_subtarget if _options[:original_subtarget].nil?
-        
+
         # check further whether defined in can?
         check_val = self.bali_can?(subtarget, operation, record, _options)
 
@@ -377,7 +377,7 @@ module Bali::Objector::Statics
     # well, it is largely not used unless decider's is 2 arity
     options[:original_subtarget] = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
-    can_value = BALI_FALSE 
+    can_value = BALI_FALSE
     role = nil
 
     subs.each do |subtarget|
@@ -415,7 +415,7 @@ module Bali::Objector::Statics
       if cant_value == BALI_FALSE
         role = subtarget
         if block_given?
-          yield options[:original_subtarget], role, bali_translate_response(cant_value) 
+          yield options[:original_subtarget], role, bali_translate_response(cant_value)
         end
       end
     end
