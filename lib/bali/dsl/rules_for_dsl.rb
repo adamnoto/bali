@@ -4,6 +4,11 @@ class Bali::RulesForDsl
   attr_accessor :map_rules_dsl
   attr_accessor :current_rule_group
 
+  # all to be processed subtargets
+  attr_accessor :current_subtargets
+  # rules defined with hash can: [] and cannot: []
+  attr_accessor :shortcut_rules
+
   def initialize(map_rules_dsl)
     @@lock = Mutex.new
     self.map_rules_dsl = map_rules_dsl
@@ -12,123 +17,42 @@ class Bali::RulesForDsl
   def current_rule_class
     self.map_rules_dsl.current_rule_class
   end
+  protected :current_rule_class
 
-  def describe(*params)
+  def role(*params)
     @@lock.synchronize do
-      subtargets = []
-      rules = {}
-
-      params.each do |passed_argument|
-        if passed_argument.is_a?(Symbol) || passed_argument.is_a?(String)
-          subtargets << passed_argument
-        elsif passed_argument.is_a?(NilClass)
-          subtargets << passed_argument
-        elsif passed_argument.is_a?(Array)
-          subtargets += passed_argument
-        elsif passed_argument.is_a?(Hash)
-          rules = passed_argument
+      bali_scrap_actors(*params)
+      bali_scrap_shortcut_rules(*params)
+      current_subtargets.each do |subtarget|
+        if block_given?
+          bali_process_subtarget(subtarget) do
+            yield
+          end
         else
-          raise Bali::DslError, "Allowed argument for describe: symbol, string, nil and hash"
+          bali_process_subtarget(subtarget)
         end
       end
+    end
+  end # role
 
-      target_class = self.map_rules_dsl.current_rule_class.target_class
-
-      subtargets.each do |subtarget|
-        rule_group = self.current_rule_class.rules_for(subtarget)
-        if rule_group.nil?
-          rule_group = Bali::RuleGroup.new(target_class, subtarget)
-        end
-
-        self.current_rule_group = rule_group
-
-        if block_given?
-          yield
-        else
-          # auth_val is either can or cant
-          rules.each do |auth_val, operations|
-            if operations.is_a?(Array)
-              operations.each do |op|
-                rule = Bali::Rule.new(auth_val, op)
-                self.current_rule_group.add_rule(rule)
-              end
-            else
-              operation = operations # well, basically is 1 only
-              rule = Bali::Rule.new(auth_val, operation)
-              self.current_rule_group.add_rule(rule)
-            end
-          end # each rules
-        end # block_given?
-
-        # add current_rule_group
-        self.map_rules_dsl.current_rule_class.add_rule_group(self.current_rule_group)
-      end # each subtarget
-    end # sync block
-  end # describe
+  def describe(*params)
+    if block_given?
+      role(*params) do
+        yield
+      end
+    else
+      role(*params)
+    end
+  end
 
   # others block
   def others(*params)
-    @@lock.synchronize do
-      rules = {}
-
-      params.each do |passed_argument|
-        if passed_argument.is_a?(Hash)
-          rules = passed_argument
-        else
-          raise Bali::DslError, "Allowed argument for others: hash"
-        end
-      end
-
-      self.current_rule_group  = self.map_rules_dsl.current_rule_class.others_rule_group
-
-      if block_given?
+    if block_given?
+      role("__*__") do
         yield
-      else
-        rules.each do |auth_val, operations|
-          if operations.is_a?(Array)
-            operations.each do |op|
-              rule = Bali::Rule.new(auth_val, op)
-              self.current_rule_group.add_rule(rule)
-            end
-          else
-            operation = operations
-            rule = Bali::Rule.new(auth_val, operation)
-            self.current_rule_group.add_rule(rule)
-          end
-        end # each rules
-      end # block_given?
-    end # synchronize
+      end
+    end
   end # others
-
-  # to define can and cant is basically using this method
-  def bali_process_auth_rules(auth_val, args)
-    conditional_hash = nil
-    operations = []
-
-    # scan args for options
-    args.each do |elm|
-      if elm.is_a?(Hash)
-        conditional_hash = elm
-      else
-        operations << elm
-      end
-    end
-
-    # add operation one by one
-    operations.each do |op|
-      rule = Bali::Rule.new(auth_val, op)
-      if conditional_hash
-        if conditional_hash[:if] || conditional_hash["if"]
-          rule.decider = conditional_hash[:if] || conditional_hash["if"]
-          rule.decider_type = :if
-        elsif conditional_hash[:unless] || conditional_hash[:unless]
-          rule.decider = conditional_hash[:unless] || conditional_hash["unless"]
-          rule.decider_type = :unless
-        end
-      end
-      self.current_rule_group.add_rule(rule)
-    end
-  end # bali_process_auth_rules
 
   # clear all defined rules
   def clear_rules
@@ -163,4 +87,95 @@ class Bali::RulesForDsl
     puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot_all instead"
     cannot_all
   end
+  
+  private
+    def bali_scrap_actors(*params)
+      self.current_subtargets = []
+      params.each do |passed_argument|
+        if passed_argument.is_a?(Symbol) || passed_argument.is_a?(String)
+          self.current_subtargets << passed_argument
+        elsif passed_argument.is_a?(NilClass)
+          self.current_subtargets << passed_argument
+        elsif passed_argument.is_a?(Array)
+          self.current_subtargets += passed_argument
+        end
+      end
+      nil
+    end
+
+    def bali_scrap_shortcut_rules(*params)
+      self.shortcut_rules = {}
+      params.each do |passed_argument|
+        if passed_argument.is_a?(Hash)
+          self.shortcut_rules = passed_argument
+        end
+      end
+      nil
+    end
+
+    def bali_process_subtarget(subtarget)
+      target_class = self.map_rules_dsl.current_rule_class.target_class
+      rule_class = self.map_rules_dsl.current_rule_class
+
+      rule_group = rule_class.rules_for(subtarget)
+
+      if rule_group.nil?
+        rule_group = Bali::RuleGroup.new(target_class, subtarget)
+      end
+
+      self.current_rule_group = rule_group
+
+      if block_given?
+        yield
+      else
+        # auth_val is either can or cannot
+        shortcut_rules.each do |auth_val, operations|
+          if operations.is_a?(Array)
+            operations.each do |op|
+              rule = Bali::Rule.new(auth_val, op)
+              rule_group.add_rule(rule)
+            end
+          else
+            operation = operations # well, basically is 1 only
+            rule = Bali::Rule.new(auth_val, operation)
+            rule_group.add_rule(rule)
+          end
+        end # each rules
+      end # block_given?
+
+      # add current_rule_group
+      rule_class.add_rule_group(rule_group)
+
+      nil
+    end
+
+    # to define can and cant is basically using this method
+    def bali_process_auth_rules(auth_val, args)
+      conditional_hash = nil
+      operations = []
+
+      # scan args for options
+      args.each do |elm|
+        if elm.is_a?(Hash)
+          conditional_hash = elm
+        else
+          operations << elm
+        end
+      end
+
+      # add operation one by one
+      operations.each do |op|
+        rule = Bali::Rule.new(auth_val, op)
+        if conditional_hash
+          if conditional_hash[:if] || conditional_hash["if"]
+            rule.decider = conditional_hash[:if] || conditional_hash["if"]
+            rule.decider_type = :if
+          elsif conditional_hash[:unless] || conditional_hash[:unless]
+            rule.decider = conditional_hash[:unless] || conditional_hash["unless"]
+            rule.decider_type = :unless
+          end
+        end
+        self.current_rule_group.add_rule(rule)
+      end
+    end # bali_process_auth_rules
 end # class
