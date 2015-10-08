@@ -75,39 +75,9 @@ module Bali::Objector::Statics
   end
 
   # will return array
-  def bali_translate_subtarget_roles(_subtarget_roles)
-    if _subtarget_roles.is_a?(String) || _subtarget_roles.is_a?(Symbol) || _subtarget_roles.is_a?(NilClass)
-      return [_subtarget_roles]
-    elsif _subtarget_roles.is_a?(Array)
-      return _subtarget_roles
-    else
-      # this case, _subtarget_roles is an object but not a symbol or a string
-      # let's try to deduct subtarget's roles
-
-      _subtarget = _subtarget_roles
-      _subtarget_class = _subtarget.class.to_s
-
-      # variable to hold deducted role of the passed object
-      deducted_roles = nil
-
-      Bali::TRANSLATED_SUBTARGET_ROLES.each do |subtarget_class, roles_field_name|
-        if _subtarget_class == subtarget_class
-          deducted_roles = _subtarget.send(roles_field_name)
-          if deducted_roles.is_a?(String) || deducted_roles.is_a?(Symbol) || deducted_roles.is_a?(NilClass)
-            deducted_roles = [deducted_roles]
-            break
-          elsif deducted_roles.is_a?(Array)
-            break
-          end
-        end # if matching class
-      end # each TRANSLATED_SUBTARGET_ROLES
-
-      if deducted_roles.nil?
-        raise Bali::AuthorizationError, "Bali does not know how to process roles: #{_subtarget_roles}"
-      end
-
-      return deducted_roles
-    end # if
+  def bali_translate_subtarget_roles(arg)
+    role_extractor = Bali::RoleExtractor.new(arg)
+    role_extractor.get_role
   end
 
   ### options passable to bali_can? and bali_cannot? are:
