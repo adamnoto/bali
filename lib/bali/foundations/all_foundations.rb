@@ -9,3 +9,4 @@ require_relative "rule/rule"
 require_relative "rule/rule_class"
 require_relative "rule/rule_group"
 
+require_relative "role_extractor"
