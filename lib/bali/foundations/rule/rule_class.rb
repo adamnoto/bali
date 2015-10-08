@@ -27,9 +27,10 @@ class Bali::RuleClass
     if rule_group.is_a?(Bali::RuleGroup)
       target_user = rule_group.subtarget
       if target_user == "__*__" || target_user == :"__*__"
-        raise Bali::DslError, "__*__ is a reserved subtarget used by Bali's internal"
+        self.others_rule_group = rule_group
+      else
+        self.rule_groups[rule_group.subtarget] = rule_group
       end
-      self.rule_groups[rule_group.subtarget] = rule_group
     else
       raise Bali::DslError, "Rule group must be an instance of Bali::RuleGroup, got: #{rule_group.class.name}"
     end
