@@ -104,16 +104,6 @@ describe Bali do
             end
           end
         end.to_not raise_error
-
-        expect do
-          Bali.map_rules do
-            rules_for My::Transaction do
-              describe :general_user, nil, -> { "finance_user "} do
-                can :print
-              end
-            end
-          end
-        end.to raise_error(Bali::DslError)
       end
 
       context "when inheriting" do
