@@ -36,6 +36,7 @@ class Bali::RulesForDsl
   end # role
 
   def describe(*params)
+    puts "Bali Deprecation Warning: describing rules using describe will be deprecated on major release 3.0, use role instead"
     if block_given?
       role(*params) do
         yield
