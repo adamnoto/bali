@@ -74,6 +74,46 @@ module Bali::Objector::Statics
     end
   end
 
+  # what is the result when decider is executed
+  # rule: the rule object
+  # original subtarget: raw, unprocessed arugment passed as subtarget
+  def bali_decider_processing_result(rule, original_subtarget, record)
+    # must test first
+    decider = rule.decider
+    case decider.arity
+    when 0
+      if rule.decider_type == :if
+        return decider.() ? BALI_TRUE : BALI_FALSE
+      elsif rule.decider_type == :unless
+        unless decider.()
+          return BALI_TRUE
+        else
+          return BALI_FALSE
+        end
+      end
+    when 1
+      if rule.decider_type == :if
+        return decider.(record) ? BALI_TRUE : BALI_FALSE
+      elsif rule.decider_type == :unless
+        unless decider.(record)
+          return BALI_TRUE
+        else
+          return BALI_FALSE
+        end
+      end
+    when 2
+      if rule.decider_type == :if
+        return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
+      elsif rule.decider_type == :unless
+        unless decider.(record, original_subtarget)
+          return BALI_TRUE
+        else
+          return BALI_FALSE
+        end
+      end
+    end
+  end
+
   # will return array
   def bali_translate_subtarget_roles(arg)
     role_extractor = Bali::RoleExtractor.new(arg)
@@ -175,41 +215,8 @@ module Bali::Objector::Statics
 
     if rule
       if rule.has_decider?
-        # must test first
-        decider = rule.decider
-        original_subtarget = options.fetch(:original_subtarget)
-        case decider.arity
-        when 0
-          if rule.decider_type == :if
-            return decider.() ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.()
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
-        when 1
-          if rule.decider_type == :if
-            return decider.(record) ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.(record)
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
-        when 2
-          if rule.decider_type == :if
-            return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.(record, original_subtarget)
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
-        end
+        return bali_decider_processing_result(rule, 
+                   options.fetch(:original_subtarget), record)
       else
         # rule is properly defined
         return BALI_TRUE
@@ -295,40 +302,8 @@ module Bali::Objector::Statics
 
     if rule
       if rule.has_decider?
-        decider = rule.decider
-        original_subtarget = options.fetch(:original_subtarget)
-        case decider.arity
-        when 0
-          if rule.decider_type == :if
-            return decider.() ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.()
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
-        when 1
-          if rule.decider_type == :if
-            return decider.(record) ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.(record)
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
-        when 2
-          if rule.decider_type == :if
-            return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.(record, original_subtarget)
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
-        end
+        return bali_decider_processing_result(rule, 
+                   options.fetch(:original_subtarget), record)
       else
         return BALI_TRUE # rule is properly defined
       end # if rule has decider
