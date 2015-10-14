@@ -6,7 +6,7 @@ class Bali::RoleExtractor
     @arg = arg
   end
 
-  def get_role(object = @arg)
+  def get_roles(object = @arg)
     case object
     when String; get_role_string(object)
     when Symbol; get_role_symbol(object)
