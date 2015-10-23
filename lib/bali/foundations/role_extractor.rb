@@ -46,7 +46,7 @@ class Bali::RoleExtractor
       Bali::TRANSLATED_SUBTARGET_ROLES.each do |current_subtarget_class, roles_field_name|
         if object_class == current_subtarget_class
           deducted_roles = object.send(roles_field_name)
-          deducted_roles = get_role(deducted_roles)
+          deducted_roles = get_roles(deducted_roles)
           role_extracted = true
           break
         end # if matching class
