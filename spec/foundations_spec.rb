@@ -6,14 +6,6 @@ describe "Bali foundations" do
       rule_class = Bali::RuleClass.new(My::Transaction)
     end
 
-    it "does not allow defining rule group for __*__" do
-      expect do
-        rule_group = Bali::RuleGroup.new(My::Transaction, "__*__")
-        rule_class = Bali::RuleClass.new(My::Transaction)
-        rule_class.add_rule_group(rule_group)
-      end.to raise_error Bali::DslError
-    end
-
     it "does not allow creation of instance for target other than class" do
       expect { Bali::RuleClass.new(Object.new) }.to raise_error(Bali::DslError)
     end
@@ -80,7 +72,7 @@ describe "Bali foundations" do
         expect(cloned_rc.others_rule_group.object_id).to_not eq(rule_class.others_rule_group.object_id)
 
         rule_class.rule_groups.each do |subtarget, rule_group|
-          cloned_rg = cloned_rc.rule_groups[subtarget] 
+          cloned_rg = cloned_rc.rule_groups[subtarget]
           expect(cloned_rg.object_id).to_not eq(rule_group.object_id)
 
           expect(cloned_rg.cants.object_id).to_not eq(rule_group.cants.object_id)
@@ -96,10 +88,10 @@ describe "Bali foundations" do
         Bali.clear_rules
         Bali.map_rules do
           rules_for My::Transaction do
-            describe :general_user, :finance do
+            role :general_user, :finance do
               can :print
             end
-            describe :finance do
+            role :finance do
               can :edit, :update, :view, :save
             end
             others do
@@ -133,16 +125,16 @@ describe "Bali foundations" do
         expect(stxn_finance_rg.cans.length).to eq(5)
         expect(stxn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
         expect(stxn_finance_rg.cants.length).to eq(0)
-      end 
+      end
 
       it "clears only rules from finance" do
         txn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::Transaction, "finance")
 
         Bali.map_rules do
           rules_for My::SecuredTransaction, inherits: My::Transaction do
-            describe :finance do
+            role :general_user do
               clear_rules
-              can :view, :print
+              cannot_all
             end
           end
         end
@@ -152,11 +144,13 @@ describe "Bali foundations" do
         expect(txn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
         expect(stxn_finance_rg.cans.keys).to include(:view, :print)
 
-        # check general user is not affected
+        # check finance user is not affected
         stxn_general_user_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, :general_user)
         stxn = My::SecuredTransaction.new
-        stxn.can?(:general_user, :view).should be_truthy
-        stxn.can?(:general_user, :print).should be_truthy
+        stxn.can?(:finance, :view).should be_truthy
+        stxn.can?(:finance, :print).should be_truthy
+        stxn.can?(:general_user, :view).should be_falsey
+        stxn.can?(:general_user, :print).should be_falsey
       end
     end
   end
