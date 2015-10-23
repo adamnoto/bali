@@ -76,4 +76,5 @@
 == Version 2.1.3
 
 1. Deprecating `describe` block in favour of `role` block, `describe` is to be deprecated in version 3.0.
-2. Heavy refactoring
+2. Using strategy pattern, heavy refactoring 
+3. Human-readable authorisation error message when invoking !-version of can/cannot, for eg: Role general_user is not allowed to perform operation `update` on My::Transaction 
