@@ -77,10 +77,10 @@ module Bali::Objector::Statics
 
     judgement_value
   rescue => e
-    if e.is_a?(Bali::AuthorizationError)
+    if e.is_a?(Bali::AuthorizationError) || e.is_a?(Bali::Error)
       raise e
     else
-      raise Bali::ObjectionError, e.message
+      raise Bali::ObjectionError, e.message, e.backtrace
     end
   end
 
@@ -115,13 +115,13 @@ module Bali::Objector::Statics
     if e.is_a?(Bali::AuthorizationError)
       raise e
     else
-      raise Bali::ObjectionError, e.message
+      raise Bali::ObjectionError, e.message, e.backtrace
     end
   end
 
   def can!(subtarget_roles, operation, record = self, options = {})
     can?(subtarget_roles, operation, record, options) do |original_subtarget, role, can_value|
-      if can_value
+      if !can_value
         auth_error = Bali::AuthorizationError.new
         auth_error.auth_level = :can
         auth_error.operation = operation
