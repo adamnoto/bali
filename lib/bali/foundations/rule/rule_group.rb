@@ -33,6 +33,9 @@ class Bali::RuleGroup
     self.cants = {}
 
     # by default, rule group is neither zeus nor plant
+    # it is neutral.
+    # meaning, it is neither allowed to do everything, nor it is 
+    # prohibited to do anything. neutral.
     self.zeus = false
     self.plant = false
   end

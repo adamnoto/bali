@@ -167,16 +167,22 @@ class Bali::RulesForDsl
       # add operation one by one
       operations.each do |op|
         rule = Bali::Rule.new(auth_val, op)
-        if conditional_hash
-          if conditional_hash[:if] || conditional_hash["if"]
-            rule.decider = conditional_hash[:if] || conditional_hash["if"]
-            rule.decider_type = :if
-          elsif conditional_hash[:unless] || conditional_hash[:unless]
-            rule.decider = conditional_hash[:unless] || conditional_hash["unless"]
-            rule.decider_type = :unless
-          end
-        end
+        bali_embed_conditions(rule, conditional_hash)
         self.current_rule_group.add_rule(rule)
       end
     end # bali_process_auth_rules
+
+    # process conditional statement in rule definition
+    def bali_embed_conditions(rule, conditional_hash = nil)
+      return if conditional_hash.nil?
+
+      condition_type = conditional_hash.keys[0].to_s.downcase
+      condition_type_symb = condition_type.to_sym
+
+      if condition_type_symb == :if || condition_type_symb == :unless
+        rule.decider = conditional_hash.values[0]
+        rule.decider_type = condition_type_symb
+      end
+      nil
+    end
 end # class
