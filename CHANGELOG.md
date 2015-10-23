@@ -72,3 +72,9 @@
 
 1. `nil` will be printed <nil> when objecting with can! or cannot! for better readability.
 2. Bug fixes on declaring multiple rules with decider. Previously, others were ignored--now, every single rule will get defined whether decider is present or not.
+
+== Version 2.2.0
+
+1. Deprecating `describe` block in favour of `role` block, `describe` is to be deprecated in version 3.0.
+2. Using strategy pattern, heavy refactoring 
+3. Human-readable authorisation error message when invoking !-version of can/cannot, for eg: Role general_user is not allowed to perform operation `update` on My::Transaction 

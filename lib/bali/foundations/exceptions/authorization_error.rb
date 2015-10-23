@@ -11,9 +11,28 @@ class Bali::AuthorizationError < Bali::Error
   # whether a class or an object
   attr_accessor :target
 
-  def to_s
-    # better error message for nil, so that it won't be empty
-    role = self.role ? self.role : "<nil>"
-    "Role #{role} is performing #{operation} using precedence #{auth_level}"
+  def target_proper_class
+    if target.is_a?(Class)
+      target
+    else
+      target.class
+    end
   end
+
+  def to_s
+    role = humanise_value(self.role)
+    operation = humanise_value(self.operation)
+    auth_level = humanise_value(self.auth_level)
+
+    if auth_level == :can
+      "Role #{role} is not allowed to perform operation `#{operation}` on #{target_proper_class}"
+    else
+      "Role #{role} is allowed to perform operation `#{operation}` on #{target_proper_class}"
+    end
+  end
+
+  private
+    def humanise_value(val)
+      val.nil? ? "<nil>" : val
+    end
 end
