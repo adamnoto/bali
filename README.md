@@ -28,6 +28,7 @@ And then execute:
 
 1. `cant` and `cant_all` which are used to declare rules will be deprecated on version 3.0, in favor of `cannot` and `cannot_all`. The reason behind this is that `can` and `cant` only differ by 1 letter, it is thought to be better to make it less ambiguous.
 2. `cant?` and subsequently new-introduced `cant!` will be deprecated on version 3.0, in favor of `cannot?` and `cannot!` for the same reason as above.
+3. Since version 2.1.3, `describe` block is replaced with `role` block. `describe` block will be deprecated on version 3.0.
 
 ## Usage
 
@@ -88,21 +89,21 @@ The specification above seems very terrifying, but with Bali, those can be defin
 ```ruby
   Bali.map_rules do
     rules_for My::Transaction do
-      describe(:supreme_user) { can_all }
-      describe :admin_user do
+      role(:supreme_user) { can_all }
+      role :admin_user do
         can_all
         # a more specific rule would be executed even if can_all is present
         can :cancel,
           if: proc { |record| record.payment_channel == "CREDIT_CARD" &&
                               !record.is_settled? }
       end
-      describe "general user", can: [:download]
-      describe "finance" do
+      role "general user", can: [:download]
+      role "finance" do
         can :delete, if: proc { |record| record.is_settled? }
         can :cancel, unless: proc { |record| record.is_settled? }
       end # finance_user description
-      describe :guest, nil { can :report_fraud }
-      describe :client do
+      role :guest, nil { can :report_fraud }
+      role :client do
         can :create
       end
       others do

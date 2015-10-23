@@ -72,3 +72,8 @@
 
 1. `nil` will be printed <nil> when objecting with can! or cannot! for better readability.
 2. Bug fixes on declaring multiple rules with decider. Previously, others were ignored--now, every single rule will get defined whether decider is present or not.
+
+== Version 2.1.3
+
+1. Deprecating `describe` block in favour of `role` block, `describe` is to be deprecated in version 3.0.
+2. Heavy refactoring
