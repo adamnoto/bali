@@ -132,9 +132,9 @@ describe "Bali foundations" do
 
         Bali.map_rules do
           rules_for My::SecuredTransaction, inherits: My::Transaction do
-            role :finance do
+            role :general_user do
               clear_rules
-              can :view, :print
+              cannot_all
             end
           end
         end
@@ -144,11 +144,13 @@ describe "Bali foundations" do
         expect(txn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
         expect(stxn_finance_rg.cans.keys).to include(:view, :print)
 
-        # check general user is not affected
+        # check finance user is not affected
         stxn_general_user_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, :general_user)
         stxn = My::SecuredTransaction.new
-        stxn.can?(:general_user, :view).should be_truthy
-        stxn.can?(:general_user, :print).should be_truthy
+        stxn.can?(:finance, :view).should be_truthy
+        stxn.can?(:finance, :print).should be_truthy
+        stxn.can?(:general_user, :view).should be_falsey
+        stxn.can?(:general_user, :print).should be_falsey
       end
     end
   end
