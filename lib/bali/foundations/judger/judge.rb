@@ -23,7 +23,6 @@ module Bali::Judger
   class Judge
     attr_accessor :original_subtarget
     attr_accessor :subtarget
-    attr_accessor :auth_level
     attr_accessor :operation
     # record can be the class, or an instance of a class
     attr_accessor :record
@@ -32,9 +31,9 @@ module Bali::Judger
     attr_accessor :cross_checking
 
     # this class is abstract, shouldn't be initialized
-    def initialize(deconstruct = true)
-      if deconstruct
-        raise Bali::Error, "Bali::Judge::Judger is abstract, construct by using build!"
+    def initialize(unconstructable = true)
+      if unconstructable
+        raise Bali::Error, "Bali::Judge::Judger is unconstructable, properly construct by using build to get a concrete class!"
       end
       self
     end 
@@ -44,23 +43,28 @@ module Bali::Judger
       if auth_level == :can
         judge = Bali::Judger::PositiveJudge.new
       elsif auth_level == :cannot
-        judge = Bal::Judger::NegativeJudge.new
+        judge = Bali::Judger::NegativeJudge.new
       else
         raise Bali::Error, "Unable to find judge for `#{auth_level}` case"
       end
 
-      judge.original_subtarget = options.fetch(:original_subtarget)
-      judge.subtarget = options.fetch(:subtarget)
-      judge.operation = options.fetch(:operation)
-      judge.record = options.fetch(:record)
-      
+      judge.original_subtarget = options[:original_subtarget]
+      judge.subtarget = options[:subtarget]
+      judge.operation = options[:operation]
+      judge.record = options[:record]
+      judge.cross_checking = false
+
       judge
     end
 
-    def clone
-      new_judge = Judge.new
+    def clone(options = {})
+      if options[:reverse]
+        new_judge = Bali::Judger::Judge.build(self.reverse_auth_level)
+      else
+        new_judge = Bali::Judger::Judge.build(self.auth_level)
+      end
+
       new_judge.subtarget = subtarget
-      new_judge.auth_level = auth_level
       new_judge.operation = operation
       new_judge.record = record
       new_judge.cross_checking = cross_checking
@@ -91,7 +95,12 @@ module Bali::Judger
 
     def rule
       unless @rule_checked
-        self.rule = rule_group.get_rule(auth_level, operation)
+        # rule group may be nil, for when user checking for undefined rule group
+        if rule_group
+          @rule = rule_group.get_rule(auth_level, operation)
+        else
+          self.rule = nil
+        end
       end
       @rule
     end
@@ -104,205 +113,217 @@ module Bali::Judger
 
     def otherly_rule
       unless @otherly_rule_checked
-        # retrieve rule from others group
-        @otherly_rule = other_rule_group.get_rule(auth_level, operation)
-        @otherly_rule_checked = true
+        if other_rule_group
+          # retrieve rule from others group
+          @otherly_rule = other_rule_group.get_rule(auth_level, operation)
+          @otherly_rule_checked = true
+        end
       end
       @otherly_rule
     end
 
     # return either true or false
-    def judgement
+    # options can specify if returning raw, by specifying holy: true
+    def judgement(options = {})
+      # the divine judgement will come to thee, O Thou 
+      # the doer of truth. return raw, untranslated to true/false.
+      our_holy_judgement = nil
+
       # default of can? is false whenever RuleClass for that class is undefined
       # or RuleGroup for that subtarget is not defined
       if rule_group.nil?
         if other_rule_group.nil?
           # no more chance for checking
-          return natural_value 
+          our_holy_judgement = natural_value 
         end
       end
 
-      if need_to_check_for_intervention? 
-        return check_intervention
+      if our_holy_judgement.nil? && need_to_check_for_intervention? 
+        our_holy_judgement = check_intervention
       end
 
-      if rule_group && rule_group.plant? &&
+      if our_holy_judgement.nil? && 
+          rule_group && rule_group.plant? &&
           rule.nil? && otherly_rule.nil?
-        return natural_value
+        our_holy_judgement = natural_value
       end
 
-      if rule.nil?
+      if our_holy_judgement.nil? && rule.nil?
         cross_check_value = nil
         # default if can? for undefined rule is false, after related clause
         # cannot be found in cannot?
-        unless cross_check
-          self_clone = self.clone
-          self_clone.cross_check = true
-          self_clone.auth_level = reverse_auth_level 
-          cross_check_value = self_clone.judge
+        unless cross_checking
+          reversed_self = self.clone reverse: true
+          reversed_self.cross_checking = true
+          cross_check_value = reversed_self.judgement holy: true
         end 
 
-        if can_use_otherly_rule?
-          # give chance to check at others block
-          rule = otherly_rule
-        else
-          cross_check_reverse_value
-        end
-      end
+        # if cross check value nil, then the reverse rule is not defined,
+        # let's determine whether he is zeus or plant
+        if cross_check_value.nil?
+          # rule_group can be nil for when user checking under undefined rule-group
+          if rule_group
+            if rule_group.plant?
+              our_holy_judgement = plant_return_value
+            end
 
-      if rule
-        if rule.has_decider?
-          return get_decider_result(rule, original_subtarget, record)
+            if rule_group.zeus?
+              our_holy_judgement = zeus_return_value
+            end 
+          end # if rule_group exist
         else
-          return default_positive_return_value
+          # process value from cross checking
+          
+          if can_use_otherly_rule?(cross_check_value, cross_checking)
+            # give chance to check at others block
+            self.rule = otherly_rule
+          else
+            our_holy_judgement = cross_check_reverse_value(cross_check_value)
+          end
+        end
+      end # if our judgement nil and rule is nil
+
+      # if our holy judgement is still nil, but rule is defined
+      if our_holy_judgement.nil? && rule
+        if rule.has_decider?
+          our_holy_judgement = get_decider_result(rule, original_subtarget, record)
+        else
+          our_holy_judgement = default_positive_return_value
         end
       end
 
       # return fuzy if otherly rule defines contrary to this auth_level
-      if other_rule_group.get_rule(reverse_auth_level, operation)
-        return default_negative_fuzy_return_value
+      if our_holy_judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.get_rule(reverse_auth_level, operation))
+        if rule_group && (rule_group.zeus? || rule_group.plant?)
+          # don't overwrite our holy judgement with fuzy value if rule group
+          # zeus/plant, because zeus/plant is more definite than any fuzy values
+          # eventhough the rule is abstractly defined
+        else
+          our_holy_judgement = default_negative_fuzy_return_value
+        end
       end
 
-      return natural_value
-    end
+      # if at this point still nil, well, 
+      # return the natural value for this judge
+      if our_holy_judgement.nil?
+        if otherly_rule
+          our_holy_judgement = BALI_FUZY_TRUE
+        else
+          our_holy_judgement = natural_value
+        end
+      end
 
-    def need_to_check_for_intervention?
-      raise "Abstract method called"
-    end
-
-    def check_intervention
-      raise "Abstract method undefined"
-    end
-
-    def  default_return_value
-      raise "Abstract method undefined"
-    end
-
-    def default_value_if_rule_class_undefined
-      raise "Abstract method undefined"
+      holy = !!options[:holy]
+      return holy ? our_holy_judgement : translate_holy_judgement(our_holy_judgement)
     end
 
     private
-      def should_reverse_judging?
-        self.cross_checking == false
+      # translate response for value above to traditional true/false
+      # holy judgement refer to non-standard true/false being used inside Bali
+      # which need to be translated from other beings to know
+      def translate_holy_judgement(bali_bool_value)
+        unless bali_bool_value.is_a?(Integer)
+          raise Bali::Error, "Expect bali value to be an Integer, got: `#{bali_bool_value}`" 
+        end
+        if bali_bool_value < 0
+          return false
+        elsif bali_bool_value > 0
+          return true
+        end
       end
 
-    def bali_cannot?(subtarget, operation, record = self, options = {})
-      # plant subtarget is not allowed to do things unless specificly defined
-      if rule_group && rule_group.plant?
+      def can_use_otherly_rule?(cross_check_value, is_cross_checking)
+        # either if rule from others block is defined, and the result so far is fuzy
+        # or, otherly rule is defined, and it is still a cross check
+        # plus, the result is not a definite BALI_TRUE/BALI_FALSE
+        #
+        # rationalisation:
+        # 1. Definite answer such as BALI_TRUE and BALI_FALSE is to be prioritised over
+        #    FUZY answer, because definite answer is not gathered from others block where
+        #    FUZY answer is. Therefore, it is an intended result
+        # 2. If the answer is FUZY, otherly_rule only be considered if the result
+        #    is either FUZY TRUE or FUZY FALSE, or
+        # 3. Or, when already in cross check mode, we cannot retrieve cross_check_value
+        #    what we can is instead, if otherly rule is available, just to try the odd
+        (!otherly_rule.nil? && cross_check_value && !(cross_check_value == BALI_TRUE || cross_check_value == BALI_FALSE)) ||
+          (!otherly_rule.nil? && (cross_check_value == BALI_FUZY_FALSE || cross_check_value == BALI_FUZY_TRUE)) ||
+          (!otherly_rule.nil? && is_cross_checking && cross_check_value.nil?)
+      end
+
+      # if after cross check (checking for cannot) the return is false,
+      # meaning for us, (checking for can), the return have to be true
+      def cross_check_reverse_value(cross_check_value)
+        # either the return is not fuzy, or otherly rule is undefined
+        if cross_check_value == BALI_TRUE
+          return BALI_FALSE
+        elsif cross_check_value == BALI_FALSE
+          return BALI_TRUE
+        elsif cross_check_value == BALI_FUZY_FALSE 
+          return BALI_FUZY_TRUE
+        elsif cross_check_value == BALI_FUZY_TRUE
+          return BALI_FUZY_FALSE
+        else
+          raise Bali::Error, "Unknown how to process cross check value: `#{cross_check_value}`"
+        end
+      end # cross_check_reverse_value
+
+      def check_intervention
         if rule.nil?
-          _options = options.dup
-          _options[:cross_check] = true
-          _options[:original_subtarget] = original_subtarget if _options[:original_subtarget].nil?
+          self_clone = self.clone reverse: true
+          self_clone.cross_checking = true
 
-          # check further whether defined in can?
-          check_val = self.bali_can?(subtarget, operation, record, _options)
+          check_val = self_clone.judgement holy: true
 
+          # check further whether contradicting rule is defined to overwrite this
+          # super-power either can_all or cannot_all rule
           if check_val == BALI_TRUE
-            return BALI_FALSE # well, it is defined in can, so it must overwrite this cant_all rule
-          else
-            # plant, and then rule is not defined for further inspection. stright
-            # is not allowed to do this thing
-            return BALI_TRUE
-          end
-        end
-      end
-
-      if rule.nil?
-        unless options[:cross_check]
-          options[:cross_check] = true
-          cross_check_value = self.bali_can?(subtarget, operation, record, options)
-        end
-
-        if (otherly_rule && cross_check_value && !(cross_check_value == BALI_TRUE || cross_check_value == BALI_FALSE)) ||
-            (otherly_rule && (cross_check_value == BALI_FUZY_FALSE || cross_check_value == BALI_FUZY_TRUE)) ||
-            (otherly_rule && options[:cross_check] && cross_check_value.nil?)
-          rule = otherly_rule
-        else
-          if cross_check_value == BALI_TRUE
-            # from can? because of cross check, then it should be false
+            # it is defined, must overwrite
             return BALI_FALSE
-          elsif cross_check_value == BALI_FALSE
-            # from can? because of cross check returning false
-            # then it should be true, that is, cannot
-            return BALI_TRUE
-          end
-        end
-      end
-
-      # do after cross check
-      # godly subtarget is not to be prohibited in his endeavours
-      # so long that no specific rule about this operation is defined
-      return BALI_FALSE if rule_group && rule_group.zeus? && rule.nil? && otherly_rule.nil?
-
-      if rule
-        if rule.has_decider?
-          return get_decider_result(rule, original_subtarget, record)
-        else
-          return BALI_TRUE # rule is properly defined
-        end # if rule has decider
-      end # if rule is nil
-
-      # return fuzy if otherly rule defines contrary to this cannot rule
-      if other_rule_group.get_rule(:can, operation)
-        return BALI_FUZY_TRUE
-      else
-        BALI_TRUE
-      end
-    end # bali cannot
-
-
-    # translate response for value above to traditional true/false
-    def bali_translate_response(bali_bool_value)
-      raise Bali::Error, "Expect bali value to be an integer" unless bali_bool_value.is_a?(Integer)
-      if bali_bool_value < 0
-        return false
-      elsif bali_bool_value > 0
-        return true
-      else
-        raise Bali::Error, "Bali bool value can either be negative or positive integer"
-      end
-    end
-
-    # what is the result when decider is executed
-    # rule: the rule object
-    # original subtarget: raw, unprocessed arugment passed as subtarget
-    def get_decider_result(rule, original_subtarget, record)
-      # must test first
-      decider = rule.decider
-      case decider.arity
-      when 0
-        if rule.decider_type == :if
-          return decider.() ? BALI_TRUE : BALI_FALSE
-        elsif rule.decider_type == :unless
-          unless decider.()
-            return BALI_TRUE
           else
-            return BALI_FALSE
-          end
-        end
-      when 1
-        if rule.decider_type == :if
-          return decider.(record) ? BALI_TRUE : BALI_FALSE
-        elsif rule.decider_type == :unless
-          unless decider.(record)
+            # futher inspection said no such overwriting value is exist
             return BALI_TRUE
-          else
-            return BALI_FALSE
+          end # check_val
+        end # if rule nil
+      end # check intervention
+
+      # what is the result when decider is executed
+      # rule: the rule object
+      # original subtarget: raw, unprocessed arugment passed as subtarget
+      def get_decider_result(rule, original_subtarget, record)
+        # must test first
+        decider = rule.decider
+        case decider.arity
+        when 0
+          if rule.decider_type == :if
+            return decider.() ? BALI_TRUE : BALI_FALSE
+          elsif rule.decider_type == :unless
+            unless decider.()
+              return BALI_TRUE
+            else
+              return BALI_FALSE
+            end
           end
-        end
-      when 2
-        if rule.decider_type == :if
-          return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
-        elsif rule.decider_type == :unless
-          unless decider.(record, original_subtarget)
-            return BALI_TRUE
-          else
-            return BALI_FALSE
+        when 1
+          if rule.decider_type == :if
+            return decider.(record) ? BALI_TRUE : BALI_FALSE
+          elsif rule.decider_type == :unless
+            unless decider.(record)
+              return BALI_TRUE
+            else
+              return BALI_FALSE
+            end
+          end
+        when 2
+          if rule.decider_type == :if
+            return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
+          elsif rule.decider_type == :unless
+            unless decider.(record, original_subtarget)
+              return BALI_TRUE
+            else
+              return BALI_FALSE
+            end
           end
         end
       end
-    end
-
-  end
-end
+  end # class
+end # module
