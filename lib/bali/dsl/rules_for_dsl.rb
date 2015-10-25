@@ -75,13 +75,11 @@ class Bali::RulesForDsl
   end
 
   def can_all
-    self.current_rule_group.zeus = true
-    self.current_rule_group.plant = false
+    Bali::Integrator::RuleGroup.make_zeus(self.current_rule_group)
   end
 
   def cannot_all
-    self.current_rule_group.plant = true
-    self.current_rule_group.zeus = false
+    Bali::Integrator::RuleGroup.make_plant(self.current_rule_group)
   end
 
   def cant_all
