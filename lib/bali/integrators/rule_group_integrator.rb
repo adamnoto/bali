@@ -10,7 +10,6 @@ module Bali
         rule_class = Bali::Integrator::RuleClass.for(target_class)
         rule_class.nil? ? nil : rule_class.rules_for(subtarget)
       end
-
     end
   end
 end

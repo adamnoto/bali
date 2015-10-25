@@ -29,7 +29,6 @@ module Bali
           raise Bali::DslError, "Only allow instance of Bali::RuleClass"
         end
       end # add_rule_class
-
     end
   end
 end
