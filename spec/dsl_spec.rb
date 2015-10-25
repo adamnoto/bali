@@ -341,6 +341,33 @@ describe Bali do
       Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
     end
 
+    context "shortcut notation" do
+      it "raises error when notation does not have hash" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              role :user
+            end
+          end
+        end.to raise_error(Bali::DslError)
+      end
+
+      it "does not raise an error when properly defined with a hash" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              role :user, can: :edit, cannot: [:delete, :refund]
+            end
+          end
+        end.to_not raise_error
+
+        rule_group = Bali::Integrator::RuleGroup.for(My::Transaction, :user)
+        expect(rule_group.get_rule(:can, :edit)).to_not be_nil
+        expect(rule_group.get_rule(:cannot, :delete)).to_not be_nil
+        expect(rule_group.get_rule(:cannot, :refund)).to_not be_nil
+      end
+    end
+
     it "allows definition of rules per multiple subtarget" do
       expect(Bali::Integrator::RuleClass.all.size).to eq(0)
       Bali.map_rules do

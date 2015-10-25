@@ -6,8 +6,6 @@ class Bali::RulesForDsl
 
   # all to be processed subtargets
   attr_accessor :current_subtargets
-  # rules defined with hash can: [] and cannot: []
-  attr_accessor :shortcut_rules
 
   def initialize(map_rules_dsl)
     @@lock = Mutex.new
@@ -22,17 +20,29 @@ class Bali::RulesForDsl
   def role(*params)
     @@lock.synchronize do
       bali_scrap_actors(*params)
-      bali_scrap_shortcut_rules(*params)
       current_subtargets.each do |subtarget|
+        bali_set_subtarget(subtarget)
+
         if block_given?
-          bali_process_subtarget(subtarget) do
-            yield
-          end
+          yield
         else
-          bali_process_subtarget(subtarget)
-        end
-      end
-    end
+          # if no block, then rules are defined using shortcut notation, eg:
+          # role :user, can: [:edit]
+          # the last element of which params must be a hash
+          shortcut_rules = params[-1]
+          unless shortcut_rules.is_a?(Hash)
+            raise Bali::DslError, "Passin hash as arguments for shortcut notation"
+          end
+
+          shortcut_can_rules = shortcut_rules[:can] || shortcut_rules["can"]
+          shortcut_cannot_rules = shortcut_rules[:cannot] || shortcut_rules["cannot"]
+
+          shortcut_rules.each do |auth_val, args|
+            Bali::Integrator::Rule.add(auth_val, self.current_rule_group, *args)
+          end # each shortcut rules
+        end # whether block is given or not
+      end # each subtarget
+    end # sync
   end # role
 
   def describe(*params)
@@ -102,19 +112,10 @@ class Bali::RulesForDsl
       nil
     end
 
-    def bali_scrap_shortcut_rules(*params)
-      self.shortcut_rules = {}
-      params.each do |passed_argument|
-        if passed_argument.is_a?(Hash)
-          self.shortcut_rules = passed_argument
-        end
-      end
-      nil
-    end
-
-    def bali_process_subtarget(subtarget)
-      target_class = self.map_rules_dsl.current_rule_class.target_class
+    # set the current processing on a specific subtarget
+    def bali_set_subtarget(subtarget)
       rule_class = self.map_rules_dsl.current_rule_class
+      target_class = rule_class.target_class
 
       rule_group = rule_class.rules_for(subtarget)
 
@@ -122,30 +123,8 @@ class Bali::RulesForDsl
         rule_group = Bali::RuleGroup.new(target_class, subtarget)
       end
 
+      rule_class.add_rule_group rule_group
       self.current_rule_group = rule_group
-
-      if block_given?
-        yield
-      else
-        # auth_val is either can or cannot
-        shortcut_rules.each do |auth_val, operations|
-          if operations.is_a?(Array)
-            operations.each do |op|
-              rule = Bali::Rule.new(auth_val, op)
-              rule_group.add_rule(rule)
-            end
-          else
-            operation = operations # well, basically is 1 only
-            rule = Bali::Rule.new(auth_val, operation)
-            rule_group.add_rule(rule)
-          end
-        end # each rules
-      end # block_given?
-
-      # add current_rule_group
-      rule_class.add_rule_group(rule_group)
-
-      nil
     end
 
 end # class
