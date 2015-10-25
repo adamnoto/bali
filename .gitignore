@@ -12,3 +12,5 @@
 *.swo
 *.gemspec
 *.gem
+
+plugins
