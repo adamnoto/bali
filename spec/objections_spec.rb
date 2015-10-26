@@ -4,12 +4,12 @@ describe "Model objections" do
   let(:me)  { My::Employee.new }
 
   it "should return false to can? for undefined rule class" do
-    Bali::Integrators::Rule.rule_class_for(My::Employee).should be_nil
+    Bali::Integrator::RuleClass.for(My::Employee).should be_nil
     My::Employee.can?(:undefined_subtarget, :new).should be_falsey
   end
 
   it "should return true to cannot? for undefined rule class" do
-    Bali::Integrators::Rule.rule_class_for(My::Employee).should be_nil
+    Bali::Integrator::RuleClass.for(My::Employee).should be_nil
     My::Employee.cannot?(:undefined_subtarget, :new).should be_truthy
   end
 
@@ -19,8 +19,8 @@ describe "Model objections" do
       end
     end
 
-    Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
-    Bali::Integrators::Rule.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
+    Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
+    Bali::Integrator::RuleGroup.for(My::Transaction, :undefined_subtarget).should be_nil
     My::Transaction.can?(:undefined_subtarget, :new).should be_falsey
   end
 
@@ -30,8 +30,8 @@ describe "Model objections" do
       end
     end
 
-    Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
-    Bali::Integrators::Rule.rule_group_for(My::Transaction, :undefined_subtarget).should be_nil
+    Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
+    Bali::Integrator::RuleGroup.for(My::Transaction, :undefined_subtarget).should be_nil
     My::Transaction.cannot?(:undefined_subtarget, :new).should be_truthy
   end
 
@@ -705,7 +705,7 @@ describe "Model objections" do
 
         it "cannot delete transaction" do
           txn.can?("general user", :delete).should be_falsey
-          Bali::Integrators::Rule.rule_group_for(txn.class, "general user").get_rule(:cannot, :delete)
+          Bali::Integrator::RuleGroup.for(txn.class, "general user").get_rule(:cannot, :delete)
             .class.should == Bali::Rule
         end
 

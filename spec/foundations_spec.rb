@@ -29,25 +29,25 @@ describe "Bali foundations" do
     end
 
     it "cannot add rule class other than of class Bali::RuleClass" do
-      expect { Bali::Integrators::Rule.add_rule_class(nil) }.to raise_error(Bali::DslError)
-      expect { Bali::Integrators::Rule.add_rule_class("adam") }.to raise_error(Bali::DslError)
-      Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction)).should_not be_nil
+      expect { Bali::Integrator::RuleClass.add(nil) }.to raise_error(Bali::DslError)
+      expect { Bali::Integrator::RuleClass.add("adam") }.to raise_error(Bali::DslError)
+      Bali::Integrator::RuleClass.add(Bali::RuleClass.new(My::Transaction)).should_not be_nil
     end
 
     it "rule class for is only defined for a Class" do
-      expect { Bali::Integrators::Rule.rule_class_for("adam") }.to raise_error(Bali::DslError)
+      expect { Bali::Integrator::RuleClass.for("adam") }.to raise_error(Bali::DslError)
 
-      Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrator::RuleClass.add(Bali::RuleClass.new(My::Transaction))
+      Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
     end
 
     it "should return nil whenever trying to search for inexistent rule class" do
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).should be_nil
+      Bali::Integrator::RuleClass.for(My::Transaction).should be_nil
     end
 
     it "should return Bali::RuleClass if rule class is defined" do
-      Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrator::RuleClass.add(Bali::RuleClass.new(My::Transaction))
+      Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
     end
 
     context "cloning" do
@@ -103,7 +103,7 @@ describe "Bali foundations" do
       end
 
       it "clears only rules from others" do
-        txn_others_rg = Bali::Integrators::Rule.rule_group_for(My::Transaction, "__*__")
+        txn_others_rg = Bali::Integrator::RuleGroup.for(My::Transaction, "__*__")
         expect(txn_others_rg.cans.length).to eq(1)
         expect(txn_others_rg.cants.length).to eq(2)
 
@@ -115,12 +115,12 @@ describe "Bali foundations" do
           end
         end
 
-        stxn_others_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, "__*__")
+        stxn_others_rg = Bali::Integrator::RuleGroup.for(My::SecuredTransaction, "__*__")
 
         expect(stxn_others_rg.cans.length).to eq(0)
         expect(stxn_others_rg.cants.length).to eq(0)
 
-        stxn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, "finance")
+        stxn_finance_rg = Bali::Integrator::RuleGroup.for(My::SecuredTransaction, "finance")
 
         expect(stxn_finance_rg.cans.length).to eq(5)
         expect(stxn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
@@ -128,7 +128,7 @@ describe "Bali foundations" do
       end
 
       it "clears only rules from finance" do
-        txn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::Transaction, "finance")
+        txn_finance_rg = Bali::Integrator::RuleGroup.for(My::Transaction, "finance")
 
         Bali.map_rules do
           rules_for My::SecuredTransaction, inherits: My::Transaction do
@@ -139,13 +139,13 @@ describe "Bali foundations" do
           end
         end
 
-        stxn_finance_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, "finance")
+        stxn_finance_rg = Bali::Integrator::RuleGroup.for(My::SecuredTransaction, "finance")
 
         expect(txn_finance_rg.cans.keys).to include(:print, :edit, :update, :view, :save)
         expect(stxn_finance_rg.cans.keys).to include(:view, :print)
 
         # check finance user is not affected
-        stxn_general_user_rg = Bali::Integrators::Rule.rule_group_for(My::SecuredTransaction, :general_user)
+        stxn_general_user_rg = Bali::Integrator::RuleGroup.for(My::SecuredTransaction, :general_user)
         stxn = My::SecuredTransaction.new
         stxn.can?(:finance, :view).should be_truthy
         stxn.can?(:finance, :print).should be_truthy
@@ -161,14 +161,14 @@ describe "Bali foundations" do
     let(:rule_cant_edit)  { Bali::Rule.new(:cant, :edit)  }
 
     it "should return nil whenever trying to search for inexistent rule group" do
-      Bali::Integrators::Rule.rule_group_for(My::Transaction, :basic_user).should be_nil
+      Bali::Integrator::RuleGroup.for(My::Transaction, :basic_user).should be_nil
     end
 
     it "should return Bali::RuleGroup if rule group is defined" do
-      Bali::Integrators::Rule.add_rule_class(Bali::RuleClass.new(My::Transaction))
-      rule_class = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+      Bali::Integrator::RuleClass.add(Bali::RuleClass.new(My::Transaction))
+      rule_class = Bali::Integrator::RuleClass.for(My::Transaction)
       rule_class.add_rule_group(Bali::RuleGroup.new(My::Transaction, :basic))
-      Bali::Integrators::Rule.rule_group_for(My::Transaction, :basic).class.should == Bali::RuleGroup
+      Bali::Integrator::RuleGroup.for(My::Transaction, :basic).class.should == Bali::RuleGroup
     end
 
     RSpec.shared_examples "rule" do

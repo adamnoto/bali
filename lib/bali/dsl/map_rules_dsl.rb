@@ -16,7 +16,7 @@ class Bali::MapRulesDsl
       if parent_class 
         # in case there is inherits specification
         raise Bali::DslError, "inherits must take a class" unless parent_class.is_a?(Class)
-        rule_class_from_parent = Bali::Integrators::Rule.rule_class_for(parent_class)
+        rule_class_from_parent = Bali::Integrator::RuleClass.for(parent_class)
         raise Bali::DslError, "not yet defined a rule class for #{parent_class}" if rule_class_from_parent.nil?
         self.current_rule_class = rule_class_from_parent.clone(target_class: target_class)
       end
@@ -24,7 +24,7 @@ class Bali::MapRulesDsl
       Bali::RulesForDsl.new(self).instance_eval(&block)
 
       # done processing the block, now add the rule class
-      Bali::Integrators::Rule.add_rule_class(self.current_rule_class)
+      Bali::Integrator::RuleClass.add(self.current_rule_class)
     end
   end
 
