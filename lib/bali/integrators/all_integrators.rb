@@ -3,7 +3,6 @@ module Bali
   end
 end
 
-require_relative "plugin_integrator"
 require_relative "rule_class_integrator"
 require_relative "rule_group_integrator"
 require_relative "rule_integrator"
