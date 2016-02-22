@@ -8,7 +8,7 @@ class Bali::RulesForDsl
   attr_accessor :current_subtargets
 
   def initialize(map_rules_dsl)
-    @@lock = Mutex.new
+    @@lock ||= Mutex.new
     self.map_rules_dsl = map_rules_dsl
   end
 
