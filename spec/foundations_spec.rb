@@ -6,10 +6,6 @@ describe "Bali foundations" do
       rule_class = Bali::RuleClass.new(My::Transaction)
     end
 
-    it "does not allow creation of instance for target other than class" do
-      expect { Bali::RuleClass.new(Object.new) }.to raise_error(Bali::DslError)
-    end
-
     # non-nil rule group is rule group that is defined with proper-named group
     # such as :user, :admin, :supreme, etc
     it "can add non-nil rule group" do
@@ -26,12 +22,6 @@ describe "Bali foundations" do
       rule_class = Bali::RuleClass.new(My::Transaction)
       expect { rule_class.add_rule_group(rule_group) }.to_not raise_error
       rule_class.rules_for(nil).class.should == Bali::RuleGroup
-    end
-
-    it "cannot add rule class other than of class Bali::RuleClass" do
-      expect { Bali::Integrator::RuleClass.add(nil) }.to raise_error(Bali::DslError)
-      expect { Bali::Integrator::RuleClass.add("adam") }.to raise_error(Bali::DslError)
-      Bali::Integrator::RuleClass.add(Bali::RuleClass.new(My::Transaction)).should_not be_nil
     end
 
     it "rule class for is only defined for a Class" do

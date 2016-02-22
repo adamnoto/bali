@@ -18,16 +18,10 @@ module Bali
 
       # add a new rule class
       def add(rule_class)
-        if rule_class.is_a?(Bali::RuleClass)
-          target = rule_class.target_class
+        target = rule_class.target_class
 
-          raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
-
-          Bali::RULE_CLASS_MAP[target.to_s] = rule_class
-          rule_class
-        else
-          raise Bali::DslError, "Only allow instance of Bali::RuleClass"
-        end
+        Bali::RULE_CLASS_MAP[target.to_s] = rule_class
+        rule_class
       end # add_rule_class
     end
   end

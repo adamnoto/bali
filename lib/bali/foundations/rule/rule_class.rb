@@ -13,12 +13,7 @@ class Bali::RuleClass
   attr_accessor :others_rule_group
 
   def initialize(target_class)
-    if target_class.is_a?(Class)
-      @target_class = target_class
-    else
-      raise Bali::DslError, "Target class must be a Class"
-    end
-
+    @target_class = target_class
     self.rule_groups = {}
     self.others_rule_group = Bali::RuleGroup.new(target_class, "__*__")
   end

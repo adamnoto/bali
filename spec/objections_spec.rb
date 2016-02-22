@@ -51,7 +51,7 @@ describe "Model objections" do
     before do
       Bali.map_rules do
         roles_for My::Employee, :roles
-        rules_for My::Transaction do
+        rules_for 'My::Transaction' do
           role :admin, :general_user do
             can :show, :edit, :new
           end
