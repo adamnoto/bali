@@ -31,7 +31,7 @@ class Bali::RulesForDsl
           # the last element of which params must be a hash
           shortcut_rules = params[-1]
           unless shortcut_rules.is_a?(Hash)
-            raise Bali::DslError, "Passin hash as arguments for shortcut notation"
+            raise Bali::DslError, "Pass a hash for shortcut notation"
           end
 
           shortcut_can_rules = shortcut_rules[:can] || shortcut_rules["can"]

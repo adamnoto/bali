@@ -32,7 +32,7 @@ class Bali::Rule
     elsif aval == :cant
       @auth_val = :cannot
     else
-      raise Bali::DslError, "auth_val can only either be :can or :cannot"
+      fail Bali::DslError, "auth_val can only either be :can or :cannot"
     end
   end
 
@@ -40,7 +40,7 @@ class Bali::Rule
     if dectype == :if || dectype == :unless
       @decider_type = dectype
     else
-      raise Bali::DslError, "decider type can only be either if or unless, got: #{dectype}"
+      fail Bali::DslError, "decider type not allowed"
     end
   end
 
@@ -50,7 +50,6 @@ class Bali::Rule
   end
 
   def has_decider?
-    raise Bali::DslError, "has decider but not sure if it is if or unless type decider" if self.decider.is_a?(Proc) && self.decider_type.nil?
-    self.decider.is_a?(Proc)
+    self.decider.is_a?(Proc) && !self.decider_type.nil?
   end
 end

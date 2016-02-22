@@ -24,13 +24,6 @@ describe "Bali foundations" do
       rule_class.rules_for(nil).class.should == Bali::RuleGroup
     end
 
-    it "rule class for is only defined for a Class" do
-      expect { Bali::Integrator::RuleClass.for("adam") }.to raise_error(Bali::DslError)
-
-      Bali::Integrator::RuleClass.add(Bali::RuleClass.new(My::Transaction))
-      Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
-    end
-
     it "should return nil whenever trying to search for inexistent rule class" do
       Bali::Integrator::RuleClass.for(My::Transaction).should be_nil
     end
@@ -246,8 +239,6 @@ describe "Bali foundations" do
       expect(rule.has_decider?).to be_falsey
 
       rule.decider = -> { true }
-      expect { rule.has_decider? }.to raise_error(Bali::DslError)
-      expect { rule.decider_type = :whatever }.to raise_error(Bali::DslError)
 
       expect { rule.decider_type = :if }.to_not raise_error
       expect(rule.has_decider?).to be_truthy

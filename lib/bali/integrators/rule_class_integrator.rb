@@ -12,7 +12,6 @@ module Bali
 
       # return all rule class of a target
       def for(target)
-        raise Bali::DslError, "Target must be a class" unless target.is_a?(Class)
         Bali::RULE_CLASS_MAP[target.to_s]
       end
 
