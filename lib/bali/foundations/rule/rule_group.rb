@@ -51,12 +51,10 @@ class Bali::RuleGroup
   end
 
   def add_rule(rule)
-    raise Bali::DslError, "Rule must be of class Bali::Rule, got: #{rule.class.name}" unless rule.is_a?(Bali::Rule)
-
     # operation cannot be defined twice
     operation = rule.operation.to_sym
 
-    raise Bali::DslError, "Rule is defined twice for operation #{operation}" if self.cants[operation] && self.cans[operation]
+    return if self.cants[operation] && self.cans[operation]
 
     if rule.is_discouragement?
       self.cants[operation] = rule
@@ -80,7 +78,7 @@ class Bali::RuleGroup
     when :cannot, "cannot"
       rule = self.cants[operation.to_sym]
     else
-      raise Bali::DslError, "Undefined operation: #{auth_val}"
+      fail Bali::DslError, "Undefined operation: #{auth_val}"
     end
 
     rule

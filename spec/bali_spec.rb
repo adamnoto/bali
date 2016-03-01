@@ -1,23 +1,24 @@
 require_relative 'spec_helper'
 
-module My; end
-class My::Transaction
-  include Bali::Objector
+module My
+  class Transaction
+    include Bali::Objector
 
-  attr_accessor :is_settled
-  attr_accessor :payment_channel
+    attr_accessor :is_settled
+    attr_accessor :payment_channel
 
-  alias :is_settled? :is_settled
-  alias :settled= :is_settled=
-end
+    alias :is_settled? :is_settled
+    alias :settled= :is_settled=
+  end
 
-class My::SecuredTransaction < My::Transaction
-end
+  class SecuredTransaction < My::Transaction
+  end
 
-class My::Employee
-  include Bali::Objector
+  class Employee
+    include Bali::Objector
 
-  # number of experience in the company
-  attr_accessor :exp_years
-  attr_accessor :roles
+    # number of experience in the company
+    attr_accessor :exp_years
+    attr_accessor :roles
+  end
 end

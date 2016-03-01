@@ -79,7 +79,7 @@ module Bali::Judger
 
     def rule_group
       unless @rule_group_checked
-        @rule_group = Bali::Integrators::Rule.rule_group_for(record_class, subtarget)
+        @rule_group = Bali::Integrator::RuleGroup.for(record_class, subtarget)
         @rule_group_checked = true
       end
       @rule_group
@@ -87,7 +87,7 @@ module Bali::Judger
 
     def other_rule_group
       unless @other_rule_group_checked
-        @other_rule_group = Bali::Integrators::Rule.rule_group_for(record_class, "__*__")
+        @other_rule_group = Bali::Integrator::RuleGroup.for(record_class, "__*__")
         @other_rule_group_checked = true
       end
       @other_rule_group

@@ -20,11 +20,6 @@ module Bali
   # }
   TRANSLATED_SUBTARGET_ROLES = {}
 
-  # pub/sub for plugin that extend bali
-  LISTENABLE_EVENTS = {}
-end
-
-module Bali
   extend self
   def map_rules(&block)
     dsl_map_rules = Bali::MapRulesDsl.new

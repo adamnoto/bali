@@ -40,7 +40,7 @@ describe Bali do
       end
 
       it "should redefine rule if same operation is re-described" do
-        Bali::Integrators::Rule.rule_classes.size.should == 0
+        expect(Bali::Integrator::RuleClass.all.size).to eq(0)
 
         Bali.map_rules do
           rules_for My::Transaction do
@@ -51,7 +51,7 @@ describe Bali do
           end
         end
 
-        rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+        rc = Bali::Integrator::RuleClass.for(My::Transaction)
         expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
           .to eq(true)
       end
@@ -131,7 +131,7 @@ describe Bali do
 
     context "when describing each rules using role" do
       it "can define nil rule group" do
-        expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
+        expect(Bali::Integrator::RuleClass.all.size).to eq(0)
         Bali.map_rules do
           rules_for My::Transaction do
             role nil do
@@ -139,8 +139,8 @@ describe Bali do
             end
           end
         end
-        Bali::Integrators::Rule.rule_classes.size.should == 1
-        Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+        Bali::Integrator::RuleClass.all.size.should == 1
+        Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
       end
 
       it "disallows calling role outside of rules_for" do
@@ -327,7 +327,7 @@ describe Bali do
     end # context others
 
     it "allows definition of rules per subtarget" do
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
+      expect(Bali::Integrator::RuleClass.all.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           role :general_user, can: :show
@@ -337,12 +337,39 @@ describe Bali do
           end
         end
       end
-      Bali::Integrators::Rule.rule_classes.size.should == 1
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrator::RuleClass.all.size.should == 1
+      Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
+    end
+
+    context "shortcut notation" do
+      it "raises error when notation does not have hash" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              role :user
+            end
+          end
+        end.to raise_error(Bali::DslError)
+      end
+
+      it "does not raise an error when properly defined with a hash" do
+        expect do
+          Bali.map_rules do
+            rules_for My::Transaction do
+              role :user, can: :edit, cannot: [:delete, :refund]
+            end
+          end
+        end.to_not raise_error
+
+        rule_group = Bali::Integrator::RuleGroup.for(My::Transaction, :user)
+        expect(rule_group.get_rule(:can, :edit)).to_not be_nil
+        expect(rule_group.get_rule(:cannot, :delete)).to_not be_nil
+        expect(rule_group.get_rule(:cannot, :refund)).to_not be_nil
+      end
     end
 
     it "allows definition of rules per multiple subtarget" do
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
+      expect(Bali::Integrator::RuleClass.all.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           role(:general_user, :finance_user, can: [:show])
@@ -355,11 +382,11 @@ describe Bali do
         end
       end
 
-      Bali::Integrators::Rule.rule_classes.size.should == 1
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).class.should == Bali::RuleClass
+      Bali::Integrator::RuleClass.all.size.should == 1
+      Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
 
-      rule_group_gu = Bali::Integrators::Rule.rule_group_for(My::Transaction, :general_user)
-      rule_group_fu = Bali::Integrators::Rule.rule_group_for(My::Transaction, :finance_user)
+      rule_group_gu = Bali::Integrator::RuleGroup.for(My::Transaction, :general_user)
+      rule_group_fu = Bali::Integrator::RuleGroup.for(My::Transaction, :finance_user)
 
       rule_group_gu.get_rule(:can, :show).class.should == Bali::Rule
       rule_group_gu.get_rule(:can, :print).class.should == Bali::Rule
@@ -476,7 +503,7 @@ describe Bali do
     end # when having unless decider (fine-grained test)
 
     it "allows unless-decider to be executed in context" do
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
+      expect(Bali::Integrator::RuleClass.all.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           role :finance_user do
@@ -520,35 +547,35 @@ describe Bali do
           role :general_user, can: :show
         end
       end
-      Bali::Integrators::Rule.rule_classes.size.should == 1
-      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+      Bali::Integrator::RuleClass.all.size.should == 1
+      rc = Bali::Integrator::RuleClass.for(My::Transaction)
       rc.class.should == Bali::RuleClass
       rc.rules_for(:general_user).class.should == Bali::RuleGroup
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
-      expect(Bali::Integrators::Rule.rule_class_for(My::Transaction)).to_not be_nil
+      expect(Bali::Integrator::RuleClass.for(My::Transaction)).to_not be_nil
 
       Bali.map_rules do
         rules_for My::Transaction do
           role :general_user, can: :show
         end
       end
-      Bali::Integrators::Rule.rule_classes.size.should == 1
-      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+      Bali::Integrator::RuleClass.all.size.should == 1
+      rc = Bali::Integrator::RuleClass.for(My::Transaction)
       rc.class.should == Bali::RuleClass
       rc.rules_for(:general_user).class.should == Bali::RuleGroup
       rc.rules_for(:general_user).get_rule(:can, :show).class.should == Bali::Rule
-      Bali::Integrators::Rule.rule_class_for(My::Transaction).should == rc
+      Bali::Integrator::RuleClass.for(My::Transaction).should == rc
     end
 
     it "should redefine rule class if Bali.map_rules is called" do
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(0)
+      expect(Bali::Integrator::RuleClass.all.size).to eq(0)
       Bali.map_rules do
         rules_for My::Transaction do
           role :general_user, can: [:update, :delete, :edit]
         end
       end
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(1)
-      expect(Bali::Integrators::Rule.rule_class_for(My::Transaction)
+      expect(Bali::Integrator::RuleClass.all.size).to eq(1)
+      expect(Bali::Integrator::RuleClass.for(My::Transaction)
         .rules_for(:general_user)
         .rules.size).to eq(3)
 
@@ -558,8 +585,8 @@ describe Bali do
           role :finance_user, can: [:update, :delete, :edit]
         end
       end
-      expect(Bali::Integrators::Rule.rule_classes.size).to eq(1)
-      rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+      expect(Bali::Integrator::RuleClass.all.size).to eq(1)
+      rc = Bali::Integrator::RuleClass.for(My::Transaction)
       expect(rc.rules_for(:general_user).rules.size).to eq(1)
       expect(rc.rules_for(:finance_user).rules.size).to eq(3)
     end
@@ -581,7 +608,7 @@ describe Bali do
           end # map rules
         end.to_not raise_error
 
-        rc = Bali::Integrators::Rule.rule_class_for(My::Transaction)
+        rc = Bali::Integrator::RuleClass.for(My::Transaction)
         expect(rc.rules_for("__*__").get_rule(:can, :read)).to_not be_nil
       end
 

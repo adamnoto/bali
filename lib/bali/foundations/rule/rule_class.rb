@@ -13,26 +13,17 @@ class Bali::RuleClass
   attr_accessor :others_rule_group
 
   def initialize(target_class)
-    if target_class.is_a?(Class)
-      @target_class = target_class
-    else
-      raise Bali::DslError, "Target class must be a Class"
-    end
-
+    @target_class = target_class
     self.rule_groups = {}
     self.others_rule_group = Bali::RuleGroup.new(target_class, "__*__")
   end
 
   def add_rule_group(rule_group)
-    if rule_group.is_a?(Bali::RuleGroup)
-      target_user = rule_group.subtarget
-      if target_user == "__*__" || target_user == :"__*__"
-        self.others_rule_group = rule_group
-      else
-        self.rule_groups[rule_group.subtarget] = rule_group
-      end
+    target_user = rule_group.subtarget
+    if target_user == "__*__" || target_user == :"__*__"
+      self.others_rule_group = rule_group
     else
-      raise Bali::DslError, "Rule group must be an instance of Bali::RuleGroup, got: #{rule_group.class.name}"
+      self.rule_groups[rule_group.subtarget] = rule_group
     end
   end
 
