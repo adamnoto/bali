@@ -81,4 +81,4 @@
 
 == Version 2.4.0 (March 1, 2016)
 
-1. rules_for accepting String
+1. rules_for accepting String instead of consanttised class name, in case the class is not yet loaded
