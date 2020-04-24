@@ -71,8 +71,8 @@ module Bali::Objector::Statics
       role = subtarget
     end
 
-    if block_given? 
-      yield original_subtarget, role, judgement_value 
+    if block_given?
+      yield original_subtarget, role, judgement_value
     end
 
     judgement_value

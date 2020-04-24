@@ -1,5 +1,5 @@
 # grand scheme of things begin here
-class Bali::MapRulesDsl
+class Bali::Dsl::MapRulesDsl
   attr_accessor :current_rule_class
 
   def initialize
@@ -12,7 +12,7 @@ class Bali::MapRulesDsl
       self.current_rule_class = Bali::RuleClass.new(target_class)
 
       parent_class = options_hash[:inherits] || options_hash["inherits"]
-      if parent_class 
+      if parent_class
         # in case there is inherits specification
         parent_is_class = parent_class.class
         fail Bali::DslError, 'inherits must take a class' unless parent_is_class
@@ -21,7 +21,7 @@ class Bali::MapRulesDsl
         self.current_rule_class = rule_class_from_parent.clone(target_class: target_class)
       end
 
-      Bali::RulesForDsl.new(self).instance_eval(&block)
+      Bali::Dsl::RulesForDsl.new(self).instance_eval(&block)
 
       # done processing the block, now add the rule class
       Bali::Integrator::RuleClass.add(self.current_rule_class)

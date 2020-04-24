@@ -4,7 +4,7 @@ require "date"
 # module that would allow all defined rules to be printed for check
 module Bali::Printer
   module_function
-    
+
   SEPARATOR = " " * 6
   SUBTARGET_TITLE_SEPARATOR = SEPARATOR + ("-" * 80) + "\n"
 
@@ -14,7 +14,7 @@ module Bali::Printer
     # build up the string for pretty printing rules
     Bali::RULE_CLASS_MAP.each do |klass, rule_class|
       output << "===== #{klass.to_s} =====\n\n"
-      
+
       rule_class.rule_groups.each do |subtarget, rule_group|
         print_rule_group(rule_group, output)
       end
@@ -41,13 +41,13 @@ module Bali::Printer
 
     target_io << "#{SEPARATOR}#{subtarget}, can all: #{is_zeus}, cannot all: #{is_plant}\n"
     target_io << SUBTARGET_TITLE_SEPARATOR
-    
+
     if is_zeus
       target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} can do anything except if explicitly stated otherwise\n"
     elsif is_plant
       target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} cannot do anything except if explicitly stated otherwise\n"
     end
-  
+
     rule_group.rules.each do |rule|
       written_rule = StringIO.new
       written_rule << "#{SEPARATOR}  #{counter+=1}. #{subtarget} #{rule.auth_val} #{rule.operation} #{target}"

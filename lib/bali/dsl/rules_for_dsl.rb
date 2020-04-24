@@ -1,6 +1,6 @@
 # this class is used to define DSL after rules_for is invoked.
 # @author Adam Pahlevi Baihaqi
-class Bali::RulesForDsl
+class Bali::Dsl::RulesForDsl
   attr_accessor :map_rules_dsl
   attr_accessor :current_rule_group
 
@@ -96,7 +96,7 @@ class Bali::RulesForDsl
     puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot_all instead"
     cannot_all
   end
-  
+
   private
     def bali_scrap_actors(*params)
       self.current_subtargets = []
