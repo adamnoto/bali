@@ -1,3 +1,3 @@
 module Bali
-  VERSION = "2.4.0"
+  VERSION = "6.0.0rc1"
 end
