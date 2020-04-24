@@ -32,7 +32,7 @@ class Bali::Rule
     elsif aval == :cant
       @auth_val = :cannot
     else
-      fail Bali::DslError, "auth_val can only either be :can or :cannot"
+      raise Bali::DslError, "auth_val can only either be :can or :cannot"
     end
   end
 
@@ -40,7 +40,7 @@ class Bali::Rule
     if dectype == :if || dectype == :unless
       @decider_type = dectype
     else
-      fail Bali::DslError, "decider type not allowed"
+      raise Bali::DslError, "decider type not allowed"
     end
   end
 

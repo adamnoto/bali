@@ -15,9 +15,9 @@ class Bali::Dsl::MapRulesDsl
       if parent_class
         # in case there is inherits specification
         parent_is_class = parent_class.class
-        fail Bali::DslError, 'inherits must take a class' unless parent_is_class
+        raise Bali::DslError, 'inherits must take a class' unless parent_is_class
         rule_class_from_parent = Bali::Integrator::RuleClass.for(parent_class)
-        fail Bali::DslError, "not yet defined a rule class for #{parent_class}" if rule_class_from_parent.nil?
+        raise Bali::DslError, "not yet defined a rule class for #{parent_class}" if rule_class_from_parent.nil?
         self.current_rule_class = rule_class_from_parent.clone(target_class: target_class)
       end
 
@@ -36,15 +36,15 @@ class Bali::Dsl::MapRulesDsl
   end
 
   def describe(*params)
-    fail Bali::DslError, "describe block must be within rules_for block"
+    raise Bali::DslError, "describe block must be within rules_for block"
   end
 
   def role(*params)
-    fail Bali::DslError, "role block must be within rules_for block"
+    raise Bali::DslError, "role block must be within rules_for block"
   end
 
   def can(*params)
-    fail Bali::DslError, "can block must be within role block"
+    raise Bali::DslError, "can block must be within role block"
   end
 
   def cant(*params)
@@ -53,15 +53,15 @@ class Bali::Dsl::MapRulesDsl
   end
 
   def cannot(*params)
-    fail Bali::DslError, "cant block must be within role block"
+    raise Bali::DslError, "cant block must be within role block"
   end
 
   def can_all(*params)
-    fail Bali::DslError, "can_all block must be within role block"
+    raise Bali::DslError, "can_all block must be within role block"
   end
 
   def clear_rules
-    fail Bali::DslError, "clear_rules must be called within role block"
+    raise Bali::DslError, "clear_rules must be called within role block"
   end
 
   def cant_all(*params)
@@ -70,6 +70,6 @@ class Bali::Dsl::MapRulesDsl
   end
 
   def cannot_all(*params)
-    fail Bali::DslError, "cant_all block must be within role block"
+    raise Bali::DslError, "cant_all block must be within role block"
   end
 end

@@ -34,7 +34,7 @@ class Bali::RuleGroup
 
     # by default, rule group is neither zeus nor plant
     # it is neutral.
-    # meaning, it is neither allowed to do everything, nor it is 
+    # meaning, it is neither allowed to do everything, nor it is
     # prohibited to do anything. neutral.
     self.zeus = false
     self.plant = false
@@ -78,7 +78,7 @@ class Bali::RuleGroup
     when :cannot, "cannot"
       rule = self.cants[operation.to_sym]
     else
-      fail Bali::DslError, "Undefined operation: #{auth_val}"
+      raise Bali::DslError, "Undefined operation: #{auth_val}"
     end
 
     rule
