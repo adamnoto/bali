@@ -480,7 +480,7 @@ describe Bali do
           before { txn.is_settled = false }
           it("returns false to can?") { txn.can?(:finance_user, :delete).should be_falsey }
           it("returns true to cannot?") { txn.cannot?(:finance_user, :delete).should be_truthy }
-        end 
+        end
         context "settled transaction" do
           before { txn.is_settled = true }
           it("returns true to can?") { txn.can?(:finance_user, :delete).should be_truthy }
@@ -493,7 +493,7 @@ describe Bali do
           before { txn.is_settled = false }
           it("returns false to can?") { txn.can?(:finance_user, :payout).should be_falsey }
           it("returns true to cannot?") { txn.cannot?(:finance_user, :payout).should be_truthy }
-        end 
+        end
         context "settled transaction" do
           before { txn.is_settled = true }
           it("returns true to can?") { txn.can?(:finance_user, :payout).should be_truthy }

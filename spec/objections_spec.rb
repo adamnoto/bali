@@ -103,22 +103,15 @@ describe "Model objections" do
 
       txn.can?(:general_user, :copy).should be_truthy
       txn.can?(me, :copy).should be_truthy
-      expect { txn.can!(:general_user, :copy) }.to_not raise_error
-      expect { txn.can!(me, :copy) }.to_not raise_error
 
       me.roles = [:admin]
       txn.can?(:admin, :delete).should be_truthy
       txn.can?(me, :delete).should be_truthy
-      expect { txn.can!(:admin, :delete) }.to_not raise_error
-      expect { txn.can!(me, :delete) }.to_not raise_error
 
       me.roles = [:admin, :general_user]
       txn.can?(me, :delete).should be_truthy
       txn.can?(me, :copy).should be_truthy
       txn.can?(me, :edit).should be_truthy
-      expect { txn.can!(me, :delete) }.to_not raise_error
-      expect { txn.can!(me, :copy) }.to_not raise_error
-      expect { txn.can!(me, :edit) }.to_not raise_error
     end
 
     it "can query rule having if decider" do
@@ -141,37 +134,25 @@ describe "Model objections" do
 
       txn.can?(me, :show).should be_truthy
       txn.cannot?(me, :show).should be_falsey
-      expect { txn.can!(me, :show) }.to_not raise_error
-      expect { txn.cannot!(me, :show) }.to raise_error(Bali::AuthorizationError)
 
       me.exp_years = 2
       txn.can?(me, :edit).should be_falsey
       txn.cannot?(me, :edit).should be_truthy
-      expect { txn.can!(me, :edit) }.to raise_error(Bali::AuthorizationError)
-      expect { txn.cannot!(me, :edit) }.to_not raise_error
 
       me.exp_years = 3
       txn.can?(me, :edit).should be_falsey
       txn.cannot?(me, :edit).should be_truthy
-      expect { txn.can!(me, :edit) }.to raise_error(Bali::AuthorizationError)
-      expect { txn.cannot!(me, :edit) }.to_not raise_error
 
       me.exp_years = 4
       txn.can?(me, :edit).should be_truthy
       txn.cannot?(me, :edit).should be_falsey
-      expect { txn.can!(me, :edit) }.to_not raise_error
-      expect { txn.cannot!(me, :edit) }.to raise_error(Bali::AuthorizationError)
 
       txn.can?(me, :cancel).should be_truthy
       txn.cannot?(me, :cancel).should be_falsey
-      expect { txn.can!(me, :cancel) }.to_not raise_error
-      expect { txn.cannot!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
 
       txn.is_settled = true
       txn.can?(me, :cancel).should be_falsey
-      expect { txn.can!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
       txn.cannot?(me, :cancel).should be_truthy
-      expect { txn.cannot!(me, :cancel) }.to_not raise_error
 
       me.roles = :admin
       me.exp_years = 0
@@ -183,14 +164,6 @@ describe "Model objections" do
       txn.cannot?(me, :edit).should be_falsey
       txn.cannot?(me, :cancel).should be_falsey
 
-      expect { txn.can!(me, :show) }.to_not raise_error
-      expect { txn.can!(me, :edit) }.to_not raise_error
-      expect { txn.can!(me, :cancel) }.to_not raise_error
-      expect { txn.cannot!(me, :show) }.to raise_error(Bali::AuthorizationError)
-      expect { txn.cannot!(me, :edit) }.to raise_error(Bali::AuthorizationError)
-      expect { txn.cannot!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
-
-
       me.roles = [:general_user, :admin]
       txn.can?(me, :show).should be_truthy
       txn.can?(me, :edit).should be_truthy
@@ -198,13 +171,6 @@ describe "Model objections" do
       txn.cannot?(me, :show).should be_falsey
       txn.cannot?(me, :edit).should be_falsey
       txn.cannot?(me, :cancel).should be_falsey
-
-      expect { txn.can!(me, :show) }.to_not raise_error
-      expect { txn.can!(me, :edit) }.to_not raise_error
-      expect { txn.can!(me, :cancel) }.to_not raise_error
-      expect { txn.cannot!(me, :show) }.to raise_error(Bali::AuthorizationError)
-      expect { txn.cannot!(me, :edit) }.to raise_error(Bali::AuthorizationError)
-      expect { txn.cannot!(me, :cancel) }.to raise_error(Bali::AuthorizationError)
     end
 
     it "can query rule having unless decider" do
@@ -679,9 +645,6 @@ describe "Model objections" do
         it "can't edit or update transaction" do
           txn.can?(nil, :edit).should be_falsey
           txn.can?(nil, :update).should be_falsey
-          expect do
-            txn.can!(nil, :update)
-          end.to raise_error(Bali::AuthorizationError, "Role <nil> is not allowed to perform operation `update` on My::Transaction")
         end
       end
 
@@ -798,21 +761,6 @@ describe "Model objections" do
         My::Transaction.can?(nil, :save).should be_falsey
       end
 
-      it "can answer to can!" do
-        expect { My::Transaction.can!(:supreme_user, :delete) }.not_to raise_error
-        expect { My::Transaction.can!(:admin_user, :delete) }.not_to raise_error
-        expect { My::Transaction.can!(:general_user, :view) }.not_to raise_error
-        expect { My::Transaction.can!(:general_user, :delete) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.can!(:general_user, :do_something_undefined) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.can!(:finance_user, :update) }.not_to raise_error
-        expect { My::Transaction.can!(:finance_user, :save) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.can!(:monitoring, :read) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.can!(:monitoring, :monitor) }.not_to raise_error
-        expect { My::Transaction.can!(:monitoring, :ask) }.not_to raise_error
-        expect { My::Transaction.can!(nil, :view) }.not_to raise_error
-        expect { My::Transaction.can!(nil, :save) }.to raise_error(Bali::AuthorizationError)
-      end
-
       it "can answer to cannot?" do
         My::Transaction.cannot?(:supreme_user, :delete).should be_falsey
         My::Transaction.cannot?(:admin_user, :delete).should be_falsey
@@ -825,72 +773,6 @@ describe "Model objections" do
         My::Transaction.cannot?(:monitoring, :monitor).should be_falsey
         My::Transaction.cannot?(nil, :view).should be_falsey
         My::Transaction.cannot?(nil, :save).should be_truthy
-      end
-
-      it "can answer to cannot!" do
-        expect { My::Transaction.cannot!(:supreme_user, :delete) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(:admin_user, :delete) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(:general_user, :edit) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(:general_user, :view) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(:general_user, :delete) }.to_not raise_error
-        expect { My::Transaction.cannot!(:finance_user, :update) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(:finance_user, :new) }.to_not raise_error
-        expect { My::Transaction.cannot!(:monitoring, :read) }.to_not raise_error
-        expect { My::Transaction.cannot!(:monitoring, :monitor) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(nil, :view) }.to raise_error(Bali::AuthorizationError)
-        expect { My::Transaction.cannot!(nil, :save) }.to_not raise_error
-      end
-
-      it "raises exception with information on can! on an unauthorized access" do
-        begin
-          My::Transaction.can!(:general_user, :delete)
-        rescue => e
-          e.class.should == Bali::AuthorizationError
-          e.auth_level.should == :can
-          e.role.should == :general_user
-          e.subtarget.should == :general_user
-          e.operation.should == :delete
-          e.target.should == My::Transaction
-        end
-
-        user = My::Employee.new
-        user.roles = [:general_user]
-        begin
-          txn.can!(user, :delete)
-        rescue => e
-          e.class.should == Bali::AuthorizationError
-          e.auth_level.should == :can
-          e.role.should == :general_user
-          e.subtarget.should == user
-          e.operation.should == :delete
-          e.target.should == txn
-        end
-      end
-
-      it "raises exception with information on cannot! on an unauthorized access" do
-        begin
-          My::Transaction.cannot!(:monitoring, :monitor)
-        rescue => e
-          e.class.should == Bali::AuthorizationError
-          e.auth_level.should == :cannot
-          e.role.should == :monitoring
-          e.subtarget.should == :monitoring
-          e.operation.should == :monitor
-          e.target.should == My::Transaction
-        end
-
-        user = My::Employee.new
-        user.roles = [:general_user]
-        begin
-          txn.cannot!(user, :delete)
-        rescue => e
-          e.class.should == Bali::AuthorizationError
-          e.auth_level.should == :cannot
-          e.role.should == :monitoring_user
-          e.subtarget.should == user
-          e.operation.should == :monitor
-          e.target.should == txn
-        end
       end
     end
 
