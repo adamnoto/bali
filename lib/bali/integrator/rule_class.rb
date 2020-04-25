@@ -2,7 +2,7 @@ module Bali
   module Integrator
     # high-level functions to access and manage RuleClass classes
     module RuleClass
-      
+
       module_function
 
       # return all rule classes

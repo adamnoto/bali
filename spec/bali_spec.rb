@@ -1,3 +1,10 @@
+require_relative "./models/transaction"
+require_relative "./rules/transaction_rules"
+
+Bali.configure do |config|
+  config.rules_path = File.expand_path(__FILE__ + "/../rules/")
+end
+
 module My
   class Transaction
     include Bali::Objector
