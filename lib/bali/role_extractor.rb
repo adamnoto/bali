@@ -1,6 +1,6 @@
 class Bali::RoleExtractor
   attr_reader :arg
-  
+
   # argument can be anything, as long as role extractor know how to extract
   def initialize(arg)
     @arg = arg
@@ -53,7 +53,7 @@ class Bali::RoleExtractor
       end # each TRANSLATED_SUBTARGET_ROLES
 
       unless role_extracted
-        raise Bali::AuthorizationError, "Bali does not know how to process roles: #{object}"
+        raise Bali::Error, "Bali does not know how to process roles: #{object}"
       end
 
       deducted_roles

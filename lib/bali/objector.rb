@@ -52,12 +52,6 @@ module Bali::Objector::Statics
     end
 
     judgement_value
-  rescue => e
-    if e.is_a?(Bali::AuthorizationError) || e.is_a?(Bali::Error)
-      raise e
-    else
-      raise Bali::ObjectionError, e.message, e.backtrace
-    end
   end
 
   def cant?(subtarget_roles, operation, record = self, options = {})
@@ -87,11 +81,5 @@ module Bali::Objector::Statics
     end
 
     judgement_value
-  rescue => e
-    if e.is_a?(Bali::AuthorizationError)
-      raise e
-    else
-      raise Bali::ObjectionError, e.message, e.backtrace
-    end
   end
 end

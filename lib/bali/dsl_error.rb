@@ -1,3 +1,3 @@
-# this error is thrown when there is incorrect syntax in the DSL
+# Error class to represent incorrect usage of syntax
 class Bali::DslError < Bali::Error
 end
