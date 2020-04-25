@@ -245,9 +245,7 @@ describe Bali do
         expect do
           Bali.map_rules do
             rules_for My::Transaction do
-              others do
-                can :show
-              end
+              can :show
             end
           end
         end.to_not raise_error
@@ -263,9 +261,7 @@ describe Bali do
         expect do
           Bali.map_rules do
             rules_for My::Transaction do
-              others do
-                can :show
-              end
+              can :show
             end
           end
         end.to_not raise_error
@@ -281,9 +277,7 @@ describe Bali do
         expect do
           Bali.map_rules do
             rules_for My::Transaction do
-              others do
-                cant :show
-              end
+              cant :show
             end
           end
         end.to_not raise_error
@@ -299,9 +293,7 @@ describe Bali do
         expect do
           Bali.map_rules do
             rules_for My::Transaction do
-              others do
-                can_all
-              end
+              can_all
             end
           end
         end.to_not raise_error

@@ -38,7 +38,7 @@ class Bali::Dsl::RulesForDsl
           shortcut_cant_rules = shortcut_rules[:cant] || shortcut_rules["cant"]
 
           shortcut_rules.each do |auth_val, args|
-            Bali::Integrator::Rule.add(auth_val, self.current_rule_group, *args)
+            add(auth_val, self.current_rule_group, *args)
           end # each shortcut rules
         end # whether block is given or not
       end # each subtarget
@@ -61,22 +61,29 @@ class Bali::Dsl::RulesForDsl
   end
 
   def can(*args)
-    Bali::Integrator::Rule.add_can(self.current_rule_group, *args)
+    add_can(self.current_rule_group, *args)
   end
 
   def cant(*args)
-    Bali::Integrator::Rule.add_cant(self.current_rule_group, *args)
+    add_cant(self.current_rule_group, *args)
   end
 
   def can_all
-    Bali::Integrator::RuleGroup.make_zeus(self.current_rule_group)
+    bali_set_subtarget("__*__") if current_rule_group.nil?
+
+    current_rule_group.zeus = true
+    current_rule_group.plant = false
   end
 
   def cant_all
-    Bali::Integrator::RuleGroup.make_plant(self.current_rule_group)
+    bali_set_subtarget("__*__") if current_rule_group.nil?
+
+    current_rule_group.plant = true
+    current_rule_group.zeus = false
   end
 
   private
+
     def bali_scrap_actors(*params)
       self.current_subtargets = []
       params.each do |passed_argument|
@@ -104,6 +111,59 @@ class Bali::Dsl::RulesForDsl
 
       rule_class.add_rule_group rule_group
       self.current_rule_group = rule_group
+    end
+
+    # to define can and cant is basically using this method
+    # args can comprises of symbols, and hash (for condition)
+    def add(auth_val, rule_group, *args)
+      conditional_hash = nil
+      operations = []
+
+      # scan args for options
+      args.each do |elm|
+        if elm.is_a?(Hash)
+          conditional_hash = elm
+        else
+          operations << elm
+        end
+      end
+
+      # add operation one by one
+      operations.each do |op|
+        rule = Bali::Rule.new(auth_val, op)
+        embed_condition(rule, conditional_hash)
+
+        if rule_group.nil?
+          bali_set_subtarget("__*__")
+          rule_group = current_rule_group
+        end
+
+        rule_group.add_rule(rule)
+      end
+    end # bali_process_auth_rules
+
+    # add can rule programatically
+    def add_can(rule_group, *args)
+      add :can, rule_group, *args
+    end
+
+    # add cant rule programatically
+    def add_cant(rule_group, *args)
+      add :cant, rule_group, *args
+    end
+
+    # process conditional statement in rule definition
+    # conditional hash: {if: proc} or {unless: proc}
+    def embed_condition(rule, conditional_hash = nil)
+      return if conditional_hash.nil?
+
+      condition_type = conditional_hash.keys[0].to_s.downcase
+      condition_type_symb = condition_type.to_sym
+
+      if condition_type_symb == :if
+        rule.decider = conditional_hash.values[0]
+      end
+      nil
     end
 
 end # class
