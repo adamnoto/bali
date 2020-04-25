@@ -35,17 +35,14 @@ module Bali::Printer
     target = rule_group.target.to_s
     subtarget = rule_group.subtarget.to_s.capitalize
     subtarget = "Others" if subtarget == "__*__"
-    is_zeus = rule_group.zeus?
-    is_plant = rule_group.plant?
+    can_all = rule_group.can_all?
     counter = 0
 
-    target_io << "#{SEPARATOR}#{subtarget}, can all: #{is_zeus}, cant all: #{is_plant}\n"
+    target_io << "#{SEPARATOR}#{subtarget}, can all: #{can_all}, cant all: #{!can_all}\n"
     target_io << SUBTARGET_TITLE_SEPARATOR
 
-    if is_zeus
+    if can_all
       target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} can do anything except if explicitly stated otherwise\n"
-    elsif is_plant
-      target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} cant do anything except if explicitly stated otherwise\n"
     end
 
     rule_group.rules.each do |rule|

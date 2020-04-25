@@ -35,7 +35,7 @@ module Bali::Judger
     end
 
     def need_to_check_for_intervention?
-      rule_group && rule_group.zeus?
+      rule_group && rule_group.can_all?
     end
   end # positive judger
 end # module judger

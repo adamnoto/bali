@@ -9,12 +9,8 @@ class Bali::RuleGroup
   attr_accessor :cans, :cants
 
   # if set to true then the subtarget can do anything
-  attr_accessor :zeus
-  alias :zeus? :zeus
-
-  # if set to true, well, cant do anything
-  attr_accessor :plant
-  alias :plant? :plant
+  attr_accessor :can_all
+  alias :can_all? :can_all
 
   # allowing "general user" and :general_user to route to the same rule group
   def self.canon_name(subtarget)
@@ -31,21 +27,14 @@ class Bali::RuleGroup
 
     @cans = {}
     @cants = {}
-
-    # by default, rule group is neither zeus nor plant
-    # it is neutral.
-    # meaning, it is neither allowed to do everything, nor it is
-    # prohibited to do anything. neutral.
-    @zeus = false
-    @plant = false
+    @can_all = false
   end
 
   def clone
     cloned_rg = Bali::RuleGroup.new(target, subtarget)
     cans.each_value { |can_rule| cloned_rg.add_rule(can_rule.clone) }
     cants.each_value { |cant_rule| cloned_rg.add_rule(cant_rule.clone) }
-    cloned_rg.zeus = zeus
-    cloned_rg.plant = plant
+    cloned_rg.can_all = can_all
 
     cloned_rg
   end

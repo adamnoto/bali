@@ -68,15 +68,13 @@ class Bali::Dsl::RulesForDsl
   def can_all
     bali_set_subtarget("__*__") if current_rule_group.nil?
 
-    current_rule_group.zeus = true
-    current_rule_group.plant = false
+    current_rule_group.can_all = true
   end
 
   def cant_all
     bali_set_subtarget("__*__") if current_rule_group.nil?
 
-    current_rule_group.plant = true
-    current_rule_group.zeus = false
+    current_rule_group.can_all = false
   end
 
   private

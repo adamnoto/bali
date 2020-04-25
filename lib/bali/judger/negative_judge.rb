@@ -34,7 +34,7 @@ module Bali::Judger
     end
 
     def need_to_check_for_intervention?
-      rule_group && rule_group.plant?
+      rule_group && !rule_group.can_all?
     end
   end
 end

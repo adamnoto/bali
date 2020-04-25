@@ -271,9 +271,9 @@ describe "Model objections" do
         expect(txn.cant?(:finance, :view)).to be_truthy
       end
 
-      it "should allow finance to index transaction" do
-        # expect(txn.can?(:finance, :index)).to be_truthy
-        expect(txn.cant?(:finance, :index)).to be_falsey
+      it "disallows finance to index transaction" do
+        expect(txn.can?(:finance, :index)).to be_falsey
+        expect(txn.cant?(:finance, :index)).to be_truthy
       end
     end # finance_user
 
@@ -369,9 +369,9 @@ describe "Model objections" do
         expect(txn.cant?(:finance, :view)).to be_truthy
       end
 
-      it "should allow finance to index transaction" do
-        expect(txn.can?(:finance, :index)).to be_truthy
-        expect(txn.cant?(:finance, :index)).to be_falsey
+      it "disallows finance to index transaction" do
+        expect(txn.can?(:finance, :index)).to be_falsey
+        expect(txn.cant?(:finance, :index)).to be_truthy
       end
     end # finance_user
 

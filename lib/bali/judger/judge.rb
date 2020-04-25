@@ -142,12 +142,6 @@ module Bali::Judger
         our_holy_judgement = check_intervention
       end
 
-      if our_holy_judgement.nil? &&
-          rule_group && rule_group.plant? &&
-          rule.nil? && otherly_rule.nil?
-        our_holy_judgement = natural_value
-      end
-
       if our_holy_judgement.nil? && rule.nil?
         cross_check_value = nil
         # default if can? for undefined rule is false, after related clause
@@ -159,16 +153,14 @@ module Bali::Judger
         end
 
         # if cross check value nil, then the reverse rule is not defined,
-        # let's determine whether he is zeus or plant
+        # let's determine whether they can do anything or not
         if cross_check_value.nil?
           # rule_group can be nil for when user checking under undefined rule-group
           if rule_group
-            if rule_group.plant?
-              our_holy_judgement = plant_return_value
-            end
-
-            if rule_group.zeus?
+            if rule_group.can_all?
               our_holy_judgement = zeus_return_value
+            else
+              our_holy_judgement = plant_return_value
             end
           end # if rule_group exist
         else
@@ -194,7 +186,7 @@ module Bali::Judger
 
       # return fuzy if otherly rule defines contrary to this auth_level
       if our_holy_judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.get_rule(reverse_auth_level, operation))
-        if rule_group && (rule_group.zeus? || rule_group.plant?)
+        if rule_group && rule_group.can_all?
           # don't overwrite our holy judgement with fuzy value if rule group
           # zeus/plant, because zeus/plant is more definite than any fuzy values
           # eventhough the rule is abstractly defined
