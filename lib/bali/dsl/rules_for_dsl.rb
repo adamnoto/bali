@@ -8,7 +8,6 @@ class Bali::Dsl::RulesForDsl
   attr_accessor :current_subtargets
 
   def initialize(map_rules_dsl)
-    @@lock ||= Mutex.new
     self.map_rules_dsl = map_rules_dsl
   end
 
@@ -18,31 +17,29 @@ class Bali::Dsl::RulesForDsl
   protected :current_rule_class
 
   def role(*params)
-    @@lock.synchronize do
-      bali_scrap_actors(*params)
-      current_subtargets.each do |subtarget|
-        bali_set_subtarget(subtarget)
+    bali_scrap_actors(*params)
+    current_subtargets.each do |subtarget|
+      bali_set_subtarget(subtarget)
 
-        if block_given?
-          yield
-        else
-          # if no block, then rules are defined using shortcut notation, eg:
-          # role :user, can: [:edit]
-          # the last element of which params must be a hash
-          shortcut_rules = params[-1]
-          unless shortcut_rules.is_a?(Hash)
-            raise Bali::DslError, "Pass a hash for shortcut notation"
-          end
+      if block_given?
+        yield
+      else
+        # if no block, then rules are defined using shortcut notation, eg:
+        # role :user, can: [:edit]
+        # the last element of which params must be a hash
+        shortcut_rules = params[-1]
+        unless shortcut_rules.is_a?(Hash)
+          raise Bali::DslError, "Pass a hash for shortcut notation"
+        end
 
-          shortcut_can_rules = shortcut_rules[:can] || shortcut_rules["can"]
-          shortcut_cant_rules = shortcut_rules[:cant] || shortcut_rules["cant"]
+        shortcut_can_rules = shortcut_rules[:can] || shortcut_rules["can"]
+        shortcut_cant_rules = shortcut_rules[:cant] || shortcut_rules["cant"]
 
-          shortcut_rules.each do |auth_val, args|
-            add(auth_val, self.current_rule_group, *args)
-          end # each shortcut rules
-        end # whether block is given or not
-      end # each subtarget
-    end # sync
+        shortcut_rules.each do |auth_val, args|
+          add(auth_val, self.current_rule_group, *args)
+        end # each shortcut rules
+      end # whether block is given or not
+    end # each subtarget
   end # role
 
   # others block
