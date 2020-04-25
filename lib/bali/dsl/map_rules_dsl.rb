@@ -34,10 +34,6 @@ class Bali::Dsl::MapRulesDsl
     nil
   end
 
-  def describe(*params)
-    raise Bali::DslError, "describe block must be within rules_for block"
-  end
-
   def role(*params)
     raise Bali::DslError, "role block must be within rules_for block"
   end

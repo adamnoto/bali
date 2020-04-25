@@ -45,17 +45,6 @@ class Bali::Dsl::RulesForDsl
     end # sync
   end # role
 
-  def describe(*params)
-    puts "Bali Deprecation Warning: describing rules using describe will be deprecated on major release 3.0, use role instead"
-    if block_given?
-      role(*params) do
-        yield
-      end
-    else
-      role(*params)
-    end
-  end
-
   # others block
   def others(*params)
     if block_given?
