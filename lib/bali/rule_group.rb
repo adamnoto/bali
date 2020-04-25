@@ -53,22 +53,13 @@ class Bali::RuleGroup
     end
   end
 
-  def clone
-    cloned_rg = Bali::RuleGroup.new(target, subtarget)
-    cans.each_value { |can_rule| cloned_rg.add_rule(can_rule.clone) }
-    cants.each_value { |cant_rule| cloned_rg.add_rule(cant_rule.clone) }
-    cloned_rg.right_level = right_level
-
-    cloned_rg
-  end
-
   def add_rule(rule)
     # operation cant be defined twice
     operation = rule.operation.to_sym
 
     return if cants[operation] && cans[operation]
 
-    if rule.is_discouragement?
+    if rule.term == :cant
       cants[operation] = rule
       cans.delete operation
     else
@@ -77,26 +68,13 @@ class Bali::RuleGroup
     end
   end
 
-  def clear_rules
-    @cans = {}
-    @cants = {}
-  end
-
   def get_rule(term, operation)
-    rule = nil
     case term
-    when :can, "can"
-      rule = cans[operation.to_sym]
-    when :cant, "cant"
-      rule = cants[operation.to_sym]
-    else
-      raise Bali::DslError, "Undefined operation: #{term}"
+    when :can then cans[operation.to_sym]
+    when :cant then cants[operation.to_sym]
     end
-
-    rule
   end
 
-  # all rules
   def rules
     cans.values + cants.values
   end

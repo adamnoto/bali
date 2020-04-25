@@ -22,16 +22,6 @@ module Bali
 
   extend self
 
-  def map_rules(&block)
-    dsl_map_rules = Bali::Dsl::MapRulesDsl.new
-    dsl_map_rules.instance_eval(&block)
-  end
-
-  def clear_rules
-    Bali::RULE_CLASS_MAP.clear
-    true
-  end
-
   def config
     @config ||= Bali::Config.new
   end

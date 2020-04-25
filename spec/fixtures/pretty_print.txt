@@ -1,0 +1,40 @@
+===== Transaction =====
+
+      Supervisor
+      --------------------------------------------------------------------------------
+        1. Supervisor can unsettle Transaction
+        2. Supervisor can comment Transaction
+
+      Accountant
+      --------------------------------------------------------------------------------
+        1. Accountant can unsettle Transaction
+        2. Accountant cant update Transaction
+
+      Clerk
+      --------------------------------------------------------------------------------
+        1. Clerk can unsettle Transaction
+
+      Admin
+      --------------------------------------------------------------------------------
+        1. Admin can do anything except if explicitly stated otherwise
+
+      Others
+      --------------------------------------------------------------------------------
+        1. Others can update Transaction
+        2. Others can unsettle Transaction, with condition
+        3. Others can print Transaction
+
+
+
+===== User =====
+
+      Others
+      --------------------------------------------------------------------------------
+        1. Others can see_timeline User, with condition
+        2. Others can sign_in User, with condition
+
+
+
+
+
+Printed at 01-01-2020 12:34AM +00:00

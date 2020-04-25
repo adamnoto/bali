@@ -7,31 +7,8 @@ class Bali::Rule
   attr_accessor :conditional
 
   def initialize(term, operation)
-    self.term = term
+    @term = term
     @operation = operation
-    self
-  end
-
-  def clone
-    cloned_rule = Bali::Rule.new(term, operation)
-    cloned_rule.conditional = conditional
-
-    cloned_rule
-  end
-
-  def term=(aval)
-    # TODO: in version 3 remove :cant
-    if aval == :can || aval == :cant
-      @term = aval
-    elsif aval == :cant
-      @term = :cant
-    else
-      raise Bali::DslError, "term can only either be :can or :cant"
-    end
-  end
-
-  def is_discouragement?
-    term == :cant
   end
 
   def conditional?

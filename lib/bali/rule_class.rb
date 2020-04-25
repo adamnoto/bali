@@ -1,21 +1,29 @@
 # the parent of all Bali::RuleGroup.
 class Bali::RuleClass
-  attr_reader :target_class
-
-  # consist of canonised subtarget and its rule group, eg:
-  # {
-  #   general_user: RuleGroup
-  # }
+  attr_reader :model_class
   attr_accessor :rule_groups
-
-  # rule group for "other" subtargets, always checked the last time
-  # after the "more proper" rule groups are checked
   attr_accessor :others_rule_group
 
-  def initialize(target_class)
-    @target_class = target_class
+  def self.for(target)
+    rule_class = Bali::RULE_CLASS_MAP[target.to_s]
+
+    if rule_class.nil?
+      rule_class_maker_str = target.to_s + Bali.config.suffix
+      rule_class_maker = rule_class_maker_str.safe_constantize
+
+      if rule_class_maker && rule_class_maker.ancestors.include?(Bali::Rules)
+        rule_class = rule_class_maker.current_rule_class
+        Bali::RULE_CLASS_MAP[target.to_s] = rule_class
+      end
+    end
+
+    rule_class
+  end
+
+  def initialize(model_class)
+    @model_class = model_class
     @rule_groups = {}
-    @others_rule_group = Bali::RuleGroup.new(target_class, "__*__")
+    @others_rule_group = Bali::RuleGroup.new(model_class, "__*__")
   end
 
   def add_rule_group(rule_group)
@@ -31,24 +39,5 @@ class Bali::RuleClass
     return others_rule_group if subtarget == "__*__"
     subtarget = Bali::RuleGroup.canon_name(subtarget)
     @rule_groups[subtarget]
-  end
-
-  # options can contains:
-  #  :target_class => identifying the target class on which the clone will be applied
-  def clone(options = {})
-    target_class = options.fetch(:target_class)
-    cloned_rc = Bali::RuleClass.new(target_class)
-
-    rule_groups.each do |subtarget, rule_group|
-      rule_group_clone = rule_group.clone
-      rule_group_clone.target = target_class
-      cloned_rc.add_rule_group(rule_group_clone)
-    end
-
-    others_rule_group_clone = others_rule_group.clone
-    others_rule_group_clone.target = target_class
-    cloned_rc.others_rule_group = others_rule_group_clone
-
-    cloned_rc
   end
 end

@@ -46,7 +46,7 @@ class Bali::Rules
   def self.current_rule_class
     @current_rule_class ||= begin
       rule_class = Bali::RuleClass.new(model_class)
-      Bali::Integrator::RuleClass.add(rule_class)
+      Bali::RULE_CLASS_MAP[model_class.to_s] = rule_class
       rule_class
     end
   end

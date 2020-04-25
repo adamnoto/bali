@@ -38,7 +38,7 @@ module Bali::Printer
     can_all = rule_group.can_all?
     counter = 0
 
-    target_io << "#{SEPARATOR}#{subtarget}, can all: #{can_all}, cant all: #{!can_all}\n"
+    target_io << "#{SEPARATOR}#{subtarget}\n"
     target_io << SUBTARGET_TITLE_SEPARATOR
 
     if can_all

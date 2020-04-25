@@ -61,4 +61,26 @@ describe "TransactionRules" do
     it("can download") { expect_can :download }
     it("can comment") { expect_can :comment }
   end
+
+  describe "when role is given as a string" do
+    context "when clerk" do
+      let(:role) { "clerk" }
+
+      it("cant update") { expect_cant :update }
+      it("cant print") { expect_cant :print }
+      it("can unsettle") { expect_can :unsettle }
+      it("cant download") { expect_cant :download }
+      it("cant comment") { expect_cant :comment }
+    end
+
+    context "when admin" do
+      let(:role) { "admin" }
+
+      it("can update") { expect_can :update }
+      it("can print") { expect_can :print }
+      it("can unsettle") { expect_can :unsettle }
+      it("can download") { expect_can :download }
+      it("can comment") { expect_can :comment }
+    end
+  end
 end

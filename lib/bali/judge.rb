@@ -153,12 +153,17 @@ class Bali::Judge
       record.is_a?(Class) ? record : record.class
     end
 
+    def rule_group_for(subtarget)
+      rule_class = Bali::RuleClass.for(record_class)
+      rule_class.nil? ? nil : rule_class.rules_for(subtarget)
+    end
+
     def rule_group
-      @rule_group ||= Bali::Integrator::RuleGroup.for(record_class, role)
+      @rule_group ||= rule_group_for role
     end
 
     def other_rule_group
-      @other_rule_group ||= Bali::Integrator::RuleGroup.for(record_class, "__*__")
+      @other_rule_group ||= rule_group_for "__*__"
     end
 
     def no_rule_group?
