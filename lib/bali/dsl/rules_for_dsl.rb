@@ -8,11 +8,11 @@ class Bali::Dsl::RulesForDsl
   attr_accessor :current_subtargets
 
   def initialize(map_rules_dsl)
-    self.map_rules_dsl = map_rules_dsl
+    @map_rules_dsl = map_rules_dsl
   end
 
   def current_rule_class
-    self.map_rules_dsl.current_rule_class
+    map_rules_dsl.current_rule_class
   end
   protected :current_rule_class
 
@@ -36,7 +36,7 @@ class Bali::Dsl::RulesForDsl
         shortcut_cant_rules = shortcut_rules[:cant] || shortcut_rules["cant"]
 
         shortcut_rules.each do |auth_val, args|
-          add(auth_val, self.current_rule_group, *args)
+          add(auth_val, current_rule_group, *args)
         end # each shortcut rules
       end # whether block is given or not
     end # each subtarget
@@ -53,16 +53,16 @@ class Bali::Dsl::RulesForDsl
 
   # clear all defined rules
   def clear_rules
-    self.current_rule_group.clear_rules
+    current_rule_group.clear_rules
     true
   end
 
   def can(*args)
-    add_can(self.current_rule_group, *args)
+    add_can(current_rule_group, *args)
   end
 
   def cant(*args)
-    add_cant(self.current_rule_group, *args)
+    add_cant(current_rule_group, *args)
   end
 
   def can_all
@@ -82,14 +82,14 @@ class Bali::Dsl::RulesForDsl
   private
 
     def bali_scrap_actors(*params)
-      self.current_subtargets = []
+      @current_subtargets = []
       params.each do |passed_argument|
         if passed_argument.is_a?(Symbol) || passed_argument.is_a?(String)
-          self.current_subtargets << passed_argument
+          @current_subtargets << passed_argument
         elsif passed_argument.is_a?(NilClass)
-          self.current_subtargets << passed_argument
+          @current_subtargets << passed_argument
         elsif passed_argument.is_a?(Array)
-          self.current_subtargets += passed_argument
+          @current_subtargets += passed_argument
         end
       end
       nil
@@ -97,17 +97,16 @@ class Bali::Dsl::RulesForDsl
 
     # set the current processing on a specific subtarget
     def bali_set_subtarget(subtarget)
-      rule_class = self.map_rules_dsl.current_rule_class
-      target_class = rule_class.target_class
+      target_class = current_rule_class.target_class
 
-      rule_group = rule_class.rules_for(subtarget)
+      rule_group = current_rule_class.rules_for(subtarget)
 
       if rule_group.nil?
         rule_group = Bali::RuleGroup.new(target_class, subtarget)
       end
 
-      rule_class.add_rule_group rule_group
-      self.current_rule_group = rule_group
+      current_rule_class.add_rule_group rule_group
+      @current_rule_group = rule_group
     end
 
     # to define can and cant is basically using this method

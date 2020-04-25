@@ -3,7 +3,7 @@ class Bali::Dsl::MapRulesDsl
 
   # defining rules
   def rules_for(target_class, options_hash = {}, &block)
-    self.current_rule_class = Bali::RuleClass.new(target_class)
+    @current_rule_class = Bali::RuleClass.new(target_class)
 
     parent_class = options_hash[:inherits] || options_hash["inherits"]
     if parent_class
@@ -12,13 +12,13 @@ class Bali::Dsl::MapRulesDsl
       raise Bali::DslError, 'inherits must take a class' unless parent_is_class
       rule_class_from_parent = Bali::Integrator::RuleClass.for(parent_class)
       raise Bali::DslError, "not yet defined a rule class for #{parent_class}" if rule_class_from_parent.nil?
-      self.current_rule_class = rule_class_from_parent.clone(target_class: target_class)
+      @current_rule_class = rule_class_from_parent.clone(target_class: target_class)
     end
 
     Bali::Dsl::RulesForDsl.new(self).instance_eval(&block)
 
     # done processing the block, now add the rule class
-    Bali::Integrator::RuleClass.add(self.current_rule_class)
+    Bali::Integrator::RuleClass.add(current_rule_class)
   end
 
   # subtarget_class is the subtarget's class definition

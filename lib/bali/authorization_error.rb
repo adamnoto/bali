@@ -20,9 +20,9 @@ class Bali::AuthorizationError < Bali::Error
   end
 
   def to_s
-    role = humanise_value(self.role)
-    operation = humanise_value(self.operation)
-    auth_level = humanise_value(self.auth_level)
+    role = humanise_value(role)
+    operation = humanise_value(operation)
+    auth_level = humanise_value(auth_level)
 
     if auth_level == :can
       "Role #{role} is not allowed to perform operation `#{operation}` on #{target_proper_class}"

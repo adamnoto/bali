@@ -26,18 +26,18 @@ class Bali::RuleGroup
   end
 
   def initialize(target, subtarget)
-    self.target = target
-    self.subtarget = Bali::RuleGroup.canon_name(subtarget)
+    @target = target
+    @subtarget = Bali::RuleGroup.canon_name(subtarget)
 
-    self.cans = {}
-    self.cants = {}
+    @cans = {}
+    @cants = {}
 
     # by default, rule group is neither zeus nor plant
     # it is neutral.
     # meaning, it is neither allowed to do everything, nor it is
     # prohibited to do anything. neutral.
-    self.zeus = false
-    self.plant = false
+    @zeus = false
+    @plant = false
   end
 
   def clone
@@ -54,29 +54,29 @@ class Bali::RuleGroup
     # operation cant be defined twice
     operation = rule.operation.to_sym
 
-    return if self.cants[operation] && self.cans[operation]
+    return if cants[operation] && cans[operation]
 
     if rule.is_discouragement?
-      self.cants[operation] = rule
-      self.cans.delete operation
+      cants[operation] = rule
+      cans.delete operation
     else
-      self.cans[operation] = rule
-      self.cants.delete operation
+      cans[operation] = rule
+      cants.delete operation
     end
   end
 
   def clear_rules
-    self.cans = {}
-    self.cants = {}
+    @cans = {}
+    @cants = {}
   end
 
   def get_rule(auth_val, operation)
     rule = nil
     case auth_val
     when :can, "can"
-      rule = self.cans[operation.to_sym]
+      rule = cans[operation.to_sym]
     when :cant, "cant"
-      rule = self.cants[operation.to_sym]
+      rule = cants[operation.to_sym]
     else
       raise Bali::DslError, "Undefined operation: #{auth_val}"
     end
@@ -86,6 +86,6 @@ class Bali::RuleGroup
 
   # all rules
   def rules
-    self.cans.values + self.cants.values
+    cans.values + cants.values
   end
 end

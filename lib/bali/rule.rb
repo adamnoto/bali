@@ -34,10 +34,10 @@ class Bali::Rule
   end
 
   def is_discouragement?
-    self.auth_val == :cant
+    auth_val == :cant
   end
 
   def has_decider?
-    self.decider.is_a?(Proc)
+    decider.is_a?(Proc)
   end
 end

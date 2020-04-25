@@ -59,9 +59,9 @@ module Bali::Judger
 
     def clone(options = {})
       if options[:reverse]
-        new_judge = Bali::Judger::Judge.build(self.reverse_auth_level)
+        new_judge = Bali::Judger::Judge.build(reverse_auth_level)
       else
-        new_judge = Bali::Judger::Judge.build(self.auth_level)
+        new_judge = Bali::Judger::Judge.build(auth_level)
       end
 
       new_judge.subtarget = subtarget
@@ -99,7 +99,7 @@ module Bali::Judger
         if rule_group
           @rule = rule_group.get_rule(auth_level, operation)
         else
-          self.rule = nil
+          @rule = nil
         end
       end
       @rule
@@ -153,7 +153,7 @@ module Bali::Judger
         # default if can? for undefined rule is false, after related clause
         # cant be found in cant?
         unless cross_checking
-          reversed_self = self.clone reverse: true
+          reversed_self = clone reverse: true
           reversed_self.cross_checking = true
           cross_check_value = reversed_self.judgement holy: true
         end
@@ -176,7 +176,7 @@ module Bali::Judger
 
           if can_use_otherly_rule?(cross_check_value, cross_checking)
             # give chance to check at others block
-            self.rule = otherly_rule
+            @rule = otherly_rule
           else
             our_holy_judgement = cross_check_reverse_value(cross_check_value)
           end
@@ -269,7 +269,7 @@ module Bali::Judger
 
       def check_intervention
         if rule.nil?
-          self_clone = self.clone reverse: true
+          self_clone = clone reverse: true
           self_clone.cross_checking = true
 
           check_val = self_clone.judgement holy: true
