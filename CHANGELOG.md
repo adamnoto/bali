@@ -48,8 +48,7 @@
 == Version 2.0.0rc1
 
 1. `Bali::AuthorizationError` subclass of `StandardError` tailored for raising error regarding with authorisation
-2. Deprecating `cant`, `cant?`, and `cant_all` in favor of `cannot`, `cannot?` and `cannot_all`
-3. new objectors `can!` and `cannot!` to raise error on inappropriate access
+2. new objectors `can!` and `cannot!` to raise error on inappropriate access
 
 == Version 2.0.0
 
@@ -76,9 +75,17 @@
 == Version 2.2.0
 
 1. Deprecating `describe` block in favour of `role` block, `describe` is to be deprecated in version 3.0.
-2. Using strategy pattern, heavy refactoring 
-3. Human-readable authorisation error message when invoking !-version of can/cannot, for eg: Role general_user is not allowed to perform operation `update` on My::Transaction 
+2. Using strategy pattern, heavy refactoring
+3. Human-readable authorisation error message when invoking !-version of can/cannot, for eg: Role general_user is not allowed to perform operation `update` on My::Transaction
 
 == Version 2.4.0 (March 1, 2016)
 
 1. rules_for accepting String instead of consanttised class name, in case the class is not yet loaded
+
+== Version 3.0.0rc (May 1, 2020)
+
+1. Integration with Rails is expected
+2. Removed bang methods: `can!`, `cannot!`. `can?` and `cant?` should be enough. User can raise an error by themselves as necessary.
+3. Change back from `cannot` to `cant`
+4. Removing: `Bali.map_rules` and its auxiliary functions
+5. Use class for defining rules
