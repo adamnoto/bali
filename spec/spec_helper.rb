@@ -28,3 +28,11 @@ RSpec.configure do |config|
   end
 
 end
+
+def expect_can operation
+  expect(subject.can?(user, operation)).to be_truthy
+end
+
+def expect_cant operation
+  expect(subject.can?(user, operation)).to be_falsey
+end

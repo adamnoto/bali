@@ -47,8 +47,8 @@ module Bali::Printer
 
     rule_group.rules.each do |rule|
       written_rule = StringIO.new
-      written_rule << "#{SEPARATOR}  #{counter+=1}. #{subtarget} #{rule.auth_val} #{rule.operation} #{target}"
-      if rule.has_decider?
+      written_rule << "#{SEPARATOR}  #{counter+=1}. #{subtarget} #{rule.term} #{rule.operation} #{target}"
+      if rule.conditional?
         written_rule << ", with condition"
       end
       written_rule << "\n"

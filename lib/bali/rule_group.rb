@@ -82,15 +82,15 @@ class Bali::RuleGroup
     @cants = {}
   end
 
-  def get_rule(auth_val, operation)
+  def get_rule(term, operation)
     rule = nil
-    case auth_val
+    case term
     when :can, "can"
       rule = cans[operation.to_sym]
     when :cant, "cant"
       rule = cants[operation.to_sym]
     else
-      raise Bali::DslError, "Undefined operation: #{auth_val}"
+      raise Bali::DslError, "Undefined operation: #{term}"
     end
 
     rule

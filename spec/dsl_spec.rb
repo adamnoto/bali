@@ -52,7 +52,7 @@ describe Bali do
         end
 
         rc = Bali::Integrator::RuleClass.for(My::Transaction)
-        expect(rc.rules_for(:general_user).get_rule(:can, :delete).has_decider?)
+        expect(rc.rules_for(:general_user).get_rule(:can, :delete).conditional?)
           .to eq(true)
       end
 

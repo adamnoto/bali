@@ -28,6 +28,12 @@ class Bali::Judge
 
   class << self
     def check(term, actor_or_roles, operation, record)
+      if operation.nil?
+        # eg: user.can? :sign_in
+        operation = actor_or_roles
+        actor_or_roles = nil
+      end
+
       judgement_value = default_value = term == :can ? false : true
       roles = Bali::RoleExtractor.new(actor_or_roles).get_roles
 
@@ -104,8 +110,8 @@ class Bali::Judge
 
     # if our holy judgement is still nil, but rule is defined
     if our_holy_judgement.nil? && rule
-      if rule.has_decider?
-        our_holy_judgement = get_decider_result(rule, actor, record)
+      if rule.conditional?
+        our_holy_judgement = run_condition(rule, actor, record)
       else
         our_holy_judgement = DEFINITE_TRUE
       end
@@ -200,16 +206,16 @@ class Bali::Judge
         (rule_group && rule_group.can_all?)
     end
 
-    def get_decider_result(rule, actor, record)
+    def run_condition(rule, actor, record)
       # must test first
-      decider = rule.decider
-      case decider.arity
+      conditional = rule.conditional
+      case conditional.arity
       when 0
-        return decider.() ? DEFINITE_TRUE : DEFINITE_FALSE
+        return conditional.() ? DEFINITE_TRUE : DEFINITE_FALSE
       when 1
-        return decider.(record) ? DEFINITE_TRUE : DEFINITE_FALSE
+        return conditional.(record) ? DEFINITE_TRUE : DEFINITE_FALSE
       when 2
-        return decider.(record, actor) ? DEFINITE_TRUE : DEFINITE_FALSE
+        return conditional.(record, actor) ? DEFINITE_TRUE : DEFINITE_FALSE
       end
     end
 

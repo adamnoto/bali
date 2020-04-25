@@ -5,13 +5,11 @@ module Bali::Objector
     base.extend Bali::Objector::Statics
   end
 
-  # check whether user can/cant perform an operation, return true when positive
-  # or false otherwise
-  def can?(actor_or_roles, operation)
+  def can?(actor_or_roles, operation = nil)
     self.class.can?(actor_or_roles, operation, self)
   end
 
-  def cant?(actor_or_roles, operation)
+  def cant?(actor_or_roles, operation = nil)
     self.class.cant?(actor_or_roles, operation, self)
   end
 end

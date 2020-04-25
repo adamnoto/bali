@@ -53,7 +53,7 @@ class Bali::RoleExtractor
       end # each TRANSLATED_SUBTARGET_ROLES
 
       unless role_extracted
-        raise Bali::Error, "Bali does not know how to process roles: #{object}"
+        deducted_roles = get_roles(nil)
       end
 
       deducted_roles

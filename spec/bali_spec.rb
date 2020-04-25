@@ -1,5 +1,7 @@
 require_relative "./models/transaction"
+require_relative "./models/user"
 require_relative "./rules/transaction_rules"
+require_relative "./rules/user_rules"
 
 Bali.configure do |config|
   config.rules_path = File.expand_path(__FILE__ + "/../rules/")

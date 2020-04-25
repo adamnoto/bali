@@ -114,7 +114,7 @@ describe "Model objections" do
       txn.can?(me, :edit).should be_truthy
     end
 
-    it "can query rule having if decider" do
+    it "can query rule having if condition" do
       Bali.map_rules do
         roles_for My::Employee, :roles
         rules_for My::Transaction do
@@ -569,7 +569,7 @@ describe "Model objections" do
           txn.cant?([:finance_user, :monitoring], :monitor).should be_falsey
         end
 
-        # this also test that rules with decider described simultaneously
+        # this also test that rules with condition described simultaneously
         # is also working as expected
         it "allows undeleting with role of finance" do
           txn.is_settled = false

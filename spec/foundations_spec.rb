@@ -224,25 +224,25 @@ describe "Bali foundations" do
   describe "Bali::Rule" do
     it "is creatable" do
       rule = Bali::Rule.new(:can, :delete)
-      rule.auth_val.should == :can
+      rule.term.should == :can
       rule.operation.should == :delete
-      rule.decider.should be_nil
+      rule.conditional.should be_nil
 
       rule = Bali::Rule.new(:cant, :delete)
-      rule.auth_val.should == :cant
+      rule.term.should == :cant
       rule.operation.should == :delete
-      rule.decider.should be_nil
+      rule.conditional.should be_nil
     end
 
-    it "can have decider" do
+    it "can have conditional" do
       rule = Bali::Rule.new(:can, :delete)
-      expect(rule.has_decider?).to be_falsey
+      expect(rule).not_to be_conditional
 
-      rule.decider = -> { true }
-      expect(rule.has_decider?).to be_truthy
+      rule.conditional = -> { true }
+      expect(rule).to be_conditional
     end
 
-    context "based on auth_val" do
+    context "based on term" do
       it "can only be either can or cant type" do
         expect {Bali::Rule.new(:xyz, :delete) }.to raise_error(Bali::DslError)
         expect {Bali::Rule.new(:can, :delete) }.to_not raise_error

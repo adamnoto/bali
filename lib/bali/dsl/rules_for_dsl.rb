@@ -35,8 +35,8 @@ class Bali::Dsl::RulesForDsl
         shortcut_can_rules = shortcut_rules[:can] || shortcut_rules["can"]
         shortcut_cant_rules = shortcut_rules[:cant] || shortcut_rules["cant"]
 
-        shortcut_rules.each do |auth_val, args|
-          add(auth_val, current_rule_group, *args)
+        shortcut_rules.each do |term, args|
+          add(term, current_rule_group, *args)
         end # each shortcut rules
       end # whether block is given or not
     end # each subtarget
@@ -109,7 +109,7 @@ class Bali::Dsl::RulesForDsl
 
     # to define can and cant is basically using this method
     # args can comprises of symbols, and hash (for condition)
-    def add(auth_val, rule_group, *args)
+    def add(term, rule_group, *args)
       conditional_hash = nil
       operations = []
 
@@ -124,7 +124,7 @@ class Bali::Dsl::RulesForDsl
 
       # add operation one by one
       operations.each do |op|
-        rule = Bali::Rule.new(auth_val, op)
+        rule = Bali::Rule.new(term, op)
         embed_condition(rule, conditional_hash)
 
         if rule_group.nil?
@@ -155,7 +155,7 @@ class Bali::Dsl::RulesForDsl
       condition_type_symb = condition_type.to_sym
 
       if condition_type_symb == :if
-        rule.decider = conditional_hash.values[0]
+        rule.conditional = conditional_hash.values[0]
       end
       nil
     end
