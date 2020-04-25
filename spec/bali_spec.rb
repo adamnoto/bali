@@ -1,5 +1,3 @@
-require_relative 'spec_helper'
-
 module My
   class Transaction
     include Bali::Objector
