@@ -1,4 +1,10 @@
 class Bali::RuleGroup
+  RIGHTS = [
+    INHERIT = :inherit,
+    DEFAULT_DENY = :default_deny,
+    DEFAULT_ALLOW = :default_allow
+  ].freeze
+
   # the target class
   attr_accessor :target
 
@@ -8,9 +14,11 @@ class Bali::RuleGroup
   # what can be done and what cant be done
   attr_accessor :cans, :cants
 
-  # if set to true then the subtarget can do anything
+  # if set to true then the subtarget, by default, can do everything
   attr_accessor :can_all
   alias :can_all? :can_all
+
+  attr_accessor :right_level
 
   # allowing "general user" and :general_user to route to the same rule group
   def self.canon_name(subtarget)
@@ -24,17 +32,32 @@ class Bali::RuleGroup
   def initialize(target, subtarget)
     @target = target
     @subtarget = Bali::RuleGroup.canon_name(subtarget)
+    @right_level = INHERIT
 
     @cans = {}
     @cants = {}
-    @can_all = false
+  end
+
+  def can_all?
+    right_level == DEFAULT_ALLOW
+  end
+
+  def cant_all?
+    right_level == DEFAULT_DENY
+  end
+
+  def can_all=(bool)
+    case bool
+    when true then @right_level = DEFAULT_ALLOW
+    else @right_level = DEFAULT_DENY
+    end
   end
 
   def clone
     cloned_rg = Bali::RuleGroup.new(target, subtarget)
     cans.each_value { |can_rule| cloned_rg.add_rule(can_rule.clone) }
     cants.each_value { |cant_rule| cloned_rg.add_rule(cant_rule.clone) }
-    cloned_rg.can_all = can_all
+    cloned_rg.right_level = right_level
 
     cloned_rg
   end

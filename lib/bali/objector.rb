@@ -7,79 +7,22 @@ module Bali::Objector
 
   # check whether user can/cant perform an operation, return true when positive
   # or false otherwise
-  def can?(subtargets, operation)
-    self.class.can?(subtargets, operation, self)
+  def can?(actor_or_roles, operation)
+    self.class.can?(actor_or_roles, operation, self)
   end
 
-  def cant?(subtargets, operation)
-    self.class.cant?(subtargets, operation, self)
+  def cant?(actor_or_roles, operation)
+    self.class.cant?(actor_or_roles, operation, self)
   end
 end
 
 # to allow class-level objection
 module Bali::Objector::Statics
-  # get the proper roles for the subtarget, for any type of subtarget
-  def bali_translate_subtarget_roles(arg)
-    role_extractor = Bali::RoleExtractor.new(arg)
-    role_extractor.get_roles
+  def can?(actor_or_roles, operation, record = self)
+    Bali::Judge.check(:can, actor_or_roles, operation, record)
   end
 
-  def can?(subtarget_roles, operation, record = self, options = {})
-    subs = bali_translate_subtarget_roles(subtarget_roles)
-    # well, it is largely not used unless decider's is 2 arity
-    original_subtarget = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
-
-    judgement_value = false
-    role = nil
-    judger = nil
-
-    subs.each do |subtarget|
-      next if judgement_value == true
-
-      judge = Bali::Judger::Judge.build(:can, {
-        subtarget: subtarget,
-        original_subtarget: original_subtarget,
-        operation: operation,
-        record: record
-      })
-      judgement_value = judge.judgement
-
-      role = subtarget
-    end
-
-    if block_given?
-      yield original_subtarget, role, judgement_value
-    end
-
-    judgement_value
-  end
-
-  def cant?(subtarget_roles, operation, record = self, options = {})
-    subs = bali_translate_subtarget_roles subtarget_roles
-    original_subtarget = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
-
-    judgement_value = true
-    role = nil
-    judger = nil
-
-    subs.each do |subtarget|
-      next if judgement_value == false
-
-      judge = Bali::Judger::Judge.build(:cant, {
-        subtarget: subtarget,
-        original_subtarget: original_subtarget,
-        operation: operation,
-        record: record
-      })
-      judgement_value = judge.judgement
-
-      role = subtarget
-    end
-
-    if block_given?
-      yield original_subtarget, role, judgement_value
-    end
-
-    judgement_value
+  def cant?(actor_or_roles, operation, record = self)
+    Bali::Judge.check(:cant, actor_or_roles, operation, record)
   end
 end
