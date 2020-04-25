@@ -47,9 +47,9 @@ module Bali
         add :can, rule_group, *args
       end
 
-      # add cannot rule programatically
-      def add_cannot(rule_group, *args)
-        add :cannot, rule_group, *args
+      # add cant rule programatically
+      def add_cant(rule_group, *args)
+        add :cant, rule_group, *args
       end
     end
   end

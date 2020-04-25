@@ -1,4 +1,3 @@
-# grand scheme of things begin here
 class Bali::Dsl::MapRulesDsl
   attr_accessor :current_rule_class
 
@@ -48,11 +47,6 @@ class Bali::Dsl::MapRulesDsl
   end
 
   def cant(*params)
-    puts "Deprecation Warning: declaring rules with cant will be deprecated on major release 3.0, use cannot instead"
-    cannot *params
-  end
-
-  def cannot(*params)
     raise Bali::DslError, "cant block must be within role block"
   end
 
@@ -65,11 +59,6 @@ class Bali::Dsl::MapRulesDsl
   end
 
   def cant_all(*params)
-    puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot instead"
-    cannot_all *params
-  end
-
-  def cannot_all(*params)
     raise Bali::DslError, "cant_all block must be within role block"
   end
 end

@@ -4,7 +4,7 @@ module Bali
 
       module_function
 
-      # attempt to search the rule group, 
+      # attempt to search the rule group,
       # but if not exist, will return nil
       def for(target_class, subtarget)
         rule_class = Bali::Integrator::RuleClass.for(target_class)
@@ -18,7 +18,7 @@ module Bali
         rule_group.plant = false
       end
 
-      # make a rule group a plant, that is, he cannot do everything, unless
+      # make a rule group a plant, that is, he cant do everything, unless
       # specified more specifically otherwise by a definite rule
       def make_plant(rule_group)
         rule_group.plant = true

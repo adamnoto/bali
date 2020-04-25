@@ -3,14 +3,14 @@ module Bali::Judger
   # whether it is really allowed or not. It happens for example in block with others, such as this:
   #
   # role :finance do
-  #   cannot :view
+  #   cant :view
   # end
   # others do
   #   can :view
   #   can :index
   # end
   #
-  # In the example above, objecting cannot view on finance will result in STRONG_FALSE, but
+  # In the example above, objecting cant view on finance will result in STRONG_FALSE, but
   # objecting can index on finance will result in FUZY_TRUE.
   #
   # Eventually, all FUZY value will be normal TRUE or FALSE if no definite counterpart
@@ -36,13 +36,13 @@ module Bali::Judger
         raise Bali::Error, "Bali::Judge::Judger is unconstructable, properly construct by using build to get a concrete class!"
       end
       self
-    end 
+    end
 
     def self.build(auth_level, options = {})
       judge = nil
       if auth_level == :can
         judge = Bali::Judger::PositiveJudge.new
-      elsif auth_level == :cannot
+      elsif auth_level == :cant
         judge = Bali::Judger::NegativeJudge.new
       else
         raise Bali::Error, "Unable to find judge for `#{auth_level}` case"
@@ -125,7 +125,7 @@ module Bali::Judger
     # return either true or false
     # options can specify if returning raw, by specifying holy: true
     def judgement(options = {})
-      # the divine judgement will come to thee, O Thou 
+      # the divine judgement will come to thee, O Thou
       # the doer of truth. return raw, untranslated to true/false.
       our_holy_judgement = nil
 
@@ -134,15 +134,15 @@ module Bali::Judger
       if rule_group.nil?
         if other_rule_group.nil?
           # no more chance for checking
-          our_holy_judgement = natural_value 
+          our_holy_judgement = natural_value
         end
       end
 
-      if our_holy_judgement.nil? && need_to_check_for_intervention? 
+      if our_holy_judgement.nil? && need_to_check_for_intervention?
         our_holy_judgement = check_intervention
       end
 
-      if our_holy_judgement.nil? && 
+      if our_holy_judgement.nil? &&
           rule_group && rule_group.plant? &&
           rule.nil? && otherly_rule.nil?
         our_holy_judgement = natural_value
@@ -151,12 +151,12 @@ module Bali::Judger
       if our_holy_judgement.nil? && rule.nil?
         cross_check_value = nil
         # default if can? for undefined rule is false, after related clause
-        # cannot be found in cannot?
+        # cant be found in cant?
         unless cross_checking
           reversed_self = self.clone reverse: true
           reversed_self.cross_checking = true
           cross_check_value = reversed_self.judgement holy: true
-        end 
+        end
 
         # if cross check value nil, then the reverse rule is not defined,
         # let's determine whether he is zeus or plant
@@ -169,11 +169,11 @@ module Bali::Judger
 
             if rule_group.zeus?
               our_holy_judgement = zeus_return_value
-            end 
+            end
           end # if rule_group exist
         else
           # process value from cross checking
-          
+
           if can_use_otherly_rule?(cross_check_value, cross_checking)
             # give chance to check at others block
             self.rule = otherly_rule
@@ -203,7 +203,7 @@ module Bali::Judger
         end
       end
 
-      # if at this point still nil, well, 
+      # if at this point still nil, well,
       # return the natural value for this judge
       if our_holy_judgement.nil?
         if otherly_rule
@@ -223,7 +223,7 @@ module Bali::Judger
       # which need to be translated from other beings to know
       def translate_holy_judgement(bali_bool_value)
         unless bali_bool_value.is_a?(Integer)
-          raise Bali::Error, "Expect bali value to be an Integer, got: `#{bali_bool_value}`" 
+          raise Bali::Error, "Expect bali value to be an Integer, got: `#{bali_bool_value}`"
         end
         if bali_bool_value < 0
           return false
@@ -243,14 +243,14 @@ module Bali::Judger
         #    FUZY answer is. Therefore, it is an intended result
         # 2. If the answer is FUZY, otherly_rule only be considered if the result
         #    is either FUZY TRUE or FUZY FALSE, or
-        # 3. Or, when already in cross check mode, we cannot retrieve cross_check_value
+        # 3. Or, when already in cross check mode, we cant retrieve cross_check_value
         #    what we can is instead, if otherly rule is available, just to try the odd
         (!otherly_rule.nil? && cross_check_value && !(cross_check_value == BALI_TRUE || cross_check_value == BALI_FALSE)) ||
           (!otherly_rule.nil? && (cross_check_value == BALI_FUZY_FALSE || cross_check_value == BALI_FUZY_TRUE)) ||
           (!otherly_rule.nil? && is_cross_checking && cross_check_value.nil?)
       end
 
-      # if after cross check (checking for cannot) the return is false,
+      # if after cross check (checking for cant) the return is false,
       # meaning for us, (checking for can), the return have to be true
       def cross_check_reverse_value(cross_check_value)
         # either the return is not fuzy, or otherly rule is undefined
@@ -258,7 +258,7 @@ module Bali::Judger
           return BALI_FALSE
         elsif cross_check_value == BALI_FALSE
           return BALI_TRUE
-        elsif cross_check_value == BALI_FUZY_FALSE 
+        elsif cross_check_value == BALI_FUZY_FALSE
           return BALI_FUZY_TRUE
         elsif cross_check_value == BALI_FUZY_TRUE
           return BALI_FUZY_FALSE
@@ -275,7 +275,7 @@ module Bali::Judger
           check_val = self_clone.judgement holy: true
 
           # check further whether contradicting rule is defined to overwrite this
-          # super-power either can_all or cannot_all rule
+          # super-power either can_all or cant_all rule
           if check_val == BALI_TRUE
             # it is defined, must overwrite
             return BALI_FALSE

@@ -35,7 +35,7 @@ class Bali::Dsl::RulesForDsl
           end
 
           shortcut_can_rules = shortcut_rules[:can] || shortcut_rules["can"]
-          shortcut_cannot_rules = shortcut_rules[:cannot] || shortcut_rules["cannot"]
+          shortcut_cant_rules = shortcut_rules[:cant] || shortcut_rules["cant"]
 
           shortcut_rules.each do |auth_val, args|
             Bali::Integrator::Rule.add(auth_val, self.current_rule_group, *args)
@@ -75,26 +75,16 @@ class Bali::Dsl::RulesForDsl
     Bali::Integrator::Rule.add_can(self.current_rule_group, *args)
   end
 
-  def cannot(*args)
-    Bali::Integrator::Rule.add_cannot(self.current_rule_group, *args)
-  end
-
-  def cant(*operations)
-    puts "Deprecation Warning: declaring rules with cant will be deprecated on major release 3.0, use cannot instead"
-    cannot(*operations)
+  def cant(*args)
+    Bali::Integrator::Rule.add_cant(self.current_rule_group, *args)
   end
 
   def can_all
     Bali::Integrator::RuleGroup.make_zeus(self.current_rule_group)
   end
 
-  def cannot_all
-    Bali::Integrator::RuleGroup.make_plant(self.current_rule_group)
-  end
-
   def cant_all
-    puts "Deprecation Warning: declaring rules with cant_all will be deprecated on major release 3.0, use cannot_all instead"
-    cannot_all
+    Bali::Integrator::RuleGroup.make_plant(self.current_rule_group)
   end
 
   private

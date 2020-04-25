@@ -39,13 +39,13 @@ module Bali::Printer
     is_plant = rule_group.plant?
     counter = 0
 
-    target_io << "#{SEPARATOR}#{subtarget}, can all: #{is_zeus}, cannot all: #{is_plant}\n"
+    target_io << "#{SEPARATOR}#{subtarget}, can all: #{is_zeus}, cant all: #{is_plant}\n"
     target_io << SUBTARGET_TITLE_SEPARATOR
 
     if is_zeus
       target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} can do anything except if explicitly stated otherwise\n"
     elsif is_plant
-      target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} cannot do anything except if explicitly stated otherwise\n"
+      target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} cant do anything except if explicitly stated otherwise\n"
     end
 
     rule_group.rules.each do |rule|

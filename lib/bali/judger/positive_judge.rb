@@ -9,7 +9,7 @@ module Bali::Judger
     end
 
     def reverse_auth_level
-      :cannot
+      :cant
     end
 
     def zeus_return_value

@@ -5,14 +5,14 @@ class Bali::RuleGroup
   # the user to which this rule group is applied
   attr_accessor :subtarget
 
-  # what can be done and what cannot be done
+  # what can be done and what cant be done
   attr_accessor :cans, :cants
 
   # if set to true then the subtarget can do anything
   attr_accessor :zeus
   alias :zeus? :zeus
 
-  # if set to true, well, cannot do anything
+  # if set to true, well, cant do anything
   attr_accessor :plant
   alias :plant? :plant
 
@@ -51,7 +51,7 @@ class Bali::RuleGroup
   end
 
   def add_rule(rule)
-    # operation cannot be defined twice
+    # operation cant be defined twice
     operation = rule.operation.to_sym
 
     return if self.cants[operation] && self.cans[operation]
@@ -75,7 +75,7 @@ class Bali::RuleGroup
     case auth_val
     when :can, "can"
       rule = self.cans[operation.to_sym]
-    when :cannot, "cannot"
+    when :cant, "cant"
       rule = self.cants[operation.to_sym]
     else
       raise Bali::DslError, "Undefined operation: #{auth_val}"

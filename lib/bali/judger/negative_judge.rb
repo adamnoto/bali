@@ -5,7 +5,7 @@ module Bali::Judger
     end
 
     def auth_level
-      :cannot
+      :cant
     end
 
     def reverse_auth_level
@@ -28,11 +28,11 @@ module Bali::Judger
       BALI_FUZY_TRUE
     end
 
-    # cannot? by default return true when
+    # cant? by default return true when
     def natural_value
       BALI_TRUE
     end
-    
+
     def need_to_check_for_intervention?
       rule_group && rule_group.plant?
     end

@@ -179,10 +179,10 @@ describe Bali do
         end.to_not raise_error
       end
 
-      it "disallows calling cannot outside of role block" do
+      it "disallows calling cant outside of role block" do
         expect do
           Bali.map_rules do
-            cannot :show
+            cant :show
           end
         end.to raise_error(Bali::DslError)
 
@@ -190,7 +190,7 @@ describe Bali do
           Bali.map_rules do
             rules_for My::Transaction do
               role :general_user do
-                cannot :show
+                cant :show
               end
             end
           end
@@ -215,10 +215,10 @@ describe Bali do
         end.to_not raise_error
       end
 
-      it "disallows calling cannot_all outside of role block" do
+      it "disallows calling cant_all outside of role block" do
         expect do
           Bali.map_rules do
-            cannot_all
+            cant_all
           end
         end.to raise_error(Bali::DslError)
 
@@ -226,7 +226,7 @@ describe Bali do
           Bali.map_rules do
             rules_for My::Transaction do
               role :general_user do
-                cannot_all
+                cant_all
               end
             end
           end
@@ -271,10 +271,10 @@ describe Bali do
         end.to_not raise_error
       end
 
-      it "disallows calling cannot outside of others block" do
+      it "disallows calling cant outside of others block" do
         expect do
           Bali.map_rules do
-            cannot :show
+            cant :show
           end
         end.to raise_error(Bali::DslError)
 
@@ -282,7 +282,7 @@ describe Bali do
           Bali.map_rules do
             rules_for My::Transaction do
               others do
-                cannot :show
+                cant :show
               end
             end
           end
@@ -307,10 +307,10 @@ describe Bali do
         end.to_not raise_error
       end
 
-      it "disallows calling cannot_all outside of role block" do
+      it "disallows calling cant_all outside of role block" do
         expect do
           Bali.map_rules do
-            cannot_all
+            cant_all
           end
         end.to raise_error(Bali::DslError)
 
@@ -318,7 +318,7 @@ describe Bali do
           Bali.map_rules do
             rules_for My::Transaction do
               others do
-                cannot_all
+                cant_all
               end
             end
           end
@@ -356,15 +356,15 @@ describe Bali do
         expect do
           Bali.map_rules do
             rules_for My::Transaction do
-              role :user, can: :edit, cannot: [:delete, :refund]
+              role :user, can: :edit, cant: [:delete, :refund]
             end
           end
         end.to_not raise_error
 
         rule_group = Bali::Integrator::RuleGroup.for(My::Transaction, :user)
         expect(rule_group.get_rule(:can, :edit)).to_not be_nil
-        expect(rule_group.get_rule(:cannot, :delete)).to_not be_nil
-        expect(rule_group.get_rule(:cannot, :refund)).to_not be_nil
+        expect(rule_group.get_rule(:cant, :delete)).to_not be_nil
+        expect(rule_group.get_rule(:cant, :refund)).to_not be_nil
       end
     end
 
@@ -410,7 +410,7 @@ describe Bali do
           rules_for My::Transaction do
             role :finance_user do
               can :delete, if: proc { |record| record.is_settled? }
-              cannot :payout, if: proc { |record| !record.is_settled? }
+              cant :payout, if: proc { |record| !record.is_settled? }
             end
           end
         end
@@ -426,8 +426,8 @@ describe Bali do
               txn.can?(:finance_user, :delete).should be_falsey
             end
 
-            it "returns true to cannot?" do
-              txn.cannot?(:finance_user, :delete).should be_truthy
+            it "returns true to cant?" do
+              txn.cant?(:finance_user, :delete).should be_truthy
             end
           end # when finance user
         end # unsettled transaction
@@ -435,7 +435,7 @@ describe Bali do
         context "settled transaction" do
           before { txn.is_settled = true }
           it("returns true to can?") { txn.can?(:finance_user, :delete).should be_truthy }
-          it("returns false to cannot?") { txn.cannot?(:finance_user, :delete).should be_falsey }
+          it("returns false to cant?") { txn.cant?(:finance_user, :delete).should be_falsey }
         end
       end # deleting
 
@@ -447,8 +447,8 @@ describe Bali do
               txn.can?(:finance_user, :payout).should be_falsey
             end
 
-            it "returns true to cannot?" do
-              txn.cannot?(:finance_user, :payout).should be_truthy
+            it "returns true to cant?" do
+              txn.cant?(:finance_user, :payout).should be_truthy
             end
           end # when finance user
         end # unsettled transaction
@@ -456,7 +456,7 @@ describe Bali do
         context "settled transaction" do
           before { txn.is_settled = true }
           it("returns true to can?") { txn.can?(:finance_user, :payout).should be_truthy }
-          it("returns false to cannot?") { txn.cannot?(:finance_user, :payout).should be_falsey }
+          it("returns false to cant?") { txn.cant?(:finance_user, :payout).should be_falsey }
         end
       end # payout
     end
@@ -466,7 +466,7 @@ describe Bali do
         Bali.map_rules do
           rules_for My::Transaction do
             role :finance_user do
-              cannot :delete, unless: proc { |record| record.is_settled? }
+              cant :delete, unless: proc { |record| record.is_settled? }
               can :payout, unless: proc { |record| !record.is_settled? }
             end
           end
@@ -479,12 +479,12 @@ describe Bali do
         context "unsettled transaction" do
           before { txn.is_settled = false }
           it("returns false to can?") { txn.can?(:finance_user, :delete).should be_falsey }
-          it("returns true to cannot?") { txn.cannot?(:finance_user, :delete).should be_truthy }
+          it("returns true to cant?") { txn.cant?(:finance_user, :delete).should be_truthy }
         end
         context "settled transaction" do
           before { txn.is_settled = true }
           it("returns true to can?") { txn.can?(:finance_user, :delete).should be_truthy }
-          it("returns false to cannot?") { txn.cannot?(:finance_user, :delete).should be_falsey }
+          it("returns false to cant?") { txn.cant?(:finance_user, :delete).should be_falsey }
         end
       end
 
@@ -492,12 +492,12 @@ describe Bali do
         context "unsettled transaction" do
           before { txn.is_settled = false }
           it("returns false to can?") { txn.can?(:finance_user, :payout).should be_falsey }
-          it("returns true to cannot?") { txn.cannot?(:finance_user, :payout).should be_truthy }
+          it("returns true to cant?") { txn.cant?(:finance_user, :payout).should be_truthy }
         end
         context "settled transaction" do
           before { txn.is_settled = true }
           it("returns true to can?") { txn.can?(:finance_user, :payout).should be_truthy }
-          it("returns false to cannot?") { txn.cannot?(:finance_user, :payout).should be_falsey }
+          it("returns false to cant?") { txn.cant?(:finance_user, :payout).should be_falsey }
         end
       end
     end # when having unless decider (fine-grained test)
@@ -507,18 +507,18 @@ describe Bali do
       Bali.map_rules do
         rules_for My::Transaction do
           role :finance_user do
-            cannot :chargeback, unless: proc { |record| record.is_settled? }
+            cant :chargeback, unless: proc { |record| record.is_settled? }
           end
         end
       end
 
       txn = My::Transaction.new
       txn.is_settled = false
-      txn.cannot?(:finance_user, :chargeback).should be_truthy
+      txn.cant?(:finance_user, :chargeback).should be_truthy
       txn.can?(:finance_user, :chargeback).should be_falsey
 
       txn.is_settled = true
-      txn.cannot?(:finance_user, :chargeback).should be_falsey
+      txn.cant?(:finance_user, :chargeback).should be_falsey
       txn.can?(:finance_user, :chargeback).should be_truthy
 
       # reverse meaning of the above, should return the same
@@ -533,11 +533,11 @@ describe Bali do
 
       txn = My::Transaction.new
       txn.is_settled = false
-      # txn.cannot?(:finance_user, :chargeback).should be_truthy
+      # txn.cant?(:finance_user, :chargeback).should be_truthy
       # txn.can?(:finance_user, :chargeback).should be_falsey
 
       txn.is_settled = true
-      txn.cannot?(:finance_user, :chargeback).should be_falsey
+      txn.cant?(:finance_user, :chargeback).should be_falsey
       txn.can?(:finance_user, :chargeback).should be_truthy
     end
 
@@ -601,7 +601,7 @@ describe Bali do
                 can_all
               end
               others do
-                cannot_all
+                cant_all
                 can :read
               end
             end

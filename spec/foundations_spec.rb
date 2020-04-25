@@ -79,7 +79,7 @@ describe "Bali foundations" do
             end
             others do
               can :view
-              cannot :delete, :update
+              cant :delete, :update
             end
           end
         end
@@ -117,7 +117,7 @@ describe "Bali foundations" do
           rules_for My::SecuredTransaction, inherits: My::Transaction do
             role :general_user do
               clear_rules
-              cannot_all
+              cant_all
             end
           end
         end
@@ -165,9 +165,9 @@ describe "Bali foundations" do
           My::Transaction.respond_to?(:can?).should == true
         end
 
-        it "can responds to cannot?" do
+        it "can responds to cant?" do
           transaction = My::Transaction.new
-          expect(transaction.respond_to?(:cannot?)).to eq true
+          expect(transaction.respond_to?(:cant?)).to eq true
           transaction.class.ancestors.include?(Bali::Objector).should be_truthy
 
           # class-level question too
@@ -228,8 +228,8 @@ describe "Bali foundations" do
       rule.operation.should == :delete
       rule.decider.should be_nil
 
-      rule = Bali::Rule.new(:cannot, :delete)
-      rule.auth_val.should == :cannot
+      rule = Bali::Rule.new(:cant, :delete)
+      rule.auth_val.should == :cant
       rule.operation.should == :delete
       rule.decider.should be_nil
     end
@@ -253,7 +253,7 @@ describe "Bali foundations" do
       it "can only be either can or cant type" do
         expect {Bali::Rule.new(:xyz, :delete) }.to raise_error(Bali::DslError)
         expect {Bali::Rule.new(:can, :delete) }.to_not raise_error
-        expect {Bali::Rule.new(:cannot, :delete)}.to_not raise_error
+        expect {Bali::Rule.new(:cant, :delete)}.to_not raise_error
       end
       context "cant-type rule" do
         let(:rule) { Bali::Rule.new(:cant, :delete) }

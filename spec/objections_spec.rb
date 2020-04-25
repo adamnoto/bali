@@ -8,9 +8,9 @@ describe "Model objections" do
     My::Employee.can?(:undefined_subtarget, :new).should be_falsey
   end
 
-  it "should return true to cannot? for undefined rule class" do
+  it "should return true to cant? for undefined rule class" do
     Bali::Integrator::RuleClass.for(My::Employee).should be_nil
-    My::Employee.cannot?(:undefined_subtarget, :new).should be_truthy
+    My::Employee.cant?(:undefined_subtarget, :new).should be_truthy
   end
 
   it "should return false to can? for undefined rule group" do
@@ -24,7 +24,7 @@ describe "Model objections" do
     My::Transaction.can?(:undefined_subtarget, :new).should be_falsey
   end
 
-  it "should return true to cannot? for undefined rule group" do
+  it "should return true to cant? for undefined rule group" do
     Bali.map_rules do
       rules_for My::Transaction do
       end
@@ -32,7 +32,7 @@ describe "Model objections" do
 
     Bali::Integrator::RuleClass.for(My::Transaction).class.should == Bali::RuleClass
     Bali::Integrator::RuleGroup.for(My::Transaction, :undefined_subtarget).should be_nil
-    My::Transaction.cannot?(:undefined_subtarget, :new).should be_truthy
+    My::Transaction.cant?(:undefined_subtarget, :new).should be_truthy
   end
 
   RSpec.shared_examples "objector" do
@@ -41,9 +41,9 @@ describe "Model objections" do
       My::Transaction.can?(:general_user, :delete).should be_falsey
     end
 
-    it "can asnwer to cannot? on a class" do
-      My::Transaction.cannot?(:supreme_user, :save).should be_falsey
-      My::Transaction.cannot?(:general_user, :new).should be_truthy
+    it "can asnwer to cant? on a class" do
+      My::Transaction.cant?(:supreme_user, :save).should be_falsey
+      My::Transaction.cant?(:general_user, :new).should be_truthy
     end
   end
 
@@ -71,31 +71,31 @@ describe "Model objections" do
     it "can query when role is a symbol" do
       me.roles = :general_user
       expect(txn.can?(me, :copy)).to be_truthy
-      expect(txn.cannot?(me, :copy)).to be_falsey
+      expect(txn.cant?(me, :copy)).to be_falsey
 
       expect(txn.can?(me, :delete)).to be_falsey
-      expect(txn.cannot?(me, :delete)).to be_truthy
+      expect(txn.cant?(me, :delete)).to be_truthy
     end
 
     it "can query when role is a string" do
       me.roles = "general user"
       expect(txn.can?(me, :copy)).to be_truthy
-      expect(txn.cannot?(me, :copy)).to be_falsey
+      expect(txn.cant?(me, :copy)).to be_falsey
 
       expect(txn.can?(me, :delete)).to be_falsey
-      expect(txn.cannot?(me, :delete)).to be_truthy
+      expect(txn.cant?(me, :delete)).to be_truthy
     end
 
     it "can query when role is nil" do
       me.roles = nil
       expect(txn.can?(me, :copy)).to be_falsey
-      expect(txn.cannot?(me, :copy)).to be_truthy
+      expect(txn.cant?(me, :copy)).to be_truthy
 
       expect(txn.can?(me, :delete)).to be_falsey
-      expect(txn.cannot?(me, :delete)).to be_truthy
+      expect(txn.cant?(me, :delete)).to be_truthy
 
       expect(txn.can?(me, :show)).to be_truthy
-      expect(txn.cannot?(me, :show)).to be_falsey
+      expect(txn.cant?(me, :show)).to be_falsey
     end
 
     it "can query when role is an array" do
@@ -133,26 +133,26 @@ describe "Model objections" do
       me.roles = [:general_user]
 
       txn.can?(me, :show).should be_truthy
-      txn.cannot?(me, :show).should be_falsey
+      txn.cant?(me, :show).should be_falsey
 
       me.exp_years = 2
       txn.can?(me, :edit).should be_falsey
-      txn.cannot?(me, :edit).should be_truthy
+      txn.cant?(me, :edit).should be_truthy
 
       me.exp_years = 3
       txn.can?(me, :edit).should be_falsey
-      txn.cannot?(me, :edit).should be_truthy
+      txn.cant?(me, :edit).should be_truthy
 
       me.exp_years = 4
       txn.can?(me, :edit).should be_truthy
-      txn.cannot?(me, :edit).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
 
       txn.can?(me, :cancel).should be_truthy
-      txn.cannot?(me, :cancel).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
 
       txn.is_settled = true
       txn.can?(me, :cancel).should be_falsey
-      txn.cannot?(me, :cancel).should be_truthy
+      txn.cant?(me, :cancel).should be_truthy
 
       me.roles = :admin
       me.exp_years = 0
@@ -160,17 +160,17 @@ describe "Model objections" do
       txn.can?(me, :show).should be_truthy
       txn.can?(me, :edit).should be_truthy
       txn.can?(me, :cancel).should be_truthy
-      txn.cannot?(me, :show).should be_falsey
-      txn.cannot?(me, :edit).should be_falsey
-      txn.cannot?(me, :cancel).should be_falsey
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
 
       me.roles = [:general_user, :admin]
       txn.can?(me, :show).should be_truthy
       txn.can?(me, :edit).should be_truthy
       txn.can?(me, :cancel).should be_truthy
-      txn.cannot?(me, :show).should be_falsey
-      txn.cannot?(me, :edit).should be_falsey
-      txn.cannot?(me, :cancel).should be_falsey
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
     end
 
     it "can query rule having unless decider" do
@@ -194,23 +194,23 @@ describe "Model objections" do
       me.roles = [:general_user]
 
       txn.can?(me, :show).should be_truthy
-      txn.cannot?(me, :show).should be_falsey
+      txn.cant?(me, :show).should be_falsey
 
       me.exp_years = 2
       txn.can?(me, :edit).should be_falsey
-      txn.cannot?(me, :edit).should be_truthy
+      txn.cant?(me, :edit).should be_truthy
       me.exp_years = 3
       txn.can?(me, :edit).should be_falsey
-      txn.cannot?(me, :edit).should be_truthy
+      txn.cant?(me, :edit).should be_truthy
       me.exp_years = 4
       txn.can?(me, :edit).should be_truthy
-      txn.cannot?(me, :edit).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
 
       txn.can?(me, :cancel).should be_truthy
-      txn.cannot?(me, :cancel).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
       txn.is_settled = true
       txn.can?(me, :cancel).should be_falsey
-      txn.cannot?(me, :cancel).should be_truthy
+      txn.cant?(me, :cancel).should be_truthy
 
       me.roles = :admin
       me.exp_years = 0
@@ -218,17 +218,17 @@ describe "Model objections" do
       txn.can?(me, :show).should be_truthy
       txn.can?(me, :edit).should be_truthy
       txn.can?(me, :cancel).should be_truthy
-      txn.cannot?(me, :show).should be_falsey
-      txn.cannot?(me, :edit).should be_falsey
-      txn.cannot?(me, :cancel).should be_falsey
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
 
       me.roles = [:general_user, :admin]
       txn.can?(me, :show).should be_truthy
       txn.can?(me, :edit).should be_truthy
       txn.can?(me, :cancel).should be_truthy
-      txn.cannot?(me, :show).should be_falsey
-      txn.cannot?(me, :edit).should be_falsey
-      txn.cannot?(me, :cancel).should be_falsey
+      txn.cant?(me, :show).should be_falsey
+      txn.cant?(me, :edit).should be_falsey
+      txn.cant?(me, :cancel).should be_falsey
     end
   end
 
@@ -240,10 +240,10 @@ describe "Model objections" do
           role(:supreme_user) { can_all }
           role :admin do
             can_all
-            cannot :delete
+            cant :delete
           end
           role :finance do
-            cannot :view
+            cant :view
             can :print
           end
           others do
@@ -255,7 +255,7 @@ describe "Model objections" do
 
         rules_for My::SecuredTransaction, inherits: My::Transaction do
           role :finance do
-            cannot_all
+            cant_all
           end
         end
       end # map rules
@@ -266,79 +266,79 @@ describe "Model objections" do
     describe "supreme user" do
       it "should allow to delete transaction" do
         expect(txn.can?(:supreme_user, :delete)).to be_truthy
-        expect(txn.cannot?(:supreme_user, :delete)).to be_falsey
+        expect(txn.cant?(:supreme_user, :delete)).to be_falsey
       end
 
       it "should allow to print transaction" do
         # expect(txn.can?(:supreme_user, :print)).to be_truthy
-        expect(txn.cannot?(:supreme_user, :print)).to be_falsey
+        expect(txn.cant?(:supreme_user, :print)).to be_falsey
       end
 
       it "should allow to index transaction" do
         expect(txn.can?(:supreme_user, :index)).to be_truthy
-        expect(txn.cannot?(:supreme_user, :index)).to be_falsey
+        expect(txn.cant?(:supreme_user, :index)).to be_falsey
       end
     end # supreme user
 
     describe "admin user" do
       it "should not allow to delete transaction" do
         expect(txn.can?(:admin, :delete)).to be_falsey
-        # expect(txn.cannot?(:admin, :delete)).to be_truthy
+        # expect(txn.cant?(:admin, :delete)).to be_truthy
       end
 
       it "should allow to print transaction" do
         expect(txn.can?(:admin, :print)).to be_truthy
-        expect(txn.cannot?(:admin, :print)).to be_falsey
+        expect(txn.cant?(:admin, :print)).to be_falsey
       end
     end # admin user
 
     describe "finance user" do
       it "should not allow to view transaction" do
         expect(txn.can?(:finance, :view)).to be_falsey
-        expect(txn.cannot?(:finance, :view)).to be_truthy
+        expect(txn.cant?(:finance, :view)).to be_truthy
       end
 
       it "should not allow finance to view secured transaction" do
         stxn = My::SecuredTransaction.new
         stxn.is_settled = true
         expect(stxn.can?(:finance, :view)).to be_falsey
-        expect(stxn.cannot?(:finance, :view)).to be_truthy
+        expect(stxn.cant?(:finance, :view)).to be_truthy
       end
 
       it "should allow finance to print" do
         txn.settled = true
         # expect(txn.is_settled?).to be_truthy
         # expect(txn.can?(:finance, :print)).to be_truthy
-        expect(txn.cannot?(:finance, :print)).to be_falsey
+        expect(txn.cant?(:finance, :print)).to be_falsey
 
         txn.settled = false
         # expect(txn.is_settled?).to be_falsey
         # expect(txn.can?(:finance, :print)).to be_truthy
-        # expect(txn.cannot?(:finance, :print)).to be_falsey
+        # expect(txn.cant?(:finance, :print)).to be_falsey
       end
 
       it "should not allow finance to view even if transaction is settled" do
         txn.settled = true
         expect(txn.is_settled).to be_truthy
         expect(txn.can?(:finance, :view)).to be_falsey
-        expect(txn.cannot?(:finance, :view)).to be_truthy
+        expect(txn.cant?(:finance, :view)).to be_truthy
 
         txn.settled = false
         expect(txn.is_settled).to be_falsey
         expect(txn.can?(:finance, :view)).to be_falsey
-        expect(txn.cannot?(:finance, :view)).to be_truthy
+        expect(txn.cant?(:finance, :view)).to be_truthy
       end
 
       it "should allow finance to index transaction" do
         # expect(txn.can?(:finance, :index)).to be_truthy
-        expect(txn.cannot?(:finance, :index)).to be_falsey
+        expect(txn.cant?(:finance, :index)).to be_falsey
       end
     end # finance_user
 
     context "when on undefined class" do
       it "should not allow employee to be created" do
         expect(My::Employee.can?(:finance, :create)).to be_falsey
-        expect(My::Employee.cannot?(:finance, :create)).to be_truthy
+        expect(My::Employee.cant?(:finance, :create)).to be_truthy
       end
     end
   end
@@ -351,10 +351,10 @@ describe "Model objections" do
           role(:supreme_user) { can_all }
           role :admin do
             can_all
-            cannot :delete
+            cant :delete
           end
           role :finance do
-            cannot :view
+            cant :view
             can :print
           end
           others do
@@ -371,72 +371,72 @@ describe "Model objections" do
     describe "supreme user" do
       it "should allow to delete transaction" do
         expect(txn.can?(:supreme_user, :delete)).to be_truthy
-        expect(txn.cannot?(:supreme_user, :delete)).to be_falsey
+        expect(txn.cant?(:supreme_user, :delete)).to be_falsey
       end
 
       it "should allow to print transaction" do
         expect(txn.can?(:supreme_user, :print)).to be_truthy
-        expect(txn.cannot?(:supreme_user, :print)).to be_falsey
+        expect(txn.cant?(:supreme_user, :print)).to be_falsey
       end
 
       it "should allow to index transaction" do
         expect(txn.can?(:supreme_user, :index)).to be_truthy
-        expect(txn.cannot?(:supreme_user, :index)).to be_falsey
+        expect(txn.cant?(:supreme_user, :index)).to be_falsey
       end
     end # supreme user
 
     describe "admin user" do
       it "should not allow to delete transaction" do
         expect(txn.can?(:admin, :delete)).to be_falsey
-        expect(txn.cannot?(:admin, :delete)).to be_truthy
+        expect(txn.cant?(:admin, :delete)).to be_truthy
       end
 
       it "should allow to print transaction" do
         expect(txn.can?(:admin, :print)).to be_truthy
-        expect(txn.cannot?(:admin, :print)).to be_falsey
+        expect(txn.cant?(:admin, :print)).to be_falsey
       end
     end # admin user
 
     describe "finance user" do
       it "should not allow to view" do
         expect(txn.can?(:finance, :view)).to be_falsey
-        expect(txn.cannot?(:finance, :view)).to be_truthy
+        expect(txn.cant?(:finance, :view)).to be_truthy
       end
 
       it "should allow finance to print" do
         txn.settled = true
         expect(txn.is_settled?).to be_truthy
         expect(txn.can?(:finance, :print)).to be_truthy
-        expect(txn.cannot?(:finance, :print)).to be_falsey
+        expect(txn.cant?(:finance, :print)).to be_falsey
 
         txn.settled = false
         expect(txn.is_settled?).to be_falsey
         expect(txn.can?(:finance, :print)).to be_truthy
-        expect(txn.cannot?(:finance, :print)).to be_falsey
+        expect(txn.cant?(:finance, :print)).to be_falsey
       end
 
       it "should not allow finance to view even if transaction is settled" do
         txn.settled = true
         expect(txn.is_settled).to be_truthy
         expect(txn.can?(:finance, :view)).to be_falsey
-        expect(txn.cannot?(:finance, :view)).to be_truthy
+        expect(txn.cant?(:finance, :view)).to be_truthy
 
         txn.settled = false
         expect(txn.is_settled).to be_falsey
         expect(txn.can?(:finance, :view)).to be_falsey
-        expect(txn.cannot?(:finance, :view)).to be_truthy
+        expect(txn.cant?(:finance, :view)).to be_truthy
       end
 
       it "should allow finance to index transaction" do
         expect(txn.can?(:finance, :index)).to be_truthy
-        expect(txn.cannot?(:finance, :index)).to be_falsey
+        expect(txn.cant?(:finance, :index)).to be_falsey
       end
     end # finance_user
 
     context "when on undefined class" do
       it "should not allow employee to be created" do
         expect(My::Employee.can?(:finance, :create)).to be_falsey
-        expect(My::Employee.cannot?(:finance, :create)).to be_truthy
+        expect(My::Employee.cant?(:finance, :create)).to be_truthy
       end
     end
   end
@@ -449,10 +449,10 @@ describe "Model objections" do
           role(:supreme_user) { can_all }
           role :admin_user do
             can_all
-            cannot :delete
+            cant :delete
           end
           role :general_user do
-            cannot_all
+            cant_all
             can :view
             can :print, if: proc { |txn| txn.is_settled? }
           end
@@ -470,10 +470,10 @@ describe "Model objections" do
           txn.can?(:admin_user, :create).should be_truthy
           txn.can?(:admin_user, :update).should be_truthy
 
-          txn.cannot?(:admin_user, :cancel).should be_falsey
-          txn.cannot?(:admin_user, :delete).should be_truthy
-          txn.cannot?(:admin_user, :create).should be_falsey
-          txn.cannot?(:admin_user, :update).should be_falsey
+          txn.cant?(:admin_user, :cancel).should be_falsey
+          txn.cant?(:admin_user, :delete).should be_truthy
+          txn.cant?(:admin_user, :create).should be_falsey
+          txn.cant?(:admin_user, :update).should be_falsey
         end
       end
 
@@ -484,41 +484,41 @@ describe "Model objections" do
           txn.can?(:supreme_user, :create).should be_truthy
           txn.can?(:supreme_user, :update).should be_truthy
 
-          txn.cannot?(:supreme_user, :cancel).should be_falsey
-          txn.cannot?(:supreme_user, :delete).should be_falsey
-          txn.cannot?(:supreme_user, :create).should be_falsey
-          txn.cannot?(:supreme_user, :update).should be_falsey
+          txn.cant?(:supreme_user, :cancel).should be_falsey
+          txn.cant?(:supreme_user, :delete).should be_falsey
+          txn.cant?(:supreme_user, :create).should be_falsey
+          txn.cant?(:supreme_user, :update).should be_falsey
         end
       end
 
       context "general user" do
-        it "cannot do anything" do
+        it "cant do anything" do
           txn.can?(:general_user, :cancel).should be_falsey
           txn.can?(:general_user, :delete).should be_falsey
           txn.can?(:general_user, :create).should be_falsey
           txn.can?(:general_user, :update).should be_falsey
 
-          txn.cannot?(:general_user, :cancel).should be_truthy
-          txn.cannot?(:general_user, :delete).should be_truthy
-          txn.cannot?(:general_user, :create).should be_truthy
-          txn.cannot?(:general_user, :update).should be_truthy
+          txn.cant?(:general_user, :cancel).should be_truthy
+          txn.cant?(:general_user, :delete).should be_truthy
+          txn.cant?(:general_user, :create).should be_truthy
+          txn.cant?(:general_user, :update).should be_truthy
         end
 
         it "can view transaction" do
           txn.can?(:general_user, :view).should be_truthy
-          txn.cannot?(:general_user, :view).should be_falsey
+          txn.cant?(:general_user, :view).should be_falsey
         end
 
         it "can print if transaction is settled" do
           txn.is_settled = true
           txn.can?(:general_user, :print).should be_truthy
-          txn.cannot?(:general_user, :print).should be_falsey
+          txn.cant?(:general_user, :print).should be_falsey
         end
 
         it "can't print if transaction is not settled" do
           txn.is_settled = false
           txn.can?(:general_user, :print).should be_falsey
-          txn.cannot?(:general_user, :print).should be_truthy
+          txn.cant?(:general_user, :print).should be_truthy
         end
       end
     end
@@ -538,13 +538,13 @@ describe "Model objections" do
           role :general_user, :finance_user, :monitoring do
             can :ask
           end
-          role "general user", can: [:view, :edit, :update], cannot: [:delete]
+          role "general user", can: [:view, :edit, :update], cant: [:delete]
           role "finance user" do
             can :update, :delete, :edit
             can :delete, :undelete, if: proc { |record| record.is_settled? }
           end # finance_user description
           role :monitoring do
-            cannot_all
+            cant_all
             can :monitor
           end
           role nil do
@@ -562,21 +562,21 @@ describe "Model objections" do
           roles1, roles2 = [nil, :supreme_user], [:supreme_user, nil]
 
           txn.can?(nil, :monitor).should be_falsey
-          txn.cannot?(nil, :monitor).should be_truthy
+          txn.cant?(nil, :monitor).should be_truthy
           txn.can?(roles1, :monitor).should be_truthy
           txn.can?(roles2, :monitor).should be_truthy
-          txn.cannot?(roles1, :monitor).should be_falsey
-          txn.cannot?(roles2, :monitor).should be_falsey
+          txn.cant?(roles1, :monitor).should be_falsey
+          txn.cant?(roles2, :monitor).should be_falsey
 
           txn.can?(roles1, :delete).should be_truthy
           txn.can?(roles2, :delete).should be_truthy
           txn.can?(roles1, :cancel).should be_truthy
           txn.can?(roles2, :cancel).should be_truthy
 
-          txn.cannot?(roles1, :delete).should be_falsey
-          txn.cannot?(roles2, :delete).should be_falsey
-          txn.cannot?(roles1, :cancel).should be_falsey
-          txn.cannot?(roles2, :cancel).should be_falsey
+          txn.cant?(roles1, :delete).should be_falsey
+          txn.cant?(roles2, :delete).should be_falsey
+          txn.cant?(roles1, :cancel).should be_falsey
+          txn.cant?(roles2, :cancel).should be_falsey
         end
 
         it "allows user with role of admin and finance user to delete regardless whether transaction is settled or not" do
@@ -584,17 +584,17 @@ describe "Model objections" do
 
           txn.is_settled = false
           txn.can?(:admin_user, :delete).should be_truthy
-          txn.cannot?(:admin_user, :delete).should be_falsey
+          txn.cant?(:admin_user, :delete).should be_falsey
           txn.can?(:finance_user, :delete).should be_falsey
-          txn.cannot?(:finance_user, :delete).should be_truthy
+          txn.cant?(:finance_user, :delete).should be_truthy
 
           [true, false].each do |settlement_status|
             txn.is_settled = settlement_status
 
             txn.can?(roles1, :delete).should be_truthy
             txn.can?(roles2, :delete).should be_truthy
-            txn.cannot?(roles1, :delete).should be_falsey
-            txn.cannot?(roles2, :delete).should be_falsey
+            txn.cant?(roles1, :delete).should be_falsey
+            txn.cant?(roles2, :delete).should be_falsey
           end
         end
 
@@ -604,27 +604,27 @@ describe "Model objections" do
           txn.is_settled = true
           txn.can?(roles1, :delete).should be_truthy
           txn.can?(roles2, :delete).should be_truthy
-          txn.cannot?(roles1, :delete).should be_falsey
-          txn.cannot?(roles2, :delete).should be_falsey
+          txn.cant?(roles1, :delete).should be_falsey
+          txn.cant?(roles2, :delete).should be_falsey
 
           txn.is_settled = false
           txn.can?(roles1, :delete).should be_falsey
           txn.can?(roles2, :delete).should be_falsey
-          txn.cannot?(roles1, :delete).should be_truthy
-          txn.cannot?(roles2, :delete).should be_truthy
+          txn.cant?(roles1, :delete).should be_truthy
+          txn.cant?(roles2, :delete).should be_truthy
         end
 
         it "allows user with role of finance and monitoring to monitor" do
           txn.can?(:finance_user, :monitor).should be_falsey
           txn.can?(:monitoring, :monitor).should be_truthy
-          txn.cannot?(:finance_user, :monitor).should be_truthy
-          txn.cannot?(:monitoring, :monitor).should be_falsey
+          txn.cant?(:finance_user, :monitor).should be_truthy
+          txn.cant?(:monitoring, :monitor).should be_falsey
 
           txn.can?([:monitoring, :finance_user], :monitor).should be_truthy
           txn.can?([:finance_user, :monitoring], :monitor).should be_truthy
 
-          txn.cannot?([:monitoring, :finance_user], :monitor).should be_falsey
-          txn.cannot?([:finance_user, :monitoring], :monitor).should be_falsey
+          txn.cant?([:monitoring, :finance_user], :monitor).should be_falsey
+          txn.cant?([:finance_user, :monitoring], :monitor).should be_falsey
         end
 
         # this also test that rules with decider described simultaneously
@@ -651,7 +651,7 @@ describe "Model objections" do
       context "general user" do
         it "can ask" do
           txn.can?(:general_user, :ask).should be_truthy
-          txn.cannot?("general user", :ask).should be_falsey
+          txn.cant?("general user", :ask).should be_falsey
         end
 
         it "can view transaction" do
@@ -666,14 +666,14 @@ describe "Model objections" do
           txn.can?(:general_user, :update).should be_truthy
         end
 
-        it "cannot delete transaction" do
+        it "cant delete transaction" do
           txn.can?("general user", :delete).should be_falsey
-          Bali::Integrator::RuleGroup.for(txn.class, "general user").get_rule(:cannot, :delete)
+          Bali::Integrator::RuleGroup.for(txn.class, "general user").get_rule(:cant, :delete)
             .class.should == Bali::Rule
         end
 
         context "undefined rule" do
-          it "cannot save transaction" do
+          it "cant save transaction" do
             txn.can?("general user", :save).should be_falsey
           end
         end
@@ -686,7 +686,7 @@ describe "Model objections" do
       context "finance user" do
         it "can ask" do
           txn.can?("finance user", :ask).should be_truthy
-          txn.cannot?(:finance_user, :ask).should be_falsey
+          txn.cant?(:finance_user, :ask).should be_falsey
         end
 
         it "can update and edit transaction" do
@@ -694,7 +694,7 @@ describe "Model objections" do
           txn.can?(:finance_user, :edit).should be_truthy
         end
 
-        it "cannot delete when transaction is not settled" do
+        it "cant delete when transaction is not settled" do
           txn.is_settled = false
           txn.can?(:finance_user, :delete).should be_falsey
         end
@@ -719,12 +719,12 @@ describe "Model objections" do
           txn.can?(:admin_user, :delete).should be_truthy
         end
 
-        it "cannot cancel transaction if it is not a credit card payment" do
+        it "cant cancel transaction if it is not a credit card payment" do
           txn.payment_channel = "BANK_IN"
           txn.can?(:admin_user, :cancel).should be_falsey
         end
 
-        it "cannot cancel credit card transaction if it is already settled" do
+        it "cant cancel credit card transaction if it is already settled" do
           txn.is_settled = true
           txn.payment_channel = "CREDIT_CARD"
           txn.can?(:admin_user, :cancel).should be_falsey
@@ -761,18 +761,18 @@ describe "Model objections" do
         My::Transaction.can?(nil, :save).should be_falsey
       end
 
-      it "can answer to cannot?" do
-        My::Transaction.cannot?(:supreme_user, :delete).should be_falsey
-        My::Transaction.cannot?(:admin_user, :delete).should be_falsey
-        My::Transaction.cannot?(:general_user, :edit).should be_falsey
-        My::Transaction.cannot?(:general_user, :view).should be_falsey
-        My::Transaction.cannot?(:general_user, :delete).should be_truthy
-        My::Transaction.cannot?(:finance_user, :update).should be_falsey
-        My::Transaction.cannot?(:finance_user, :new).should be_truthy
-        My::Transaction.cannot?(:monitoring, :read).should be_truthy
-        My::Transaction.cannot?(:monitoring, :monitor).should be_falsey
-        My::Transaction.cannot?(nil, :view).should be_falsey
-        My::Transaction.cannot?(nil, :save).should be_truthy
+      it "can answer to cant?" do
+        My::Transaction.cant?(:supreme_user, :delete).should be_falsey
+        My::Transaction.cant?(:admin_user, :delete).should be_falsey
+        My::Transaction.cant?(:general_user, :edit).should be_falsey
+        My::Transaction.cant?(:general_user, :view).should be_falsey
+        My::Transaction.cant?(:general_user, :delete).should be_truthy
+        My::Transaction.cant?(:finance_user, :update).should be_falsey
+        My::Transaction.cant?(:finance_user, :new).should be_truthy
+        My::Transaction.cant?(:monitoring, :read).should be_truthy
+        My::Transaction.cant?(:monitoring, :monitor).should be_falsey
+        My::Transaction.cant?(nil, :view).should be_falsey
+        My::Transaction.cant?(nil, :save).should be_truthy
       end
     end
 
@@ -793,27 +793,27 @@ describe "Model objections" do
       context "general user" do
         it "can view transaction" do
           expect(stxn.can?(:general_user, :view)).to be_truthy
-          expect(stxn.cannot?(:general_user, :view)).to be_falsey
+          expect(stxn.cant?(:general_user, :view)).to be_falsey
         end
 
         it "canot ask" do
           expect(stxn.can?(:general_user, :ask)).to be_falsey
-          expect(stxn.cannot?(:general_user, :ask)).to be_truthy
+          expect(stxn.cant?(:general_user, :ask)).to be_truthy
         end
 
-        it "cannot edit" do
+        it "cant edit" do
           expect(stxn.can?(:general_user, :edit)).to be_falsey
-          expect(stxn.cannot?(:general_user, :edit)).to be_truthy
+          expect(stxn.cant?(:general_user, :edit)).to be_truthy
         end
 
-        it "cannot delete" do
+        it "cant delete" do
           expect(stxn.can?(:general_user, :delete)).to be_falsey
-          expect(stxn.cannot?(:general_user, :delete)).to be_truthy
+          expect(stxn.cant?(:general_user, :delete)).to be_truthy
         end
 
-        it "cannot edit" do
+        it "cant edit" do
           expect(stxn.can?(:general_user, :edit)).to be_falsey
-          expect(stxn.cannot?(:general_user, :edit)).to be_truthy
+          expect(stxn.cant?(:general_user, :edit)).to be_truthy
         end
       end
     end
@@ -831,12 +831,12 @@ describe "Model objections" do
               }
             end
             role :general_user do
-              cannot :update, :edit
+              cant :update, :edit
             end
             role :finance_user do
-              cannot :delete
+              cant :delete
             end
-            role(nil) { cannot_all }
+            role(nil) { cant_all }
           end
         end # map_rules
       end # before
@@ -846,7 +846,7 @@ describe "Model objections" do
       context "admin user" do
         it "can edit" do
           expect(stxn.can?(:admin_user, :edit)).to be_truthy
-          # expect(stxn.cannot?(:admin_user, :edit)).to be_falsey
+          # expect(stxn.cant?(:admin_user, :edit)).to be_falsey
         end
 
         it "can cancel only if payment channel is credit card, and it is not settled, and admin have had 3 years experience" do
@@ -857,21 +857,21 @@ describe "Model objections" do
           stxn.is_settled = false
 
           expect(stxn.can?(emp, :cancel)).to be_truthy
-          expect(stxn.cannot?(emp, :cancel)).to be_falsey
+          expect(stxn.cant?(emp, :cancel)).to be_falsey
 
           emp.exp_years = 2
           expect(stxn.can?(emp, :cancel)).to be_falsey
-          expect(stxn.cannot?(emp, :cancel)).to be_truthy
+          expect(stxn.cant?(emp, :cancel)).to be_truthy
           emp.exp_years = 3
 
           stxn.payment_channel = "VIRTUAL_ACCOUNT"
           expect(stxn.can?(emp, :cancel)).to be_falsey
-          expect(stxn.cannot?(emp, :cancel)).to be_truthy
+          expect(stxn.cant?(emp, :cancel)).to be_truthy
           stxn.payment_channel = "CREDIT_CARD"
 
           stxn.is_settled = true
           expect(stxn.can?(emp, :cancel)).to be_falsey
-          expect(stxn.cannot?(emp, :cancel)).to be_truthy
+          expect(stxn.cant?(emp, :cancel)).to be_truthy
           stxn.is_settled = false
 
           expect(stxn.can?(emp, :cancel)).to be_truthy
@@ -879,48 +879,48 @@ describe "Model objections" do
       end
 
       context "general user" do
-        it "cannot update" do
+        it "cant update" do
           expect(stxn.can?(:general_user, :update)).to be_falsey
-          expect(stxn.cannot?(:general_user, :update)).to be_truthy
+          expect(stxn.cant?(:general_user, :update)).to be_truthy
         end
 
-        it "cannot edit" do
+        it "cant edit" do
           expect(stxn.can?(:general_user, :edit)).to be_falsey
-          expect(stxn.cannot?(:general_user, :edit)).to be_truthy
+          expect(stxn.cant?(:general_user, :edit)).to be_truthy
         end
 
         it "can view" do
           expect(stxn.can?(:general_user, :view)).to be_truthy
-          expect(stxn.cannot?(:general_user, :view)).to be_falsey
+          expect(stxn.cant?(:general_user, :view)).to be_falsey
         end
 
         it "can ask" do
           expect(stxn.can?(:general_user, :ask)).to be_truthy
-          expect(stxn.cannot?(:general_user, :ask)).to be_falsey
+          expect(stxn.cant?(:general_user, :ask)).to be_falsey
         end
       end
 
       context "monitoring" do
         it "can monitor" do
           expect(stxn.can?(:monitoring, :monitor)).to be_truthy
-          expect(stxn.cannot?(:monitoring, :monitor)).to be_falsey
+          expect(stxn.cant?(:monitoring, :monitor)).to be_falsey
         end
       end
 
       context "finance user" do
         it "can update" do
           expect(stxn.can?(:finance_user, :update)).to be_truthy
-          expect(stxn.cannot?(:finance_user, :update)).to be_falsey
+          expect(stxn.cant?(:finance_user, :update)).to be_falsey
         end
 
         it "can edit" do
           expect(stxn.can?(:finance_user, :edit)).to be_truthy
-          expect(stxn.cannot?(:finance_user, :edit)).to be_falsey
+          expect(stxn.cant?(:finance_user, :edit)).to be_falsey
         end
 
-        it "cannot delete" do
+        it "cant delete" do
           expect(stxn.can?(:finance_user, :delete)).to be_falsey
-          expect(stxn.cannot?(:finance_user, :delete)).to be_truthy
+          expect(stxn.cant?(:finance_user, :delete)).to be_truthy
         end
       end
     end
@@ -930,26 +930,26 @@ describe "Model objections" do
     Bali.map_rules do
       rules_for My::Transaction do
         role :user do
-          cannot_all
+          cant_all
           can :show
 
-          cannot :edit
+          cant :edit
           can :edit
 
           can :update
-          cannot :update
+          cant :update
         end
       end
     end
 
     txn = My::Transaction.new
     txn.can?(:user, :show).should be_truthy
-    txn.cannot?(:user, :show).should be_falsey
+    txn.cant?(:user, :show).should be_falsey
 
     txn.can?(:user, :edit).should be_truthy
-    txn.cannot?(:user, :edit).should be_falsey
+    txn.cant?(:user, :edit).should be_falsey
 
     txn.can?(:user, :update).should be_falsey
-    txn.cannot?(:user, :update).should be_truthy
+    txn.cant?(:user, :update).should be_truthy
   end
 end

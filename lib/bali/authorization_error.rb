@@ -1,4 +1,4 @@
-# Error that will be raised when subtarget cannot do something he wanted to do,
+# Error that will be raised when subtarget cant do something he wanted to do,
 # or when subtarget do something he should not be allowed to do.
 class Bali::AuthorizationError < Bali::Error
   attr_accessor :operation

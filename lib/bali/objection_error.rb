@@ -1,3 +1,3 @@
-# this error is thrown when objection is cannot be executed
+# this error is thrown when objection is cant be executed
 class Bali::ObjectionError < Bali::Error
 end

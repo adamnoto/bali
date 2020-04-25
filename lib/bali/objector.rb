@@ -11,15 +11,8 @@ module Bali::Objector
     self.class.can?(subtargets, operation, self)
   end
 
-  # check whether user can/cant perform an operation, return true when negative
-  # or false otherwise
-  def cannot?(subtargets, operation)
-    self.class.cannot?(subtargets, operation, self)
-  end
-
   def cant?(subtargets, operation)
-    puts "Deprecation Warning: please use cannot? instead, cant? will be deprecated on major release 3.0"
-    cannot?(subtargets, operation)
+    self.class.cant?(subtargets, operation, self)
   end
 end
 
@@ -67,7 +60,7 @@ module Bali::Objector::Statics
     end
   end
 
-  def cannot?(subtarget_roles, operation, record = self, options = {})
+  def cant?(subtarget_roles, operation, record = self, options = {})
     subs = bali_translate_subtarget_roles subtarget_roles
     original_subtarget = options[:original_subtarget].nil? ? subtarget_roles : options[:original_subtarget]
 
@@ -78,7 +71,7 @@ module Bali::Objector::Statics
     subs.each do |subtarget|
       next if judgement_value == false
 
-      judge = Bali::Judger::Judge.build(:cannot, {
+      judge = Bali::Judger::Judge.build(:cant, {
         subtarget: subtarget,
         original_subtarget: original_subtarget,
         operation: operation,
@@ -100,10 +93,5 @@ module Bali::Objector::Statics
     else
       raise Bali::ObjectionError, e.message, e.backtrace
     end
-  end
-
-  def cant?(subtarget_roles, operation)
-    puts "Deprecation Warning: please use cannot? instead, cant? will be deprecated on major release 3.0"
-    cannot?(subtarget_roles, operation)
   end
 end
