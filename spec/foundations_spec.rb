@@ -239,14 +239,7 @@ describe "Bali foundations" do
       expect(rule.has_decider?).to be_falsey
 
       rule.decider = -> { true }
-
-      expect { rule.decider_type = :if }.to_not raise_error
       expect(rule.has_decider?).to be_truthy
-      rule.decider_type.should == :if
-
-      expect { rule.decider_type = :unless }.to_not raise_error
-      expect(rule.has_decider?).to be_truthy
-      rule.decider_type.should == :unless
     end
 
     context "based on auth_val" do

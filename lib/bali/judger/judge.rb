@@ -294,35 +294,11 @@ module Bali::Judger
         decider = rule.decider
         case decider.arity
         when 0
-          if rule.decider_type == :if
-            return decider.() ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.()
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
+          return decider.() ? BALI_TRUE : BALI_FALSE
         when 1
-          if rule.decider_type == :if
-            return decider.(record) ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.(record)
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
+          return decider.(record) ? BALI_TRUE : BALI_FALSE
         when 2
-          if rule.decider_type == :if
-            return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
-          elsif rule.decider_type == :unless
-            unless decider.(record, original_subtarget)
-              return BALI_TRUE
-            else
-              return BALI_FALSE
-            end
-          end
+          return decider.(record, original_subtarget) ? BALI_TRUE : BALI_FALSE
         end
       end
   end # class

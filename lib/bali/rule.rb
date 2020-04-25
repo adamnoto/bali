@@ -8,8 +8,6 @@ class Bali::Rule
 
   # if decider is defined, a rule is executed only if decider evaluates to true
   attr_accessor :decider
-  # either unless or if
-  attr_reader :decider_type
 
   def initialize(auth_val, operation)
     self.auth_val = auth_val
@@ -20,7 +18,6 @@ class Bali::Rule
   def clone
     cloned_rule = Bali::Rule.new(auth_val, operation)
     cloned_rule.decider = decider if decider
-    cloned_rule.decider_type = decider_type if decider_type
 
     cloned_rule
   end
@@ -36,19 +33,11 @@ class Bali::Rule
     end
   end
 
-  def decider_type=(dectype)
-    if dectype == :if || dectype == :unless
-      @decider_type = dectype
-    else
-      raise Bali::DslError, "decider type not allowed"
-    end
-  end
-
   def is_discouragement?
     self.auth_val == :cant
   end
 
   def has_decider?
-    self.decider.is_a?(Proc) && !self.decider_type.nil?
+    self.decider.is_a?(Proc)
   end
 end

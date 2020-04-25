@@ -12,9 +12,8 @@ module Bali
         condition_type = conditional_hash.keys[0].to_s.downcase
         condition_type_symb = condition_type.to_sym
 
-        if condition_type_symb == :if || condition_type_symb == :unless
+        if condition_type_symb == :if
           rule.decider = conditional_hash.values[0]
-          rule.decider_type = condition_type_symb
         end
         nil
       end
