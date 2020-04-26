@@ -38,7 +38,7 @@ Given a model as follows:
 
 ```ruby
 class Transaction
-  include Bali::Objector
+  include Bali::Authorizer
 
   attr_accessor :is_settled
   attr_accessor :payment_channel

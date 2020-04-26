@@ -9,8 +9,8 @@ end
 
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
-generators = "#{__dir__}/generators"
-loader.ignore(generators)
+loader.ignore("#{__dir__}/generators")
+loader.ignore("#{__dir__}/bali/activerecord.rb")
 loader.setup
 
 module Bali
@@ -33,7 +33,10 @@ module Bali
     yield config
   end
 
-  require "bali/railtie" if defined? Rails
+  if defined? Rails
+    require "bali/railtie"
+    require "bali/activerecord"
+  end
 end
 
 loader.eager_load

@@ -1,5 +1,5 @@
 class User
-  include Bali::Objector
+  include Bali::Authorizer
 
   attr_accessor :role
   attr_accessor :friends

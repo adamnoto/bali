@@ -9,7 +9,7 @@ end
 
 module My
   class Transaction
-    include Bali::Objector
+    include Bali::Authorizer
 
     attr_accessor :is_settled
     attr_accessor :payment_channel
@@ -22,7 +22,7 @@ module My
   end
 
   class Employee
-    include Bali::Objector
+    include Bali::Authorizer
 
     # number of experience in the company
     attr_accessor :exp_years

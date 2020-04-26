@@ -1,8 +1,6 @@
-# module that will be included in each instantiated target classes as defined
-# in map_rules
-module Bali::Objector
+module Bali::Authorizer
   def self.included(base)
-    base.extend Bali::Objector::Statics
+    base.extend Bali::Authorizer::Statics
   end
 
   def can?(actor_or_roles, operation = nil)
@@ -15,7 +13,7 @@ module Bali::Objector
 end
 
 # to allow class-level objection
-module Bali::Objector::Statics
+module Bali::Authorizer::Statics
   def can?(actor_or_roles, operation, record = self)
     Bali::Judge.check(:can, actor_or_roles, operation, record)
   end
