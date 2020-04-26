@@ -35,7 +35,7 @@ class Bali::Judge
       end
 
       judgement_value = default_value = term == :can ? false : true
-      roles = Bali::RoleExtractor.new(actor_or_roles).get_roles
+      roles = Bali::Role.formalize actor_or_roles
 
       roles.each do |role|
         judge = Bali::Judge.new(
@@ -118,7 +118,7 @@ class Bali::Judge
     end
 
     # return fuzy if otherly rule defines contrary to this term
-    if our_holy_judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.get_rule(reversed_term, operation))
+    if our_holy_judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.find_rule(reversed_term, operation))
       if rule_group && (rule_group.can_all? || rule_group.cant_all?)
         # don't overwrite our holy judgement with fuzy value if rule group
         # zeus/plant, because zeus/plant is more definite than any fuzy values
@@ -153,9 +153,12 @@ class Bali::Judge
       record.is_a?(Class) ? record : record.class
     end
 
-    def rule_group_for(subtarget)
-      rule_class = Bali::RuleClass.for(record_class)
-      rule_class.nil? ? nil : rule_class.rules_for(subtarget)
+    def ruler
+      @ruler ||= Bali::Ruler.for record_class
+    end
+
+    def rule_group_for(role)
+      ruler.nil? ? nil : ruler[role]
     end
 
     def rule_group
@@ -163,7 +166,7 @@ class Bali::Judge
     end
 
     def other_rule_group
-      @other_rule_group ||= rule_group_for "__*__"
+      @other_rule_group ||= rule_group_for nil
     end
 
     def no_rule_group?
@@ -172,11 +175,11 @@ class Bali::Judge
 
     def rule
       # rule group may be nil, for when user checking for undefined rule group
-      @rule ||= rule_group&.get_rule(term, operation)
+      @rule ||= rule_group ? rule_group.find_rule(term, operation) : nil
     end
 
     def otherly_rule
-      @otherly_rule ||= other_rule_group&.get_rule(term, operation)
+      @otherly_rule ||= other_rule_group ? other_rule_group.find_rule(term, operation) : nil
     end
 
     def cross_check_judge

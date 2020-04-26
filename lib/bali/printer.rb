@@ -15,13 +15,10 @@ module Bali::Printer
     Bali::RULE_CLASS_MAP.each do |klass, rule_class|
       output << "===== #{klass.to_s} =====\n\n"
 
-      rule_class.rule_groups.each do |subtarget, rule_group|
-        print_rule_group(rule_group, output)
+      rule_class.roles.each do |subtarget, role|
+        print_role role, output
       end
 
-      if rule_class.others_rule_group.rules.any?
-        print_rule_group(rule_class.others_rule_group, output)
-      end
       output << "\n\n"
     end
 
@@ -31,11 +28,10 @@ module Bali::Printer
     output.string
   end
 
-  def print_rule_group(rule_group, target_io)
-    target = rule_group.target.to_s
-    subtarget = rule_group.subtarget.to_s.capitalize
-    subtarget = "Others" if subtarget == "__*__"
-    can_all = rule_group.can_all?
+  def print_role role, target_io
+    subtarget = role.subtarget.to_s.capitalize
+    subtarget = "By default" if subtarget.blank?
+    can_all = role.can_all?
     counter = 0
 
     target_io << "#{SEPARATOR}#{subtarget}\n"
@@ -45,9 +41,9 @@ module Bali::Printer
       target_io << "#{SEPARATOR}  #{counter+=1}. #{subtarget} can do anything except if explicitly stated otherwise\n"
     end
 
-    rule_group.rules.each do |rule|
+    role.rules.each do |rule|
       written_rule = StringIO.new
-      written_rule << "#{SEPARATOR}  #{counter+=1}. #{subtarget} #{rule.term} #{rule.operation} #{target}"
+      written_rule << "#{SEPARATOR}  #{counter+=1}. #{subtarget} #{rule.term} #{rule.operation}"
       if rule.conditional?
         written_rule << ", with condition"
       end

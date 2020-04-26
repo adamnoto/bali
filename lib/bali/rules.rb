@@ -1,7 +1,7 @@
 class Bali::Rules
   class << self
-    attr_writer :current_rule_group
-    attr_accessor :current_rule_class
+    attr_writer :current_role
+    attr_reader :ruler
   end
 
   def self.model_class
@@ -20,11 +20,11 @@ class Bali::Rules
   end
 
   def self.cant_all(*args)
-    current_rule_group.can_all = false
+    current_role.can_all = false
   end
 
   def self.can_all(*args)
-    current_rule_group.can_all = true
+    current_role.can_all = true
   end
 
   def self.role(*roles)
@@ -39,31 +39,29 @@ class Bali::Rules
     end
   end
 
-  def self.current_rule_group
-    @current_rule_group ||= set_role "__*__"
+  def self.current_role
+    @current_role ||= set_role nil
   end
 
-  def self.current_rule_class
-    @current_rule_class ||= begin
-      rule_class = Bali::RuleClass.new(model_class)
+  def self.ruler
+    @ruler ||= begin
+      rule_class = Bali::Ruler.new(model_class)
       Bali::RULE_CLASS_MAP[model_class.to_s] = rule_class
       rule_class
     end
   end
 
   def self.set_role(role)
-    rule_group = current_rule_class.rules_for(role) ||
-      Bali::RuleGroup.new(model_class, role)
-
-    current_rule_class.add_rule_group rule_group
-    @current_rule_group = rule_group
+    role = ruler[role] || Bali::Role.new(role)
+    ruler << role
+    @current_role = role
   end
 
   def self.add(term, *operations, block)
     operations.each do |operation|
       rule = Bali::Rule.new(term, operation)
       rule.conditional = block if block
-      current_rule_group.add_rule(rule)
+      current_role << rule
     end
   end
 

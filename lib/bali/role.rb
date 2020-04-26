@@ -1,37 +1,35 @@
-class Bali::RuleGroup
+class Bali::Role
   RIGHTS = [
     INHERIT = :inherit,
     DEFAULT_DENY = :default_deny,
     DEFAULT_ALLOW = :default_allow
   ].freeze
 
-  # the target class
-  attr_accessor :target
-
-  # the user to which this rule group is applied
   attr_accessor :subtarget
-
-  # what can be done and what cant be done
   attr_accessor :cans, :cants
 
-  # if set to true then the subtarget, by default, can do everything
   attr_accessor :can_all
   alias :can_all? :can_all
 
   attr_accessor :right_level
 
-  # allowing "general user" and :general_user to route to the same rule group
-  def self.canon_name(subtarget)
-    if subtarget.is_a?(String)
-      return subtarget.gsub(" ", "_").to_sym
+  def self.formalize(object)
+    case object
+    when String then [object]
+    when Symbol then [object]
+    when NilClass then [object]
+    when Array then object
     else
-      return subtarget
+      kls_name = object.class.to_s
+      method_name = Bali::TRANSLATED_SUBTARGET_ROLES[kls_name]
+      roles = method_name ? formalize(object.send(method_name)) : formalize(nil)
+
+      roles
     end
   end
 
-  def initialize(target, subtarget)
-    @target = target
-    @subtarget = Bali::RuleGroup.canon_name(subtarget)
+  def initialize(subtarget)
+    @subtarget = subtarget&.to_sym
     @right_level = INHERIT
 
     @cans = {}
@@ -53,7 +51,7 @@ class Bali::RuleGroup
     end
   end
 
-  def add_rule(rule)
+  def << rule
     # operation cant be defined twice
     operation = rule.operation.to_sym
 
@@ -68,7 +66,7 @@ class Bali::RuleGroup
     end
   end
 
-  def get_rule(term, operation)
+  def find_rule(term, operation)
     case term
     when :can then cans[operation.to_sym]
     when :cant then cants[operation.to_sym]
