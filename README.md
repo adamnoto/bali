@@ -13,11 +13,7 @@ Why I created Bali?
 
 ## Installation
 
-It can be installed directly by using bundler's install:
-
-    $ gem install bali
-
-Otherwise, if you are using a framework such as Rails, you can add this into your gemfile:
+Add this into your gemfile:
 
 ```ruby
 gem 'bali'
@@ -26,6 +22,12 @@ gem 'bali'
 And then execute:
 
     $ bundle
+
+To generate a rule class for `User` model:
+
+    $ bundle rails g rules user
+
+You can change `User` with any name of your model to define rules on
 
 ## Usage
 

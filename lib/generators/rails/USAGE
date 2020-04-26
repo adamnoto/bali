@@ -1,0 +1,8 @@
+Description:
+    Stubs out a rule class in app/rules directory.
+
+Examples:
+    `rails g rules book`
+
+    This creates:
+        app/rules/book_rules.rb

@@ -2,12 +2,15 @@ require_relative "bali/version"
 
 begin
   require "rails"
+  require "rails/generators"
 rescue LoadError => e
   # ignores
 end
 
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
+generators = "#{__dir__}/generators"
+loader.ignore(generators)
 loader.setup
 
 module Bali
