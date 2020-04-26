@@ -82,10 +82,11 @@
 
 1. rules_for accepting String instead of consanttised class name, in case the class is not yet loaded
 
-== Version 3.0.0rc (May 1, 2020)
+== Version 6.0.0rc (Apr 26, 2020)
 
 1. Integration with Rails is expected
 2. Removed bang methods: `can!`, `cannot!`. `can?` and `cant?` should be enough. User can raise an error by themselves as necessary.
 3. Change back from `cannot` to `cant`
 4. Removing: `Bali.map_rules` and its auxiliary functions
 5. Use class for defining rules
+6. Hook to ActiveModel without having to include `Bali::Authorizer`
