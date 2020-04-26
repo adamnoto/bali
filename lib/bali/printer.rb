@@ -22,8 +22,7 @@ module Bali::Printer
       output << "\n\n"
     end
 
-    output << "\n\n"
-    output << DateTime.now.strftime("Printed at %d-%m-%Y %I:%M%p %Z")
+    output << DateTime.now.strftime("Printed at %Y-%m-%d %I:%M%p %Z")
 
     output.string
   end
@@ -50,7 +49,5 @@ module Bali::Printer
       written_rule << "\n"
       target_io << written_rule.string
     end
-
-    target_io << "\n"
   end
 end
