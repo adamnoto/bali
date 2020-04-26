@@ -5,7 +5,6 @@ describe Bali::Printer do
 
   def expect_fixture_match text, fixture_name
     fixture_path = File.expand_path(__FILE__ + "/../fixtures/#{fixture_name}")
-    # binding.pry
 
     if File.exists? fixture_path
       expect(text).to eq File.read(fixture_path)
