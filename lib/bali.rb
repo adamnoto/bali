@@ -1,14 +1,17 @@
 require_relative "bali/version"
 
-# load the DSL syntax maker definition, ordered by proper order of invocation
-require_relative "bali/dsl/map_rules_dsl"
-require_relative "bali/dsl/rules_for_dsl"
+begin
+  require "rails"
+  require "rails/generators"
+rescue LoadError => e
+  # ignores
+end
 
-require_relative "bali/objector"
-require_relative "bali/printer"
-
-require_relative "bali/foundations/all_foundations"
-require_relative "bali/integrators/all_integrators"
+require "zeitwerk"
+loader = Zeitwerk::Loader.for_gem
+loader.ignore("#{__dir__}/generators")
+loader.ignore("#{__dir__}/bali/activerecord.rb")
+loader.setup
 
 module Bali
   # mapping class to a RuleClass
@@ -21,13 +24,19 @@ module Bali
   TRANSLATED_SUBTARGET_ROLES = {}
 
   extend self
-  def map_rules(&block)
-    dsl_map_rules = Bali::MapRulesDsl.new
-    dsl_map_rules.instance_eval(&block)
+
+  def config
+    @config ||= Bali::Config.new
   end
 
-  def clear_rules
-    Bali::RULE_CLASS_MAP.clear
-    true
+  def configure
+    yield config
+  end
+
+  if defined? Rails
+    require "bali/railtie"
+    require "bali/activerecord"
   end
 end
+
+loader.eager_load

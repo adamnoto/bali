@@ -1,8 +1,15 @@
-require_relative 'spec_helper'
+require_relative "./models/transaction"
+require_relative "./models/user"
+require_relative "./rules/transaction_rules"
+require_relative "./rules/user_rules"
+
+Bali.configure do |config|
+  config.rules_path = File.expand_path(__FILE__ + "/../rules/")
+end
 
 module My
   class Transaction
-    include Bali::Objector
+    include Bali::Authorizer
 
     attr_accessor :is_settled
     attr_accessor :payment_channel
@@ -15,7 +22,7 @@ module My
   end
 
   class Employee
-    include Bali::Objector
+    include Bali::Authorizer
 
     # number of experience in the company
     attr_accessor :exp_years

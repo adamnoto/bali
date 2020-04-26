@@ -6,13 +6,15 @@ begin
   if defined?(SimpleCov)
     SimpleCov.start
   end
-rescue LoadError => e 
+rescue LoadError => e
   # ignores
 end
 
 require "bundler/setup"
 require 'bali'
 require 'rspec'
+require "pry"
+require "bali_spec"
 
 RSpec.configure do |config|
   config.mock_with :rspec
@@ -25,4 +27,12 @@ RSpec.configure do |config|
     c.syntax = [:should, :expect]
   end
 
+end
+
+def expect_can operation
+  expect(subject.can?(user, operation)).to be_truthy
+end
+
+def expect_cant operation
+  expect(subject.can?(user, operation)).to be_falsey
 end

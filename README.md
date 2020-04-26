@@ -4,17 +4,19 @@
 
 [![Code Climate](https://codeclimate.com/github/saveav/bali/badges/gpa.svg)](https://codeclimate.com/github/saveav/bali)
 
-Bali is a powerful, framework-agnostic, thread-safe Ruby language authorization library. It is a universal authorization library, in the sense that it does not assume you to use specific Ruby library/gem/framework in order for successful use of this gem.
+Bali is a to-the-point authorization library for Rails. Bali is short for Bulwark Authorization Library.
 
-Bali is short for Bulwark Authorization Library.
+Why I created Bali?
+
+- I wasn't able to segment rules per roles
+- I want to break free from defining rules to match a controller's actions
+- I want to allow single, or multiple (or, even no) roles to be assigned to a user
+- I want inheritable system of defining the access/authorization rules
+- I want that I can easily print the list of roles possible in my app
 
 ## Installation
 
-It can be installed directly by using bundler's install:
-
-    $ gem install bali
-
-Otherwise, if you are using a framework such as Rails, you can add this into your gemfile:
+Add this into your gemfile:
 
 ```ruby
 gem 'bali'
@@ -24,130 +26,137 @@ And then execute:
 
     $ bundle
 
-## Deprecation notice
+To generate a rule class for `User` model:
 
-1. `cant` and `cant_all` which are used to declare rules will be deprecated on version 3.0, in favor of `cannot` and `cannot_all`. The reason behind this is that `can` and `cant` only differ by 1 letter, it is thought to be better to make it less ambiguous.
-2. `cant?` and subsequently new-introduced `cant!` will be deprecated on version 3.0, in favor of `cannot?` and `cannot!` for the same reason as above.
-3. Since version 2.1.3, `describe` block is replaced with `role` block. `describe` block will be deprecated on version 3.0.
+    $ bundle rails g rules user
+
+You can change `User` with any name of your model to define rules on
 
 ## Usage
 
-Please access [wiki pages](https://github.com/saveav/bali/wiki) for a more detailed, guided explanation, and see what Bali can do. This usage is a simple demonstration what average, standard use of Bali would looks like.
-
-Say:
+Given a model as follows:
 
 ```ruby
-class My::Transaction
-  include Bali::Objector
+class Transaction
+  include Bali::Authorizer
 
   attr_accessor :is_settled
   attr_accessor :payment_channel
 
-  alias :is_settled? :is_settled
-end
-
-class My::Employee
-  include Bali::Objector
-
-  # working experience in the company
-  attr_accessor :exp_years
-
-  # role/roles of this employee
-  attr_accessor :roles
+  alias :settled? :is_settled
+  alias :settled= :is_settled=
 end
 ```
 
-Your task is to define rule, with context to `My::Transaction` object, in which:
-
-1. Supreme user can do everything
-2. Admin user can do everything, but:
-   - Can only cancel transaction if the transaction is done using credit card, and the transaction itself is not settled yet
-3. General user can:
-   - Download transaction
-4. Finance user can:
-   - Index transaction
-   - Download transaction
-   - Delete transaction if the transaction is settled
-   - Cancel transaction if the transaction is settled
-5. Monitoring user can:
-   - Index transaction
-   - Download transaction
-6. Sales team can:
-   - Index transaction
-   - Download transaction
-6. Unlogged in user can:
-   - Index transaction
-   - Download transaction
-   - Report fraud
-7. Guest user can:
-   - Index transaction
-   - Download transaction
-   - Report fraud
-
-The specification above seems very terrifying, but with Bali, those can be defined in a succinct way, as follow:
+We can define the rules this way:
 
 ```ruby
-  Bali.map_rules do
-    rules_for My::Transaction do
-      role(:supreme_user) { can_all }
-      role :admin_user do
-        can_all
-        # a more specific rule would be executed even if can_all is present
-        can :cancel,
-          if: proc { |record| record.payment_channel == "CREDIT_CARD" &&
-                              !record.is_settled? }
-      end
-      role "general user", can: [:download]
-      role "finance" do
-        can :delete, if: proc { |record| record.is_settled? }
-        can :cancel, unless: proc { |record| record.is_settled? }
-      end # finance_user description
-      role :guest, nil { can :report_fraud }
-      role :client do
-        can :create
-      end
-      others do
-        cannot_all
-        can :download, :index
-        cannot :create
-      end
-    end # rules_for
+class TransactionRules < Bali::Rules
+  can :update, :unsettle
+  can :print
+
+  # redefine :delete
+  can :unsettle do |record|
+    record.settled?
   end
+
+  # will inherit update, and print
+  role :supervisor, :accountant do
+    can :unsettle
+  end
+
+  role :accountant do
+    cant :update
+  end
+
+  role :supervisor do
+    can :comment
+  end
+
+  role :clerk do
+    cant_all
+    can :unsettle
+  end
+
+  role :admin do
+    can_all
+  end
+end
 ```
 
-## Can and Cant? testing
-
-Assuming that there exist a variable `transaction` which is an instance of `My::Transaction`:
+To ask for authorization:
 
 ```ruby
-transaction.cant?(:general_user, :delete)         # => false
-transaction.can("general user", :download)        # => true
-transaction.can?(:finance, :delete)               # depends on context
-transaction.can?(:monitoring, :index)             # => true
-transaction.can?(:sales, :download)               # => true
-transaction.can?(:admin_user, :cancel)            # depends on context
-transaction.can?(:supreme_user, :cancel)          # => true
-transaction.can?(:guest, :download)               # => false
-transaction.can?(nil, :download)                  # => true
-transaction.can?(nil, :report_fraud)              # => true
-transaction.can?(:undefined_subtarget, :see)      # => false
-transaction.cant?(:undefined_subtarget, :index)   # => true
-transaction.can?(:client, :create)                # => true
-transaction.can?(:finance, :create)               # => false
-transaction.can?(:admin, :create)                 # => true
+transaction = Transaction.new
+transaction.can?(current_user, :update)
 ```
 
-Rule can also be tested on a class:
+Passing `current_user` is optional. This is also possible:
 
 ```ruby
-My::Transaction.can?(:client, :create)              # => true
-My::Transaction.can?(:guest, :create)               # => false
-My::Employee.can?(:undefined_subtarget, :create)    # => false
+transaction.can?(:archive)
+```
+
+It can also works on a class:
+
+```ruby
+User.can?(:sign_up)
+```
+
+For more coding example to better understand Bali, we would encourage you to take a look at the written spec files.
+
+## Printing defined roles
+
+```ruby
+puts Bali::Printer.pretty_print
+```
+
+Or execute:
+
+```
+$ rails bali:print_rules
+```
+
+Will print, for example, this definition:
+
+```
+===== Transaction =====
+
+      By default
+      --------------------------------------------------------------------------------
+        1. By default can update
+        2. By default can unsettle, with condition
+        3. By default can print
+      Supervisor
+      --------------------------------------------------------------------------------
+        1. Supervisor can unsettle
+        2. Supervisor can comment
+      Accountant
+      --------------------------------------------------------------------------------
+        1. Accountant can unsettle
+        2. Accountant cant update
+      Clerk
+      --------------------------------------------------------------------------------
+        1. Clerk can unsettle
+      Admin
+      --------------------------------------------------------------------------------
+        1. Admin can do anything except if explicitly stated otherwise
+
+
+===== User =====
+
+      By default
+      --------------------------------------------------------------------------------
+        1. By default can see_timeline, with condition
+        2. By default can sign_in, with condition
+
+
+Printed at 2020-01-01 12:34AM +00:00
 ```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/saveav/bali. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
 
 ## License
 
