@@ -5,7 +5,7 @@ module Rspec
 
       def create_spec_file
         template "rules_spec.rb",
-          File.join(Bali.config.rules_path, "#{file_name}_#{Bali.config.suffix.downcase}_spec.rb")
+          File.join("spec/rules", class_path, "#{file_name}_#{Bali.config.suffix.downcase}_spec.rb")
       end
     end
   end

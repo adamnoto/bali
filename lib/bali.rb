@@ -32,6 +32,8 @@ module Bali
   def configure
     yield config
   end
+
+  require "bali/railtie" if defined? Rails
 end
 
 loader.eager_load
