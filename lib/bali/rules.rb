@@ -44,11 +44,7 @@ class Bali::Rules
   end
 
   def self.ruler
-    @ruler ||= begin
-      rule_class = Bali::Ruler.new(model_class)
-      Bali::RULE_CLASS_MAP[model_class.to_s] = rule_class
-      rule_class
-    end
+    @ruler ||= Bali::Ruler.new(model_class)
   end
 
   def self.set_role(role)

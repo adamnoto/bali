@@ -12,10 +12,11 @@ module Bali::Printer
     output = StringIO.new
 
     # build up the string for pretty printing rules
-    Bali::RULE_CLASS_MAP.each do |klass, rule_class|
-      output << "===== #{klass.to_s} =====\n\n"
+    rule_classes = ObjectSpace.each_object(Class).select { |cls| cls < Bali::Rules }
+    rule_classes.each do |rule_class|
+      output << "===== #{rule_class.model_class} =====\n\n"
 
-      rule_class.roles.each do |subtarget, role|
+      rule_class.ruler.roles.each do |subtarget, role|
         print_role role, output
       end
 

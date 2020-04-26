@@ -14,9 +14,6 @@ loader.ignore("#{__dir__}/bali/activerecord.rb")
 loader.setup
 
 module Bali
-  # mapping class to a RuleClass
-  RULE_CLASS_MAP = {}
-
   # {
   #   User: :roles,
   #   AdminUser: :admin_roles
