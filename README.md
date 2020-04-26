@@ -10,6 +10,9 @@ Why I created Bali?
 
 - I wasn't able to segment rules per roles
 - I want to break free from defining rules to match a controller's actions
+- I want to allow single, or multiple (or, even no) roles to be assigned to a user
+- I want inheritable system of defining the access/authorization rules
+- I want that I can easily print the list of roles possible in my app
 
 ## Installation
 
@@ -101,6 +104,55 @@ User.can?(:sign_up)
 ```
 
 For more coding example to better understand Bali, we would encourage you to take a look at the written spec files.
+
+## Printing defined roles
+
+```ruby
+puts Bali::Printer.pretty_print
+```
+
+Or execute:
+
+```
+$ rails bali:print_rules
+```
+
+Will print, for example, this definition:
+
+```
+===== Transaction =====
+
+      By default
+      --------------------------------------------------------------------------------
+        1. By default can update
+        2. By default can unsettle, with condition
+        3. By default can print
+      Supervisor
+      --------------------------------------------------------------------------------
+        1. Supervisor can unsettle
+        2. Supervisor can comment
+      Accountant
+      --------------------------------------------------------------------------------
+        1. Accountant can unsettle
+        2. Accountant cant update
+      Clerk
+      --------------------------------------------------------------------------------
+        1. Clerk can unsettle
+      Admin
+      --------------------------------------------------------------------------------
+        1. Admin can do anything except if explicitly stated otherwise
+
+
+===== User =====
+
+      By default
+      --------------------------------------------------------------------------------
+        1. By default can see_timeline, with condition
+        2. By default can sign_in, with condition
+
+
+Printed at 2020-01-01 12:34AM +00:00
+```
 
 ## Contributing
 
