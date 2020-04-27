@@ -2,7 +2,7 @@
 
 [ ![Codeship Status for saveav/bali](https://codeship.com/projects/d2f3ded0-20cf-0133-e425-0eade5a669ff/status?branch=release)](https://codeship.com/projects/95727)
 
-[![Code Climate](https://codeclimate.com/github/saveav/bali/badges/gpa.svg)](https://codeclimate.com/github/saveav/bali)
+[![Maintainability](https://api.codeclimate.com/v1/badges/7d8f2d978205bb768d06/maintainability)](https://codeclimate.com/github/adamnoto/bali/maintainability)
 
 Bali is a to-the-point authorization library for Rails. Bali is short for Bulwark Authorization Library.
 
@@ -37,14 +37,14 @@ You can change `User` with any name of your model to define rules on
 Given a model as follows:
 
 ```ruby
-class Transaction
-  include Bali::Authorizer
-
-  attr_accessor :is_settled
-  attr_accessor :payment_channel
-
+# == Schema Information
+#
+# Table name: transactions
+#
+#  id               :bigint           not null, primary key
+#  is_settled       :boolean          not null
+class Transaction < ApplicationRecord
   alias :settled? :is_settled
-  alias :settled= :is_settled=
 end
 ```
 
@@ -101,6 +101,14 @@ It can also works on a class:
 
 ```ruby
 User.can?(:sign_up)
+```
+
+Within a controller or a view in Rails, we can also express authorization in this way:
+
+```ruby
+if can? current_user, :update, transaction
+  # snip snip
+end
 ```
 
 For more coding example to better understand Bali, we would encourage you to take a look at the written spec files.

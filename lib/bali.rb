@@ -10,19 +10,10 @@ end
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
 loader.ignore("#{__dir__}/generators")
-loader.ignore("#{__dir__}/bali/activerecord.rb")
+loader.ignore("#{__dir__}/bali/rails")
 loader.setup
 
 module Bali
-  # mapping class to a RuleClass
-  RULE_CLASS_MAP = {}
-
-  # {
-  #   User: :roles,
-  #   AdminUser: :admin_roles
-  # }
-  TRANSLATED_SUBTARGET_ROLES = {}
-
   extend self
 
   def config
@@ -35,7 +26,9 @@ module Bali
 
   if defined? Rails
     require "bali/railtie"
-    require "bali/activerecord"
+    require "bali/rails/action_controller"
+    require "bali/rails/action_view"
+    require "bali/rails/active_record"
   end
 end
 

@@ -5,7 +5,7 @@ class Bali::Role
     DEFAULT_ALLOW = :default_allow
   ].freeze
 
-  attr_accessor :subtarget
+  attr_accessor :name
   attr_accessor :cans, :cants
 
   attr_accessor :can_all
@@ -15,21 +15,22 @@ class Bali::Role
 
   def self.formalize(object)
     case object
-    when String then [object]
-    when Symbol then [object]
-    when NilClass then [object]
+    when String, Symbol, NilClass then [object]
     when Array then object
-    else
-      kls_name = object.class.to_s
-      method_name = Bali::TRANSLATED_SUBTARGET_ROLES[kls_name]
-      roles = method_name ? formalize(object.send(method_name)) : formalize(nil)
-
-      roles
+    else formalize(extract_roles_from_object(object))
     end
   end
 
-  def initialize(subtarget)
-    @subtarget = subtarget&.to_sym
+  def self.extract_roles_from_object(object)
+    method_name = object.class.role_field_for_authorization
+
+    method_name ?
+      formalize(object.send(method_name)) :
+      formalize(nil)
+  end
+
+  def initialize(name)
+    @name = name&.to_sym
     @right_level = INHERIT
 
     @cans = {}

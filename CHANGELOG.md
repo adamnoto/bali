@@ -82,7 +82,7 @@
 
 1. rules_for accepting String instead of consanttised class name, in case the class is not yet loaded
 
-== Version 6.0.0rc (Apr 26, 2020)
+== Version 6.0.0rc1 (Apr 26, 2020)
 
 1. Integration with Rails is expected
 2. Removed bang methods: `can!`, `cannot!`. `can?` and `cant?` should be enough. User can raise an error by themselves as necessary.
@@ -90,3 +90,9 @@
 4. Removing: `Bali.map_rules` and its auxiliary functions
 5. Use class for defining rules
 6. Hook to ActiveModel without having to include `Bali::Authorizer`
+
+== Version 6.0.0rc2 (Apr 28, 2020)
+
+1. Hook into ActionView and ActionController
+2. Not storing the ruler class inside a `RULE_CLASS_MAP` to avoid caching it
+3. Not storing the role field mapper inside a `TRANSLATED_SUBTARGET_ROLES`

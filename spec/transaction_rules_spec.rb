@@ -3,10 +3,6 @@ describe "TransactionRules" do
   let(:role) { nil }
   let(:user) { User.new(role) }
 
-  before do
-    Bali::TRANSLATED_SUBTARGET_ROLES[User.to_s] = "role"
-  end
-
   it "can be updated" do
     expect_can :update
   end
@@ -82,5 +78,15 @@ describe "TransactionRules" do
       it("can download") { expect_can :download }
       it("can comment") { expect_can :comment }
     end
+  end
+
+  describe "when there are multiple role" do
+    let(:role) { ["accountant", "supervisor"] }
+
+    it("can update") { expect_can :update }
+    it("can print") { expect_can :print }
+    it("can unsettle") { expect_can :unsettle }
+    it("cant download") { expect_cant :download }
+    it("can comment") { expect_can :comment }
   end
 end

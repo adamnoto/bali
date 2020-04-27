@@ -1,5 +1,8 @@
 class User
   include Bali::Authorizer
+  extend Bali::Statics::ActiveRecord
+
+  extract_roles_from :role
 
   attr_accessor :role
   attr_accessor :friends
