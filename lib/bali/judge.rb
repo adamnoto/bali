@@ -27,6 +27,13 @@ class Bali::Judge
     :should_cross_check
 
   class << self
+    def default_judgement_value(term)
+      case term
+      when :can then false
+      when :cant then true
+      end
+    end
+
     def check(term, actor_or_roles, operation, record)
       if operation.nil?
         # eg: user.can? :sign_in
@@ -34,7 +41,7 @@ class Bali::Judge
         actor_or_roles = nil
       end
 
-      judgement_value = default_value = term == :can ? false : true
+      judgement_value = default_value = default_judgement_value(term)
       roles = Bali::Role.formalize actor_or_roles
 
       roles.each do |role|
