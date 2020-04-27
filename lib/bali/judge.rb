@@ -87,24 +87,14 @@ class Bali::Judge
       cross_check_value = nil
       # default if can? for undefined rule is false, after related clause
       # cant be found in cant?
-      if should_cross_check
-        cross_check_value = cross_check_judge.judgement
-      end
+      cross_check_value = cross_check_judge.judgement if should_cross_check
 
       # if cross check value nil, then the reverse rule is not defined,
       # let's determine whether they can do anything or not
       if cross_check_value.nil?
-        # rule_group can be nil for when user checking under undefined rule-group
-        if rule_group
-          if rule_group.can_all?
-            judgement = term == :cant ? DEFINITE_FALSE : DEFINITE_TRUE
-          elsif rule_group.cant_all?
-            judgement = term == :cant ? DEFINITE_TRUE : DEFINITE_FALSE
-          end
-        end # if rule_group exist
+        judgement = deduce_from_defined_disposition
       else
         # process value from cross checking
-
         if otherly_rule && (cross_check_value == FUZY_FALSE || cross_check_value == FUZY_TRUE)
           # give chance to check at others block
           @rule = otherly_rule
@@ -112,37 +102,11 @@ class Bali::Judge
           judgement = cross_check_reverse_value(cross_check_value)
         end
       end
-    end # if our judgement nil and rule is nil
-
-    # if our holy judgement is still nil, but rule is defined
-    if judgement.nil? && rule
-      if rule.conditional?
-        judgement = evaluate(rule, actor, record)
-      else
-        judgement = DEFINITE_TRUE
-      end
     end
 
-    # return fuzy if otherly rule defines contrary to this term
-    if judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.find_rule(reversed_term, operation))
-      if rule_group && (rule_group.can_all? || rule_group.cant_all?)
-        # don't overwrite our holy judgement with fuzy value if rule group
-        # zeus/plant, because zeus/plant is more definite than any fuzy values
-        # eventhough the rule is abstractly defined
-      else
-        judgement = term == :cant ? FUZY_TRUE : FUZY_FALSE
-      end
-    end
-
-    # if at this point still nil, well,
-    # return the natural value for this judge
-    if judgement.nil?
-      if otherly_rule
-        judgement = FUZY_TRUE
-      else
-        judgement = natural_value
-      end
-    end
+    judgement ||= deduce_by_evaluation ||
+      deduce_from_fuzy_rules ||
+      natural_value
 
     return !should_cross_check ?
       judgement :
@@ -237,6 +201,32 @@ class Bali::Judge
       when DEFINITE_FALSE then DEFINITE_TRUE
       when FUZY_FALSE then FUZY_TRUE
       when FUZY_TRUE then FUZY_FALSE
+      end
+    end
+
+    def deduce_by_evaluation
+      return unless rule
+
+      rule.conditional? ?
+        evaluate(rule, actor, record) :
+        judgement = DEFINITE_TRUE
+    end
+
+    def deduce_from_defined_disposition
+      return unless rule_group
+
+      if rule_group.can_all?
+        term == :cant ? DEFINITE_FALSE : DEFINITE_TRUE
+      elsif rule_group.cant_all?
+        term == :cant ? DEFINITE_TRUE : DEFINITE_FALSE
+      end
+    end
+
+    def deduce_from_fuzy_rules
+      reversed_otherly_rule = other_rule_group.find_rule(reversed_term, operation)
+
+      if reversed_otherly_rule
+        term == :cant ? FUZY_TRUE : FUZY_FALSE
       end
     end
 

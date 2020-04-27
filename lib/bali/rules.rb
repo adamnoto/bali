@@ -4,6 +4,16 @@ class Bali::Rules
     attr_reader :ruler
   end
 
+  def self.inherited(subcls)
+    # Every rule class has the inherited block even if it's never
+    # used/formally defined, so it's easier to work with or make
+    # assumption/checking on the inherited block. As we treat
+    # rules defined in the inherited scope, as default value,
+    # this decision makes sense.
+
+    subcls.set_role nil
+  end
+
   def self.model_class
     class_name = to_s
     suffix = Bali.config.suffix
