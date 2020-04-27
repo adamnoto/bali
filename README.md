@@ -2,7 +2,7 @@
 
 [ ![Codeship Status for saveav/bali](https://codeship.com/projects/d2f3ded0-20cf-0133-e425-0eade5a669ff/status?branch=release)](https://codeship.com/projects/95727)
 
-[![Code Climate](https://codeclimate.com/github/saveav/bali/badges/gpa.svg)](https://codeclimate.com/github/saveav/bali)
+[![Maintainability](https://api.codeclimate.com/v1/badges/7d8f2d978205bb768d06/maintainability)](https://codeclimate.com/github/adamnoto/bali/maintainability)
 
 Bali is a to-the-point authorization library for Rails. Bali is short for Bulwark Authorization Library.
 
