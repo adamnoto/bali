@@ -77,13 +77,13 @@ class Bali::Judge
   end
 
   def judgement
-    our_holy_judgement = natural_value if no_rule_group?
+    judgement = natural_value if no_rule_group?
 
-    if our_holy_judgement.nil? && rule.nil? && may_have_reservation?
-      our_holy_judgement = cross_check_reverse_value(cross_check_judge.judgement)
+    if judgement.nil? && rule.nil? && may_have_reservation?
+      judgement = cross_check_reverse_value(cross_check_judge.judgement)
     end
 
-    if our_holy_judgement.nil? && rule.nil?
+    if judgement.nil? && rule.nil?
       cross_check_value = nil
       # default if can? for undefined rule is false, after related clause
       # cant be found in cant?
@@ -97,11 +97,10 @@ class Bali::Judge
         # rule_group can be nil for when user checking under undefined rule-group
         if rule_group
           if rule_group.can_all?
-            our_holy_judgement = term == :cant ? DEFINITE_FALSE : DEFINITE_TRUE
+            judgement = term == :cant ? DEFINITE_FALSE : DEFINITE_TRUE
           elsif rule_group.cant_all?
-            our_holy_judgement = term == :cant ? DEFINITE_TRUE : DEFINITE_FALSE
+            judgement = term == :cant ? DEFINITE_TRUE : DEFINITE_FALSE
           end
-
         end # if rule_group exist
       else
         # process value from cross checking
@@ -110,48 +109,48 @@ class Bali::Judge
           # give chance to check at others block
           @rule = otherly_rule
         else
-          our_holy_judgement = cross_check_reverse_value(cross_check_value)
+          judgement = cross_check_reverse_value(cross_check_value)
         end
       end
     end # if our judgement nil and rule is nil
 
     # if our holy judgement is still nil, but rule is defined
-    if our_holy_judgement.nil? && rule
+    if judgement.nil? && rule
       if rule.conditional?
-        our_holy_judgement = run_condition(rule, actor, record)
+        judgement = run_condition(rule, actor, record)
       else
-        our_holy_judgement = DEFINITE_TRUE
+        judgement = DEFINITE_TRUE
       end
     end
 
     # return fuzy if otherly rule defines contrary to this term
-    if our_holy_judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.find_rule(reversed_term, operation))
+    if judgement.nil? && rule.nil? && (other_rule_group && other_rule_group.find_rule(reversed_term, operation))
       if rule_group && (rule_group.can_all? || rule_group.cant_all?)
         # don't overwrite our holy judgement with fuzy value if rule group
         # zeus/plant, because zeus/plant is more definite than any fuzy values
         # eventhough the rule is abstractly defined
       else
-        our_holy_judgement = term == :cant ? FUZY_TRUE : FUZY_FALSE
+        judgement = term == :cant ? FUZY_TRUE : FUZY_FALSE
       end
     end
 
     # if at this point still nil, well,
     # return the natural value for this judge
-    if our_holy_judgement.nil?
+    if judgement.nil?
       if otherly_rule
-        our_holy_judgement = FUZY_TRUE
+        judgement = FUZY_TRUE
       else
-        our_holy_judgement = natural_value
+        judgement = natural_value
       end
     end
 
     return !should_cross_check ?
-      our_holy_judgement :
+      judgement :
 
       # translate response for value above to traditional true/false
       # holy judgement refer to non-standard true/false being used inside Bali
       # which need to be translated from other beings to know
-      our_holy_judgement > 0
+      judgement > 0
   end
 
   private
