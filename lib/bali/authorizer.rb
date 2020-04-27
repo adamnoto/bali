@@ -1,6 +1,6 @@
 module Bali::Authorizer
   def self.included(base)
-    base.extend Bali::Authorizer::Statics
+    base.extend Bali::Statics::Authorizer
   end
 
   def can?(actor_or_roles, operation = nil)
