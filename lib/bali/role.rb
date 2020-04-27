@@ -15,17 +15,19 @@ class Bali::Role
 
   def self.formalize(object)
     case object
-    when String then [object]
-    when Symbol then [object]
-    when NilClass then [object]
+    when String, Symbol, NilClass then [object]
     when Array then object
-    else
-      kls_name = object.class.to_s
-      method_name = Bali::TRANSLATED_SUBTARGET_ROLES[kls_name]
-      roles = method_name ? formalize(object.send(method_name)) : formalize(nil)
-
-      roles
+    else formalize(extract_roles_from_object(object))
     end
+  end
+
+  def self.extract_roles_from_object(object)
+    kls_name = object.class.to_s
+    method_name = Bali::TRANSLATED_SUBTARGET_ROLES[kls_name]
+
+    method_name ?
+      formalize(object.send(method_name)) :
+      formalize(nil)
   end
 
   def initialize(subtarget)
