@@ -29,7 +29,7 @@ module Bali::Printer
   end
 
   def print_role role, target_io
-    subtarget = role.subtarget.to_s.capitalize
+    subtarget = role.name.to_s.capitalize
     subtarget = "By default" if subtarget.blank?
     can_all = role.can_all?
     counter = 0

@@ -17,7 +17,7 @@ class Bali::Ruler
   end
 
   def << role
-    @roles[role.subtarget] = role
+    @roles[role.name] = role
   end
 
   def [] role

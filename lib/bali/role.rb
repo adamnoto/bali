@@ -5,7 +5,7 @@ class Bali::Role
     DEFAULT_ALLOW = :default_allow
   ].freeze
 
-  attr_accessor :subtarget
+  attr_accessor :name
   attr_accessor :cans, :cants
 
   attr_accessor :can_all
@@ -29,8 +29,8 @@ class Bali::Role
       formalize(nil)
   end
 
-  def initialize(subtarget)
-    @subtarget = subtarget&.to_sym
+  def initialize(name)
+    @name = name&.to_sym
     @right_level = INHERIT
 
     @cans = {}
