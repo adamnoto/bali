@@ -37,14 +37,14 @@ You can change `User` with any name of your model to define rules on
 Given a model as follows:
 
 ```ruby
-class Transaction
-  include Bali::Authorizer
-
-  attr_accessor :is_settled
-  attr_accessor :payment_channel
-
+# == Schema Information
+#
+# Table name: transactions
+#
+#  id               :bigint           not null, primary key
+#  is_settled       :boolean          not null
+class Transaction < ApplicationRecord
   alias :settled? :is_settled
-  alias :settled= :is_settled=
 end
 ```
 
@@ -101,6 +101,14 @@ It can also works on a class:
 
 ```ruby
 User.can?(:sign_up)
+```
+
+Within a controller or a view in Rails, we can also express authorization in this way:
+
+```ruby
+if can? current_user, :update, transaction
+  # snip snip
+end
 ```
 
 For more coding example to better understand Bali, we would encourage you to take a look at the written spec files.
