@@ -117,7 +117,7 @@ class Bali::Judge
     # if our holy judgement is still nil, but rule is defined
     if judgement.nil? && rule
       if rule.conditional?
-        judgement = run_condition(rule, actor, record)
+        judgement = evaluate(rule, actor, record)
       else
         judgement = DEFINITE_TRUE
       end
@@ -220,17 +220,15 @@ class Bali::Judge
         (rule_group && rule_group.can_all?)
     end
 
-    def run_condition(rule, actor, record)
-      # must test first
+    def evaluate(rule, actor, record)
       conditional = rule.conditional
-      case conditional.arity
-      when 0
-        return conditional.() ? DEFINITE_TRUE : DEFINITE_FALSE
-      when 1
-        return conditional.(record) ? DEFINITE_TRUE : DEFINITE_FALSE
-      when 2
-        return conditional.(record, actor) ? DEFINITE_TRUE : DEFINITE_FALSE
-      end
+      evaluation  = case conditional.arity
+                    when 0 then conditional.()
+                    when 1 then conditional.(record)
+                    when 2 then conditional.(record, actor)
+                    end
+
+      evaluation ? DEFINITE_TRUE : DEFINITE_FALSE
     end
 
     def cross_check_reverse_value(cross_check_value)
