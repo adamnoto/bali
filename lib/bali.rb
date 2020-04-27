@@ -14,12 +14,6 @@ loader.ignore("#{__dir__}/bali/rails")
 loader.setup
 
 module Bali
-  # {
-  #   User: :roles,
-  #   AdminUser: :admin_roles
-  # }
-  TRANSLATED_SUBTARGET_ROLES = {}
-
   extend self
 
   def config

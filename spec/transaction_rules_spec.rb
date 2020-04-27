@@ -3,10 +3,6 @@ describe "TransactionRules" do
   let(:role) { nil }
   let(:user) { User.new(role) }
 
-  before do
-    Bali::TRANSLATED_SUBTARGET_ROLES[User.to_s] = "role"
-  end
-
   it "can be updated" do
     expect_can :update
   end

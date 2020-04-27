@@ -22,8 +22,7 @@ class Bali::Role
   end
 
   def self.extract_roles_from_object(object)
-    kls_name = object.class.to_s
-    method_name = Bali::TRANSLATED_SUBTARGET_ROLES[kls_name]
+    method_name = object.class.role_field_for_authorization
 
     method_name ?
       formalize(object.send(method_name)) :
