@@ -79,10 +79,6 @@ class Bali::Judge
   def judgement
     judgement = natural_value if no_rule_group?
 
-    if judgement.nil? && rule.nil? && may_have_reservation?
-      judgement = reverse_value(cross_check_judge.judgement)
-    end
-
     if judgement.nil? && rule.nil?
       cross_check_value = nil
       # default if can? for undefined rule is false, after related clause
@@ -183,14 +179,6 @@ class Bali::Judge
       when FUZY_FALSE then FUZY_TRUE
       when FUZY_TRUE then FUZY_FALSE
       end
-    end
-
-    # returns true if we need to check rule that can overwrite
-    # the most powerful rule defined
-    def may_have_reservation?
-      term == :cant ?
-        (rule_group && rule_group.cant_all?) :
-        (rule_group && rule_group.can_all?)
     end
 
     def evaluate(rule, actor, record)
