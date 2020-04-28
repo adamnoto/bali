@@ -89,4 +89,14 @@ describe "TransactionRules" do
     it("cant download") { expect_cant :download }
     it("can comment") { expect_can :comment }
   end
+
+  describe "when role is not defined" do
+    let(:role) { :undefined }
+
+    it("can update") { expect_can :update }
+    it("can print") { expect_can :print }
+    it("cant unsettle") { expect_cant :unsettle }
+    it("cant download") { expect_cant :download }
+    it("cant comment") { expect_cant :comment }
+  end
 end

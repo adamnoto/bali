@@ -80,7 +80,7 @@ class Bali::Judge
     judgement = natural_value if no_rule_group?
 
     if judgement.nil? && rule.nil? && may_have_reservation?
-      judgement = cross_check_reverse_value(cross_check_judge.judgement)
+      judgement = reverse_value(cross_check_judge.judgement)
     end
 
     if judgement.nil? && rule.nil?
@@ -99,7 +99,7 @@ class Bali::Judge
           # give chance to check at others block
           @rule = otherly_rule
         else
-          judgement = cross_check_reverse_value(cross_check_value)
+          judgement = reverse_value(cross_check_value)
         end
       end
     end
@@ -176,6 +176,15 @@ class Bali::Judge
       term == :cant ? DEFINITE_TRUE : DEFINITE_FALSE
     end
 
+    def reverse_value(value)
+      case value
+      when DEFINITE_TRUE then DEFINITE_FALSE
+      when DEFINITE_FALSE then DEFINITE_TRUE
+      when FUZY_FALSE then FUZY_TRUE
+      when FUZY_TRUE then FUZY_FALSE
+      end
+    end
+
     # returns true if we need to check rule that can overwrite
     # the most powerful rule defined
     def may_have_reservation?
@@ -195,15 +204,6 @@ class Bali::Judge
       evaluation ? DEFINITE_TRUE : DEFINITE_FALSE
     end
 
-    def cross_check_reverse_value(cross_check_value)
-      case cross_check_value
-      when DEFINITE_TRUE then DEFINITE_FALSE
-      when DEFINITE_FALSE then DEFINITE_TRUE
-      when FUZY_FALSE then FUZY_TRUE
-      when FUZY_TRUE then FUZY_FALSE
-      end
-    end
-
     def deduce_by_evaluation
       return unless rule
 
@@ -216,9 +216,9 @@ class Bali::Judge
       return unless rule_group
 
       if rule_group.can_all?
-        term == :cant ? DEFINITE_FALSE : DEFINITE_TRUE
+        reverse_value(natural_value)
       elsif rule_group.cant_all?
-        term == :cant ? DEFINITE_TRUE : DEFINITE_FALSE
+        natural_value
       end
     end
 
