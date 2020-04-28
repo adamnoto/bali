@@ -13,6 +13,7 @@ module Bali::Printer
 
     # build up the string for pretty printing rules
     rule_classes = ObjectSpace.each_object(Class).select { |cls| cls < Bali::Rules }
+    rule_classes.sort! { |a, b| a.to_s <=> b.to_s }
     rule_classes.each do |rule_class|
       output << "===== #{rule_class.model_class} =====\n\n"
 
