@@ -21,3 +21,22 @@ script:
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+matrix:
+  include:
+    - rvm: 2.7.0
+      gemfile: gemfiles/Gemfile-rails.6.0.x
+    - rvm: 2.6.3
+      gemfile: gemfiles/Gemfile-rails.6.0.x
+    - rvm: 2.6.3
+      gemfile: gemfiles/Gemfile-rails.5.2.x
+    - rvm: 2.6.3
+      gemfile: gemfiles/Gemfile-rails.5.1.x
+    - rvm: 2.6.3
+      gemfile: gemfiles/Gemfile-rails.5.0.x
+    - rvm: ruby-head
+      gemfile: gemfiles/Gemfile-rails.edge
+
+  allow_failures:
+    - rvm: ruby-head
+    - gemfile: gemfiles/Gemfile-rails.edge
