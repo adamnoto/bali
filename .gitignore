@@ -13,5 +13,6 @@
 *.swo
 *.gemspec
 *.gem
+*.log
 
 plugins
