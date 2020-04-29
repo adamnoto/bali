@@ -15,11 +15,3 @@ require "bali"
 require "rspec"
 require "pry"
 require "test_app/app"
-
-def expect_can operation
-  expect(subject.can?(user, operation)).to be_truthy
-end
-
-def expect_cant operation
-  expect(subject.can?(user, operation)).to be_falsey
-end

@@ -1,102 +1,105 @@
 describe "TransactionRules" do
-  subject { Transaction.new }
+  subject(:transaction) { Transaction.new }
   let(:role) { nil }
   let(:user) { User.new(role: role) }
 
   it "can be updated" do
-    expect_can :update
+    expect(user).to be_able_to :update, transaction
   end
 
-  it("can update") { expect_can :update }
-  it("can print") { expect_can :print }
-  it("cant unsettle") { expect_cant :unsettle }
-  it("cant download") { expect_cant :download }
-  it("cant comment") { expect_cant :comemnt }
+  it { expect(user).to be_able_to :update, transaction }
+  it { expect(user).to be_able_to :print, transaction }
+  it { expect(user).not_to be_able_to :unsettle, transaction }
+  it { expect(user).not_to be_able_to :download, transaction }
+  it { expect(user).not_to be_able_to :comment, transaction }
 
   it "can be settled if transaction is settled" do
     subject.settled = true
-    expect(subject.can?(user, :unsettle)).to be_truthy
+    expect(user).to be_able_to :unsettle, transaction
   end
 
   context "when supervisor" do
     let(:role) { :supervisor }
 
-    it("can update") { expect_can :update }
-    it("can print") { expect_can :print }
-    it("can unsettle") { expect_can :unsettle }
-    it("cant download") { expect_cant :download }
-    it("cant comment") { expect_can :comment }
+    it { expect(user).to be_able_to :update, transaction }
+    it { expect(user).to be_able_to :print, transaction }
+    it { expect(user).to be_able_to :unsettle, transaction }
+    it { expect(user).not_to be_able_to :download, transaction }
+    it { expect(user).to be_able_to :comment, transaction }
   end
 
   context "when accountant" do
     let(:role) { :accountant }
 
-    it("can't update") { expect_cant :update }
-    it("can print") { expect_can :print }
-    it("can unsettle") { expect_can :unsettle }
-    it("cant download") { expect_cant :download }
-    it("cant comment") { expect_cant :comment }
+    it { expect(user).not_to be_able_to :update, transaction }
+    it { expect(user).to be_able_to :print, transaction }
+    it { expect(user).to be_able_to :unsettle, transaction }
+    it { expect(user).not_to be_able_to :download, transaction }
+    it { expect(user).not_to be_able_to :comment, transaction }
   end
 
   context "when clerk" do
     let(:role) { :clerk }
 
-    it("cant update") { expect_cant :update }
-    it("cant print") { expect_cant :print }
-    it("can unsettle") { expect_can :unsettle }
-    it("cant download") { expect_cant :download }
-    it("cant comment") { expect_cant :comment }
+    it { expect(user).not_to be_able_to :update, transaction }
+    it { expect(user).not_to be_able_to :print, transaction }
+    it { expect(user).to be_able_to :unsettle, transaction }
+    it { expect(user).not_to be_able_to :download, transaction }
+    it { expect(user).not_to be_able_to :comment, transaction }
   end
 
   context "when admin" do
     let(:role) { :admin }
 
-    it("can update") { expect_can :update }
-    it("can print") { expect_can :print }
-    it("can unsettle") { expect_can :unsettle }
-    it("can download") { expect_can :download }
-    it("can comment") { expect_can :comment }
+    it { expect(user).to be_able_to :update, transaction }
+    it { expect(user).to be_able_to :print, transaction }
+    it { expect(user).to be_able_to :unsettle, transaction }
+    it { expect(user).to be_able_to :download, transaction }
+    it { expect(user).to be_able_to :comment, transaction }
   end
 
   describe "when role is given as a string" do
     context "when clerk" do
       let(:role) { "clerk" }
 
-      it("cant update") { expect_cant :update }
-      it("cant print") { expect_cant :print }
-      it("can unsettle") { expect_can :unsettle }
-      it("cant download") { expect_cant :download }
-      it("cant comment") { expect_cant :comment }
+      it { expect(user.role).to be_a String }
+      it { expect(user).not_to be_able_to :update, transaction }
+      it { expect(user).not_to be_able_to :print, transaction }
+      it { expect(user).to be_able_to :unsettle, transaction }
+      it { expect(user).not_to be_able_to :download, transaction }
+      it { expect(user).not_to be_able_to :comment, transaction }
     end
 
     context "when admin" do
       let(:role) { "admin" }
 
-      it("can update") { expect_can :update }
-      it("can print") { expect_can :print }
-      it("can unsettle") { expect_can :unsettle }
-      it("can download") { expect_can :download }
-      it("can comment") { expect_can :comment }
+      it { expect(user.role).to be_a String }
+      it { expect(user).to be_able_to :update, transaction }
+      it { expect(user).to be_able_to :print, transaction }
+      it { expect(user).to be_able_to :unsettle, transaction }
+      it { expect(user).to be_able_to :download, transaction }
+      it { expect(user).to be_able_to :comment, transaction }
     end
   end
 
   describe "when there are multiple role" do
     let(:role) { ["accountant", "supervisor"] }
 
-    it("can update") { expect_can :update }
-    it("can print") { expect_can :print }
-    it("can unsettle") { expect_can :unsettle }
-    it("cant download") { expect_cant :download }
-    it("can comment") { expect_can :comment }
+    it { expect(user.role).to be_an Array }
+    it { expect(user).to be_able_to :update, transaction }
+    it { expect(user).to be_able_to :print, transaction }
+    it { expect(user).to be_able_to :unsettle, transaction }
+    it { expect(user).not_to be_able_to :download, transaction }
+    it { expect(user).to be_able_to :comment, transaction }
   end
 
   describe "when role is not defined" do
     let(:role) { :undefined }
 
-    it("can update") { expect_can :update }
-    it("can print") { expect_can :print }
-    it("cant unsettle") { expect_cant :unsettle }
-    it("cant download") { expect_cant :download }
-    it("cant comment") { expect_cant :comment }
+    it { expect(user).to be_able_to :update, transaction }
+    it { expect(user).to be_able_to :print, transaction }
+    it { expect(user).not_to be_able_to :unsettle, transaction }
+    it { expect(user).not_to be_able_to :download, transaction }
+    it { expect(user).not_to be_able_to :comment, transaction }
   end
 end

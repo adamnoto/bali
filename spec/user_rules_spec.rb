@@ -13,12 +13,12 @@ describe "UserRules" do
 
     context "when visited by user2" do
       let(:user) { user2 }
-      it { expect_can :see_timeline }
+      it { expect(user).to be_able_to :see_timeline, subject }
     end
 
     context "when visited by user3" do
       let(:user) { user3 }
-      it { expect_cant :see_timeline }
+      it { expect(user).not_to be_able_to :see_timeline, subject }
     end
   end
 
