@@ -37,6 +37,8 @@ You can change `User` with any name of your model to define rules on
 
 ## Usage
 
+> In nutshell, authorization rules are defined in a rule class which extends `Bali::Rules`. We use `can?` and `cant?` to check against those rules which we define using `can`, `cant`, `can_all`, and `cant`. Unscoped rules are inherited, otherwise we can scope rules using a `role` block.
+
 Given a model as follows:
 
 ```ruby
@@ -51,7 +53,7 @@ class Transaction < ApplicationRecord
 end
 ```
 
-We can define the rules this way:
+And given the `TransactionRules` defined as follows:
 
 ```ruby
 class TransactionRules < Bali::Rules
@@ -59,7 +61,7 @@ class TransactionRules < Bali::Rules
   can :print
 
   # redefine :delete
-  can :unsettle do |record|
+  can :unsettle do |record, current_user|
     record.settled?
   end
 
@@ -87,26 +89,17 @@ class TransactionRules < Bali::Rules
 end
 ```
 
-To ask for authorization:
+We can ask various permissions in this way:
 
 ```ruby
 transaction = Transaction.new
-transaction.can?(current_user, :update)
+TransactionRules.can?(current_user, :update, transaction)
+TransactionRules.cant?(current_user, :update, transaction)
+TransactionRules.can?(:archive, transaction)
+TransactionRules.can?(:stop_accepting_new_transaction)
 ```
 
-Passing `current_user` is optional. This is also possible:
-
-```ruby
-transaction.can?(:archive)
-```
-
-It can also works on a class:
-
-```ruby
-User.can?(:sign_up)
-```
-
-Within a controller or a view in Rails, we can also express authorization in this way:
+If we are within a Rails controller or, when rendering a view; we can cleanly ask in this way:
 
 ```ruby
 if can? current_user, :update, transaction
@@ -114,7 +107,7 @@ if can? current_user, :update, transaction
 end
 ```
 
-For more coding example to better understand Bali, we would encourage you to take a look at the written spec files.
+For more coding examples to better understand it, please feel free to take a look at the written spec files. Otherwise, if there's some unclear point, you may suggest for edits. Thank you.
 
 ## Testing the rules
 
