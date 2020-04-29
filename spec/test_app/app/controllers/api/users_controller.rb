@@ -7,7 +7,7 @@ module Api
       if can? @user, :see_timeline, @friend
         render plain: "ok"
       else
-        render plain: "prohibited"
+        render plain: "prohibited", status: :unauthorized
       end
     end
   end

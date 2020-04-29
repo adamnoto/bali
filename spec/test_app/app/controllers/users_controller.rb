@@ -1,7 +1,4 @@
 class UsersController < ApplicationController
-  def index
-  end
-
   def show
     @user = User.find params[:id]
     @friend = User.find params[:friend_id]
@@ -9,7 +6,7 @@ class UsersController < ApplicationController
     if can? @user, :see_timeline, @friend
       render plain: "ok"
     else
-      render plain: "prohibited"
+      render plain: "prohibited", status: :unauthorized
     end
   end
 end
