@@ -1,4 +1,6 @@
 class Bali::Rules
+  extend Bali::Statics::Authorizer
+
   class << self
     attr_writer :current_role
     attr_reader :ruler
