@@ -8,13 +8,13 @@ module RSpec
         end
 
         def matches?(actor)
-
           if @class_or_record
-            @actor = actor
-            @class_or_record.can?(actor, @operation)
+            rule_class = "#{@class_or_record.class.name}#{Bali.config.suffix}".constantize
+            rule_class.can?(actor, @operation, @class_or_record)
           else
             @class_or_record = actor
-            @class_or_record.can?(nil, @operation)
+            rule_class = "#{@class_or_record.name}#{Bali.config.suffix}".constantize
+            rule_class.can?(nil, @operation, @class_or_record)
           end
         end
 

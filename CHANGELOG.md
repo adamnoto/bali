@@ -101,3 +101,4 @@
 
 1. Built-in `be_able_to` matcher for RSpec
 2. Renaming `Bali::Printer.pretty_print` to `Bali::Printer.printable`
+3. Uniform `can?` and `cant?` authorizization checker

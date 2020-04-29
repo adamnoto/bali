@@ -18,6 +18,26 @@ describe "TransactionRules" do
     expect(user).to be_able_to :unsettle, transaction
   end
 
+  describe ".can?" do
+    it "returns the judgement correctly for an object" do
+      expect(TransactionRules.can?(user, :update, transaction)).to be_truthy
+    end
+
+    it "returns the judgement correctly for a class" do
+      expect(TransactionRules.can?(:update, transaction)).to be_truthy
+    end
+  end
+
+  describe ".cant?" do
+    it "returns the judgement correctly for an object" do
+      expect(TransactionRules.cant?(user, :unsettle, transaction)).to be_truthy
+    end
+
+    it "returns the judgement correctly for a class" do
+      expect(TransactionRules.cant?(:unsettle, transaction)).to be_truthy
+    end
+  end
+
   context "when supervisor" do
     let(:role) { :supervisor }
 

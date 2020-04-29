@@ -23,22 +23,32 @@ describe "UserRules" do
   end
 
   it "allows anyone to sign in" do
-    expect(user1.can?(:sign_in)).to be_truthy
-    expect(user2.can?(:sign_in)).to be_truthy
-    expect(user3.can?(:sign_in)).to be_truthy
+    # demonstrating single argument
+    expect(UserRules.can?(:sign_in)).to be_truthy
 
-    expect(user1.cant?(:sign_in)).to be_falsey
-    expect(user2.cant?(:sign_in)).to be_falsey
-    expect(user3.cant?(:sign_in)).to be_falsey
+    # demonstrating passing nil explicitly (eg: when can't
+    # find the record from the database)
+    expect(UserRules.can?(nil, :sign_in)).to be_truthy
+
+    # demonstrating passing user instance
+    expect(UserRules.can?(user1, :sign_in)).to be_truthy
+    expect(UserRules.can?(user2, :sign_in)).to be_truthy
+    expect(UserRules.can?(user3, :sign_in)).to be_truthy
+    expect(UserRules.cant?(user1, :sign_in)).to be_falsey
+    expect(UserRules.cant?(user2, :sign_in)).to be_falsey
+    expect(UserRules.cant?(user3, :sign_in)).to be_falsey
   end
 
   it "disallows anyone from spamming" do
-    expect(user1.can?(:spamming)).to be_falsey
-    expect(user2.can?(:spamming)).to be_falsey
-    expect(user3.can?(:spamming)).to be_falsey
+    expect(UserRules.can?(:spamming)).to be_falsey
+    expect(UserRules.can?(nil, :spamming)).to be_falsey
 
-    expect(user1.cant?(:spamming)).to be_truthy
-    expect(user2.cant?(:spamming)).to be_truthy
-    expect(user3.cant?(:spamming)).to be_truthy
+    expect(UserRules.can?(user1, :spamming)).to be_falsey
+    expect(UserRules.can?(user2, :spamming)).to be_falsey
+    expect(UserRules.can?(user3, :spamming)).to be_falsey
+
+    expect(UserRules.cant?(user1, :spamming)).to be_truthy
+    expect(UserRules.cant?(user2, :spamming)).to be_truthy
+    expect(UserRules.cant?(user3, :spamming)).to be_truthy
   end
 end
