@@ -11,23 +11,10 @@ rescue LoadError => e
 end
 
 require "bundler/setup"
-require 'bali'
-require 'rspec'
+require "bali"
+require "rspec"
 require "pry"
 require "bali_spec"
-
-RSpec.configure do |config|
-  config.mock_with :rspec
-
-  config.expect_with :rspec do |c|
-    c.syntax = [:should, :expect]
-  end
-
-  config.mock_with :rspec do |c|
-    c.syntax = [:should, :expect]
-  end
-
-end
 
 def expect_can operation
   expect(subject.can?(user, operation)).to be_truthy
