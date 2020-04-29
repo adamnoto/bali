@@ -7,10 +7,12 @@
 /pkg/
 /spec/reports/
 /tmp/
+/spec/test_app/tmp
 
 *.swp
 *.swo
 *.gemspec
 *.gem
+*.log
 
 plugins

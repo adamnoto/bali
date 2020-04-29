@@ -21,6 +21,7 @@ class Bali::Ruler
   end
 
   def [] role
-    @roles[role&.to_sym]
+    symbolized_role = role.to_sym if role
+    @roles[symbolized_role]
   end
 end

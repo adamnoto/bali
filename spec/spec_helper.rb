@@ -11,28 +11,13 @@ rescue LoadError => e
 end
 
 require "bundler/setup"
-require 'bali'
-require 'rspec'
+require "bali"
 require "pry"
-require "bali_spec"
+require "test_app/app"
+require 'rspec/rails'
 
 RSpec.configure do |config|
-  config.mock_with :rspec
-
-  config.expect_with :rspec do |c|
-    c.syntax = [:should, :expect]
-  end
-
-  config.mock_with :rspec do |c|
-    c.syntax = [:should, :expect]
-  end
-
-end
-
-def expect_can operation
-  expect(subject.can?(user, operation)).to be_truthy
-end
-
-def expect_cant operation
-  expect(subject.can?(user, operation)).to be_falsey
+  config.use_transactional_fixtures = true
+  config.infer_spec_type_from_file_location!
+  config.filter_rails_from_backtrace!
 end

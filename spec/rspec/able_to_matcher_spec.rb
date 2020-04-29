@@ -2,7 +2,7 @@
 
 describe RSpec::Matchers::BuiltIn::AbleToMatcher do
   let(:transaction) { Transaction.new }
-  let(:accountant) { User.new(:accountant) }
+  let(:accountant) { User.new(role: :accountant) }
 
   describe "#be_able_to" do
     context "when given a class" do

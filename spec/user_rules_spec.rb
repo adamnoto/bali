@@ -1,11 +1,11 @@
 describe "UserRules" do
-  let(:user1) { User.new }
-  let(:user2) { User.new }
-  let(:user3) { User.new }
+  let(:user1) { User.create }
+  let(:user2) { User.create }
+  let(:user3) { User.create }
 
   before do
-    user1.friends << user2
-    user2.friends << user3
+    user1.update friends: [user2]
+    user2.update friends: [user3]
   end
 
   context "when user1" do
@@ -13,12 +13,12 @@ describe "UserRules" do
 
     context "when visited by user2" do
       let(:user) { user2 }
-      it { expect_can :see_timeline }
+      it { expect(user).to be_able_to :see_timeline, subject }
     end
 
     context "when visited by user3" do
       let(:user) { user3 }
-      it { expect_cant :see_timeline }
+      it { expect(user).not_to be_able_to :see_timeline, subject }
     end
   end
 
