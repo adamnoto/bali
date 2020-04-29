@@ -96,3 +96,8 @@
 1. Hook into ActionView and ActionController
 2. Not storing the ruler class inside a `RULE_CLASS_MAP` to avoid caching it
 3. Not storing the role field mapper inside a `TRANSLATED_SUBTARGET_ROLES`
+
+== Version 6.0.0rc3 (Apr 29, 2020)
+
+1. Built-in `be_able_to` matcher for RSpec
+2. Renaming `Bali::Printer.pretty_print` to `Bali::Printer.printable`

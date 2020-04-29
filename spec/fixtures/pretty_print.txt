@@ -27,6 +27,7 @@
       --------------------------------------------------------------------------------
         1. By default can see_timeline, with condition
         2. By default can sign_in, with condition
+        3. By default cant see_banner, with condition
 
 
 Printed at 2020-01-01 12:34AM +00:00

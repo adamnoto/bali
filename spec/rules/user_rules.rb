@@ -6,4 +6,8 @@ class UserRules < Bali::Rules
   can :sign_in do
     User.no_more_beta?
   end
+
+  cant :see_banner do
+    User.no_more_beta?
+  end
 end
