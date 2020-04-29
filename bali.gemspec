@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "rspec-rails", "~> 3.9"
+  spec.add_development_dependency "rspec-rails", "~> 3.9", "<= 4"
   spec.add_development_dependency "pry-byebug"
   spec.add_development_dependency "simplecov", "0.17"
   spec.add_development_dependency 'sqlite3'
