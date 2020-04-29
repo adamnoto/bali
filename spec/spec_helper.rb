@@ -14,7 +14,7 @@ require "bundler/setup"
 require "bali"
 require "rspec"
 require "pry"
-require "bali_spec"
+require "test_app/app"
 
 def expect_can operation
   expect(subject.can?(user, operation)).to be_truthy

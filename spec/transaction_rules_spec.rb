@@ -1,7 +1,7 @@
 describe "TransactionRules" do
   subject { Transaction.new }
   let(:role) { nil }
-  let(:user) { User.new(role) }
+  let(:user) { User.new(role: role) }
 
   it "can be updated" do
     expect_can :update

@@ -2,13 +2,32 @@ require "stringio"
 require "date"
 
 # module that would allow all defined rules to be printed for check
-module Bali::Printer
-  module_function
+class Bali::Printer
+  include Singleton
 
   SEPARATOR = " " * 6
   SUBTARGET_TITLE_SEPARATOR = SEPARATOR + ("-" * 80) + "\n"
 
+  def self.printable
+    instance.printable
+  end
+
+  def self.pretty_print
+    printable
+  end
+
+  def load_rule_classes
+    return unless Bali.config.rules_path.present?
+
+    Dir["#{Bali.config.rules_path}/**/*.rb"].each do |rule_class_path|
+      require rule_class_path
+    end
+  rescue LoadError
+    # ignore
+  end
+
   def printable
+    load_rule_classes
     output = StringIO.new
 
     # build up the string for pretty printing rules
@@ -51,9 +70,5 @@ module Bali::Printer
       written_rule << "\n"
       target_io << written_rule.string
     end
-  end
-
-  def pretty_print
-    printable
   end
 end
