@@ -111,6 +111,26 @@ end
 
 For more coding example to better understand Bali, we would encourage you to take a look at the written spec files.
 
+## Testing the rules
+
+Bali is integrated into RSpec pretty well. There's a `be_able_to` matcher that we can use to test the rule:
+
+```ruby
+let(:transaction) { Transaction.new }
+let(:accountant) { User.new(:accountant) }
+
+# expectation on an instance of a class
+it "allows accountant to print, but not update, transaction" do
+  expect(accountant).to be_able_to :print, transaction
+  expect(accountant).not_to be_able_to :update, transaction
+end
+
+# expectation on a class
+it "allows User to sign in" do
+  expect(User).to be_able_to :sign_in
+end
+```
+
 ## Printing defined roles
 
 ```ruby
