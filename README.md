@@ -116,7 +116,7 @@ For more coding example to better understand Bali, we would encourage you to tak
 ## Printing defined roles
 
 ```ruby
-puts Bali::Printer.pretty_print
+puts Bali::Printer.printable
 ```
 
 Or execute:

@@ -8,7 +8,7 @@ module Bali::Printer
   SEPARATOR = " " * 6
   SUBTARGET_TITLE_SEPARATOR = SEPARATOR + ("-" * 80) + "\n"
 
-  def pretty_print
+  def printable
     output = StringIO.new
 
     # build up the string for pretty printing rules
@@ -51,5 +51,9 @@ module Bali::Printer
       written_rule << "\n"
       target_io << written_rule.string
     end
+  end
+
+  def pretty_print
+    printable
   end
 end

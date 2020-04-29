@@ -14,7 +14,9 @@ describe Bali::Printer do
   end
 
   it "match with the fixture" do
-    text = Bali::Printer.pretty_print
+    text = Bali::Printer.printable
     expect_fixture_match text, "pretty_print.txt"
+
+    expect(text).to eq Bali::Printer.pretty_print
   end
 end

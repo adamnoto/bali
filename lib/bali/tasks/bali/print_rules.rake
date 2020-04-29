@@ -4,6 +4,6 @@ namespace :bali do
     rules_path = Bali.config.rules_path
     Dir.glob("#{rules_path}/**/*.rb").each { |f| load f }
 
-    $stdout.puts Bali::Printer.pretty_print
+    $stdout.puts Bali::Printer.printable
   end
 end
