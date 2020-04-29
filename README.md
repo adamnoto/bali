@@ -12,6 +12,11 @@ Why I created Bali?
 - I want inheritable system of defining the access/authorization rules
 - I want that I can easily print the list of roles possible in my app
 
+## Supported versions
+
+* Ruby 2.0 until Ruby 2.7 (trunk)
+* Rails 5.0, Rails 6.0, until Rails edge (master)
+
 ## Installation
 
 Add this into your gemfile:
