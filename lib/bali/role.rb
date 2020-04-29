@@ -30,7 +30,7 @@ class Bali::Role
   end
 
   def initialize(name)
-    @name = name&.to_sym
+    @name = name.to_sym if name
     @right_level = INHERIT
 
     @cans = {}
