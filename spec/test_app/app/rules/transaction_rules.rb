@@ -2,6 +2,10 @@ class TransactionRules < Bali::Rules
   can :update, :unsettle
   can :print
 
+  scope do |records, user|
+    records.where(user: user)
+  end
+
   # redefine :delete
   can :unsettle do |record|
     record.settled?

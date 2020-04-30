@@ -2,20 +2,22 @@ module Bali::Statics::Authorizer
   module HelperFunctions
     extend self
 
+    def not_true_actor?(actor)
+      Symbol === actor || String === actor
+    end
+
     def find_actor(actor, operation, record = nil)
-      Symbol === actor || String === actor ?
-        nil :
-        actor
+      return actor unless not_true_actor?(actor)
     end
 
     def find_operation(actor, operation, record = nil)
-      Symbol === actor || String === actor ?
+      not_true_actor?(actor) ?
         actor :
         operation
     end
 
     def find_record(actor, operation, record = nil)
-      if (Symbol === actor || String === actor) && record.nil?
+      if not_true_actor?(actor) && record.nil?
         operation
       elsif actor.is_a?(ActiveRecord::Base) && record.nil?
         actor.class
