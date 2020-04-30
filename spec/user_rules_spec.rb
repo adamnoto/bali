@@ -31,12 +31,12 @@ describe "UserRules" do
     expect(UserRules.can?(nil, :sign_in)).to be_truthy
 
     # demonstrating passing user instance
-    expect(UserRules.can?(user1, :sign_in)).to be_truthy
-    expect(UserRules.can?(user2, :sign_in)).to be_truthy
-    expect(UserRules.can?(user3, :sign_in)).to be_truthy
-    expect(UserRules.cant?(user1, :sign_in)).to be_falsey
-    expect(UserRules.cant?(user2, :sign_in)).to be_falsey
-    expect(UserRules.cant?(user3, :sign_in)).to be_falsey
+    expect(UserRules.can?(user1, :sign_in)).to be_falsey
+    expect(UserRules.can?(user2, :sign_in)).to be_falsey
+    expect(UserRules.can?(user3, :sign_in)).to be_falsey
+    expect(UserRules.cant?(user1, :sign_in)).to be_truthy
+    expect(UserRules.cant?(user2, :sign_in)).to be_truthy
+    expect(UserRules.cant?(user3, :sign_in)).to be_truthy
   end
 
   it "disallows anyone from spamming" do

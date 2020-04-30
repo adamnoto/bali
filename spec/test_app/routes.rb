@@ -5,7 +5,11 @@
 # end; nil
 
 TestApp::Application.routes.draw do
-  resources :users, only: [:show]
+  resources :users, only: [:index, :show] do
+    collection do
+      get :index_no_current_user
+    end
+  end
 
   if Rails::VERSION::MAJOR >= 5
     namespace :api do

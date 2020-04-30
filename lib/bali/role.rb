@@ -45,18 +45,34 @@ class Bali::Role
     right_level == DEFAULT_DENY
   end
 
-  def can_all=(bool)
-    case bool
-    when true then @right_level = DEFAULT_ALLOW
-    else @right_level = DEFAULT_DENY
-    end
+  ##### DSL METHODS
+  def can(*args, &block)
+    add :can, *args, block
   end
 
-  def << rule
-    # operation cant be defined twice
-    operation = rule.operation.to_sym
+  def cant(*args, &block)
+    add :cant, *args, block
+  end
 
-    return if cants[operation] && cans[operation]
+  def can_all
+    @right_level = DEFAULT_ALLOW
+  end
+
+  def cant_all
+    @right_level = DEFAULT_DENY
+  end
+
+  def add(term, *operations, block)
+    operations.each do |operation|
+      rule = Bali::Rule.new(term, operation)
+      rule.conditional = block if block
+      self << rule
+    end
+  end
+  ##### DSL METHODS
+
+  def << rule
+    operation = rule.operation.to_sym
 
     if rule.term == :cant
       cants[operation] = rule

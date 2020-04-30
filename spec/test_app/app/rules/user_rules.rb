@@ -3,7 +3,11 @@ class UserRules < Bali::Rules
     record.friends.include? actor
   end
 
-  can :sign_in do
+  can :sign_in do |record, actor|
+    actor ? false : User.no_more_beta?
+  end
+
+  can :send_message do
     User.no_more_beta?
   end
 
