@@ -1,9 +1,18 @@
+require "forwardable"
+
 class Bali::Rules
   extend Bali::Statics::Authorizer
 
   class << self
+    extend Forwardable
+
     attr_writer :current_role
     attr_reader :ruler
+
+    def_delegators :inheritable_role, :can, :can
+    def_delegators :inheritable_role, :cant, :cant
+    def_delegators :inheritable_role, :cant_all, :cant_all
+    def_delegators :inheritable_role, :can_all, :can_all
   end
 
   def self.model_class
@@ -11,22 +20,6 @@ class Bali::Rules
     suffix = Bali.config.suffix
     rule_class_maker_str = class_name[0...class_name.length - suffix.length]
     rule_class_maker_str.constantize
-  end
-
-  def self.can(*args, &block)
-    inheritable_role.add :can, *args, block
-  end
-
-  def self.cant(*args, &block)
-    inheritable_role.add :cant, *args, block
-  end
-
-  def self.cant_all(*args)
-    inheritable_role.can_all = false
-  end
-
-  def self.can_all(*args)
-    inheritable_role.can_all = true
   end
 
   def self.role(*role_names, &block)

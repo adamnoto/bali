@@ -6,15 +6,16 @@ Bali is a to-the-point authorization library for Rails. Bali is short for Bulwar
 
 Why I created Bali?
 
-- I wasn't able to segment rules per roles
-- I want to break free from defining rules to match a controller's actions
-- I want to allow single, or multiple (or, even no) roles to be assigned to a user
-- I want inheritable system of defining the access/authorization rules
-- I want that I can easily print the list of roles possible in my app
+- I want to segment access rules per roles
+- I want to assign those roles to a user
+- I don't want to force access rules to match controllers' actions
+- I want an intuitive DSL
+- I want to easily print those defined roles
+- On top of that, it integrates well with Rails (and optionally, RSpec)
 
 ## Supported versions
 
-* Ruby 2.0 until Ruby 2.7 (trunk)
+* Ruby 2.4.4 until Ruby 2.7 (trunk)
 * Rails 5.0, Rails 6.0, until Rails edge (master)
 
 ## Installation
@@ -29,15 +30,15 @@ And then execute:
 
     $ bundle
 
-To generate a rule class for `User` model:
+To generate a rule class, for example for a model named `User`:
 
     $ bundle rails g rules user
 
-You can change `User` with any name of your model to define rules on
+We can suplant `User` with something else
 
 ## Usage
 
-> In nutshell, authorization rules are defined in a rule class which extends `Bali::Rules`. We use `can?` and `cant?` to check against those rules which we define using `can`, `cant`, `can_all`, and `cant`. Unscoped rules are inherited, otherwise we can scope rules using a `role` block.
+In a nutshell, authorization rules are to be defined in a class extending `Bali::Rules` (by default located in `app/rules`). We use `can?` and `cant?` to check against those rules which we define using `can`, `cant`, `can_all`, and `cant`. Unscoped rules are inherited, otherwise we can scope rules by defining them within a `role` block.
 
 Given a model as follows:
 
@@ -96,10 +97,10 @@ transaction = Transaction.new
 TransactionRules.can?(current_user, :update, transaction)
 TransactionRules.cant?(current_user, :update, transaction)
 TransactionRules.can?(:archive, transaction)
-TransactionRules.can?(:stop_accepting_new_transaction)
+TransactionRules.can?(:accept_new_transaction)
 ```
 
-If we are within a Rails controller or, when rendering a view; we can cleanly ask in this way:
+Inside a controller or a view; we can do:
 
 ```ruby
 if can? current_user, :update, transaction
@@ -107,7 +108,9 @@ if can? current_user, :update, transaction
 end
 ```
 
-We may also omit `current_user`, in that case, it is passed implicitly. The call then become more cleaner:
+Bali can automatically detect the rule class to use for such a query. That way, we don't have to manually spell out `TransactionRules` when it is clear that the `transaction` is a `Transaction`.
+
+We may also omit `current_user` to make the call shorter and more concise:
 
 ```ruby
 if can? :update, transaction
@@ -115,7 +118,7 @@ if can? :update, transaction
 end
 ```
 
-For more coding examples to better understand it, please feel free to take a look at the written spec files. Otherwise, if there's some unclear point, you may suggest for edits. Thank you.
+For more coding examples, please take a look at the written test files. Otherwise, if you may encounter some unclear points, please feel free to suggest for edits. Thank you.
 
 ## Testing the rules
 
@@ -188,7 +191,7 @@ Printed at 2020-01-01 12:34AM +00:00
 
 ## Contributing
 
-Bug reports and pull requests are welcome. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome. Bali is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
 
 ## License
 
