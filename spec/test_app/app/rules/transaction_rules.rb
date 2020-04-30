@@ -9,6 +9,7 @@ class TransactionRules < Bali::Rules
 
   # will inherit update, and print
   role :supervisor, :accountant do
+    unscope
     can :unsettle
   end
 
@@ -26,6 +27,7 @@ class TransactionRules < Bali::Rules
   end
 
   role :admin do
+    unscope
     can_all
   end
 end

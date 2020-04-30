@@ -13,6 +13,7 @@ class Bali::Rules
     def_delegators :inheritable_role, :cant, :cant
     def_delegators :inheritable_role, :cant_all, :cant_all
     def_delegators :inheritable_role, :can_all, :can_all
+    def_delegators :inheritable_role, :scope, :scope
   end
 
   def self.model_class

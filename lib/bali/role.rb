@@ -5,13 +5,15 @@ class Bali::Role
     DEFAULT_ALLOW = :default_allow
   ].freeze
 
-  attr_accessor :name
+  attr_reader :name
+  attr_reader :scope
   attr_accessor :cans, :cants
 
   attr_accessor :can_all
   alias :can_all? :can_all
 
   attr_accessor :right_level
+  attr_reader :unscoped
 
   def self.formalize(object)
     case object
@@ -32,6 +34,7 @@ class Bali::Role
   def initialize(name)
     @name = name.to_sym if name
     @right_level = INHERIT
+    @unscoped = false
 
     @cans = {}
     @cants = {}
@@ -43,6 +46,10 @@ class Bali::Role
 
   def cant_all?
     right_level == DEFAULT_DENY
+  end
+
+  def unscoped?
+    @unscoped
   end
 
   ##### DSL METHODS
@@ -65,9 +72,17 @@ class Bali::Role
   def add(term, *operations, block)
     operations.each do |operation|
       rule = Bali::Rule.new(term, operation)
-      rule.conditional = block if block
+      rule.conditional = block
       self << rule
     end
+  end
+
+  def scope(&block)
+    @scope = block
+  end
+
+  def unscope
+    @unscoped = true
   end
   ##### DSL METHODS
 
