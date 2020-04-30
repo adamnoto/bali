@@ -30,9 +30,13 @@ matrix:
       gemfile: gemfiles/Gemfile-rails.6.0.x
     - rvm: 2.6.3
       gemfile: gemfiles/Gemfile-rails.5.2.x
+    - rvm: 2.4.0
+      gemfile: gemfiles/Gemfile-rails.5.2.x
     - rvm: 2.6.3
       gemfile: gemfiles/Gemfile-rails.5.1.x
     - rvm: 2.6.3
+      gemfile: gemfiles/Gemfile-rails.5.0.x
+    - rvm: 2.2.0
       gemfile: gemfiles/Gemfile-rails.5.0.x
     - rvm: ruby-head
       gemfile: gemfiles/Gemfile-rails.edge
