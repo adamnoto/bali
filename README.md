@@ -15,7 +15,7 @@ Why I created Bali?
 
 ## Supported versions
 
-* Ruby 2.2 until Ruby 2.7 (trunk)
+* Ruby 2.4.4 until Ruby 2.7 (trunk)
 * Rails 5.0, Rails 6.0, until Rails edge (master)
 
 ## Installation
