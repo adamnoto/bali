@@ -122,4 +122,8 @@ describe "TransactionRules" do
     it { expect(user).not_to be_able_to :download, transaction }
     it { expect(user).not_to be_able_to :comment, transaction }
   end
+
+  describe ".rule_scope" do
+
+  end
 end

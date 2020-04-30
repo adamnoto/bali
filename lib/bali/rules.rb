@@ -2,6 +2,7 @@ require "forwardable"
 
 class Bali::Rules
   extend Bali::Statics::Authorizer
+  extend Bali::Statics::ScopeRuler
 
   class << self
     extend Forwardable
