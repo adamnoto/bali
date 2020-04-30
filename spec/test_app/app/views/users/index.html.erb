@@ -1,0 +1,14 @@
+<%
+  def current_user
+    @current_user
+  end
+%>
+
+Can send message? <%= can? :send_message %>
+Can sign in? <%= can? :sign_in %>
+Can send message from helper? <%= can_send_message? %>
+Cant see banner? <%= cant? :see_banner %>
+Cant see banner from helper? <%= cant_see_banner? %> %>
+Can update transaction? <%= can? :update, Transaction %>
+
+<% undef current_user %>

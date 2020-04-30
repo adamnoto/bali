@@ -107,6 +107,14 @@ if can? current_user, :update, transaction
 end
 ```
 
+We may also omit `current_user`, in that case, it is passed implicitly. The call then become more cleaner:
+
+```ruby
+if can? :update, transaction
+  # snip snip
+end
+```
+
 For more coding examples to better understand it, please feel free to take a look at the written spec files. Otherwise, if there's some unclear point, you may suggest for edits. Thank you.
 
 ## Testing the rules

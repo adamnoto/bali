@@ -14,6 +14,7 @@ class Bali::Ruler
   def initialize(model_class)
     @model_class = model_class
     @roles = {}
+    @roles[nil] = Bali::Role.new(nil)
   end
 
   def << role

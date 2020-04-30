@@ -6,16 +6,6 @@ class Bali::Rules
     attr_reader :ruler
   end
 
-  def self.inherited(subcls)
-    # Every rule class has the inherited block even if it's never
-    # used/formally defined, so it's easier to work with or make
-    # assumption/checking on the inherited block. As we treat
-    # rules defined in the inherited scope, as default value,
-    # this decision makes sense.
-
-    subcls.set_role nil
-  end
-
   def self.model_class
     class_name = to_s
     suffix = Bali.config.suffix
@@ -24,26 +14,32 @@ class Bali::Rules
   end
 
   def self.can(*args, &block)
-    add :can, *args, block
+    inheritable_role.add :can, *args, block
   end
 
   def self.cant(*args, &block)
-    add :cant, *args, block
+    inheritable_role.add :cant, *args, block
   end
 
   def self.cant_all(*args)
-    current_role.can_all = false
+    inheritable_role.can_all = false
   end
 
   def self.can_all(*args)
-    current_role.can_all = true
+    inheritable_role.can_all = true
   end
 
-  def self.role(*roles)
-    roles.each do |role|
-      if Symbol === role || String === role || NilClass === role
-        set_role role
-        yield
+  def self.role(*role_names, &block)
+    role_names.each do |role_name|
+      if Symbol === role_name || String === role_name || NilClass === role_name
+        role = ruler[role_name]
+
+        if role.nil?
+          role = Bali::Role.new(role_name)
+          ruler << role
+        end
+
+        role.instance_eval(&block)
       else
         raise Bali::DslError, "Cannot define role using #{param.class}. " +
           "Please use either a Symbol, a String or nil"
@@ -51,26 +47,11 @@ class Bali::Rules
     end
   end
 
-  def self.current_role
-    @current_role ||= set_role nil
-  end
-
   def self.ruler
     @ruler ||= Bali::Ruler.new(model_class)
   end
 
-  def self.set_role(role)
-    role = ruler[role] || Bali::Role.new(role)
-    ruler << role
-    @current_role = role
+  def self.inheritable_role
+    ruler[nil]
   end
-
-  def self.add(term, *operations, block)
-    operations.each do |operation|
-      rule = Bali::Rule.new(term, operation)
-      rule.conditional = block if block
-      current_role << rule
-    end
-  end
-
 end
