@@ -7,6 +7,7 @@ class Bali::Role
 
   attr_accessor :name
   attr_accessor :cans, :cants
+  attr_reader :scope
 
   attr_accessor :can_all
   alias :can_all? :can_all
@@ -60,6 +61,11 @@ class Bali::Role
 
   def cant_all
     @right_level = DEFAULT_DENY
+  end
+
+  def scope(&block)
+    raise Bali::DslError, "Block can't be scoped inside a role" if name
+    @scope = block
   end
 
   def add(term, *operations, block)

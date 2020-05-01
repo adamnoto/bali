@@ -9,6 +9,7 @@ class Bali::Rules
     attr_writer :current_role
     attr_reader :ruler
 
+    def_delegators :inheritable_role, :scope, :scope
     def_delegators :inheritable_role, :can, :can
     def_delegators :inheritable_role, :cant, :cant
     def_delegators :inheritable_role, :cant_all, :cant_all
