@@ -11,6 +11,8 @@ TestApp::Application.routes.draw do
     end
   end
 
+  resources :transactions, only: [:index]
+
   if Rails::VERSION::MAJOR >= 5
     namespace :api do
       resources :users, only: [:show]

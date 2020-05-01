@@ -1,0 +1,11 @@
+<%
+  def current_user
+    @current_user
+  end
+%>
+
+Unscoped: <%= @all_transactions.pluck(:id).sort.join(", ") %>
+Scoped in controller: <%= @scoped_transactions.pluck(:id).sort.join(", ") %>
+Scoped in view: <%= rule_scope(@all_transactions).pluck(:id).sort.join(", ") %>
+
+<% undef current_user %>

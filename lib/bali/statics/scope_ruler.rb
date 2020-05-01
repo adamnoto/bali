@@ -1,9 +1,9 @@
 module Bali::Statics::ScopeRuler
-  def rule_scope(arg1, arg2)
+  def rule_scope(arg1, arg2 = nil)
     if arg2.nil?
       data = arg1
       if respond_to?(:current_user)
-        actor = arg1
+        actor = current_user
       end
     else
       data, actor = arg1, arg2
@@ -13,7 +13,6 @@ module Bali::Statics::ScopeRuler
 
     rule_class = Bali::Rules.for(data.model)
     return unless rule_class
-
     scope = rule_class.inheritable_role.scope
 
     if scope.arity == 0
