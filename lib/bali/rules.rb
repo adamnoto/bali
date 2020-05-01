@@ -2,6 +2,7 @@ require "forwardable"
 
 class Bali::Rules
   extend Bali::Statics::Authorizer
+  extend Bali::Statics::ScopeRuler
 
   class << self
     extend Forwardable
@@ -14,6 +15,11 @@ class Bali::Rules
     def_delegators :inheritable_role, :cant, :cant
     def_delegators :inheritable_role, :cant_all, :cant_all
     def_delegators :inheritable_role, :can_all, :can_all
+  end
+
+  def self.for(record_class)
+    rule_maker_cls_str = "#{record_class}#{Bali.config.suffix}"
+    rule_maker_cls_str.safe_constantize
   end
 
   def self.model_class

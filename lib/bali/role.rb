@@ -64,6 +64,8 @@ class Bali::Role
   end
 
   def scope(&block)
+    return @scope unless block_given?
+
     raise Bali::DslError, "Block can't be scoped inside a role" if name
     @scope = block
   end

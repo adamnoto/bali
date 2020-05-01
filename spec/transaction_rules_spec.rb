@@ -122,4 +122,21 @@ describe "TransactionRules" do
     it { expect(user).not_to be_able_to :download, transaction }
     it { expect(user).not_to be_able_to :comment, transaction }
   end
+
+  describe ".rule_scope" do
+    let(:user) { User.create }
+    let(:admin) { User.create(role: "admin") }
+
+    let!(:user_data) { 5.times.map { Transaction.create(user_id: user.id) } }
+    let!(:admin_data) { 5.times.map { Transaction.create(user_id: admin.id) } }
+
+    it "runs the scope" do
+      transaction_data = Transaction.all
+      data_for_user = TransactionRules.rule_scope(transaction_data, user)
+      data_for_admin = TransactionRules.rule_scope(transaction_data, admin)
+
+      expect(data_for_user.pluck(:id).sort).to eq user_data.pluck(:id).sort
+      expect(data_for_admin.pluck(:id).sort).to eq (user_data.pluck(:id) + admin_data.pluck(:id)).sort
+    end
+  end
 end

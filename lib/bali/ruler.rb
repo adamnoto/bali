@@ -6,8 +6,7 @@ class Bali::Ruler
   private :model_class
 
   def self.for(record_class)
-    rule_maker_cls_str = "#{record_class}#{Bali.config.suffix}"
-    rule_class = rule_maker_cls_str.safe_constantize
+    rule_class = Bali::Rules.for(record_class)
     rule_class.ruler if rule_class
   end
 
