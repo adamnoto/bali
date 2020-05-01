@@ -5,8 +5,15 @@ class Bali::Role
     DEFAULT_ALLOW = :default_allow
   ].freeze
 
+  IDENTIFIER_CLASSES = [
+    String,
+    Symbol,
+    NilClass,
+  ].freeze
+
   attr_accessor :name
   attr_accessor :cans, :cants
+  attr_reader :scope
 
   attr_accessor :can_all
   alias :can_all? :can_all
@@ -15,7 +22,7 @@ class Bali::Role
 
   def self.formalize(object)
     case object
-    when String, Symbol, NilClass then [object]
+    when *IDENTIFIER_CLASSES then [object]
     when Array then object
     else formalize(extract_roles_from_object(object))
     end
@@ -60,6 +67,13 @@ class Bali::Role
 
   def cant_all
     @right_level = DEFAULT_DENY
+  end
+
+  def scope(&block)
+    return @scope unless block_given?
+
+    raise Bali::DslError, "Block can't be scoped inside a role" if name
+    @scope = block
   end
 
   def add(term, *operations, block)

@@ -38,7 +38,7 @@ We can suplant `User` with something else
 
 ## Usage
 
-In a nutshell, authorization rules are to be defined in a class extending `Bali::Rules` (by default located in `app/rules`). We use `can?` and `cant?` to check against those rules which we define using `can`, `cant`, `can_all`, and `cant`. Unscoped rules are inherited, otherwise we can scope rules by defining them within a `role` block.
+In a nutshell, authorization rules are to be defined in a class extending `Bali::Rules` (by default located in `app/rules`). We use `can?` and `cant?` to check against those rules which we define using `can`, `cant`, `can_all`, and `cant_all`. Unscoped rules are inherited, otherwise we can scope rules by defining them within a `role` block.
 
 Given a model as follows:
 
@@ -138,6 +138,36 @@ end
 it "allows User to sign in" do
   expect(User).to be_able_to :sign_in
 end
+```
+
+## Scoping data to role
+
+Some user can access all data, and some can only access to data belonging to them. This can be achieved by using a `scope` block. A `scope` block must not be defined within a `role` block.
+
+An example of defining a `scope` block for the `TransactionRules`.
+
+```ruby
+class TransactionRules < Bali::Rules
+  scope do |data, current_user|
+    unless current_user.role == "admin"
+      data.where(user_id: current_user.id)
+    end
+  end
+
+  # ...
+end
+```
+
+We can use `rule_scope` to execute the scope for a given data:
+
+```ruby
+transactions = TransactionRules.rule_scope(Transaction.all, current_user)
+```
+
+Inside a controller/view, we may also omit `current_user` to make the call concise.
+
+```ruby
+transactions = rule_scope(Transaction.all)
 ```
 
 ## Printing defined roles

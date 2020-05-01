@@ -2,6 +2,12 @@ class TransactionRules < Bali::Rules
   can :update, :unsettle
   can :print
 
+  scope do |data, current_user|
+    unless current_user.role == "admin"
+      data.where(user_id: current_user.id)
+    end
+  end
+
   # redefine :delete
   can :unsettle do |record|
     record.settled?

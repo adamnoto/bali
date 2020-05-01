@@ -6,8 +6,7 @@ class Bali::Ruler
   private :model_class
 
   def self.for(record_class)
-    rule_maker_cls_str = "#{record_class}#{Bali.config.suffix}"
-    rule_class = rule_maker_cls_str.safe_constantize
+    rule_class = Bali::Rules.for(record_class)
     rule_class.ruler if rule_class
   end
 
@@ -24,5 +23,16 @@ class Bali::Ruler
   def [] role
     symbolized_role = role.to_sym if role
     @roles[symbolized_role]
+  end
+
+  def find_or_create_role role_name
+    role = self[role_name]
+
+    if role.nil?
+      role = Bali::Role.new(role_name)
+      self << role
+    end
+
+    role
   end
 end
