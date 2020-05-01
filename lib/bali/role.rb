@@ -5,6 +5,12 @@ class Bali::Role
     DEFAULT_ALLOW = :default_allow
   ].freeze
 
+  IDENTIFIER_CLASSES = [
+    String,
+    Symbol,
+    NilClass,
+  ].freeze
+
   attr_accessor :name
   attr_accessor :cans, :cants
   attr_reader :scope
@@ -16,7 +22,7 @@ class Bali::Role
 
   def self.formalize(object)
     case object
-    when String, Symbol, NilClass then [object]
+    when *IDENTIFIER_CLASSES then [object]
     when Array then object
     else formalize(extract_roles_from_object(object))
     end

@@ -31,14 +31,8 @@ class Bali::Rules
 
   def self.role(*role_names, &block)
     role_names.each do |role_name|
-      if Symbol === role_name || String === role_name || NilClass === role_name
-        role = ruler[role_name]
-
-        if role.nil?
-          role = Bali::Role.new(role_name)
-          ruler << role
-        end
-
+      if Bali::Role::IDENTIFIER_CLASSES.include?(role_name.class)
+        role = ruler.find_or_create_role role_name
         role.instance_eval(&block)
       else
         raise Bali::DslError, "Cannot define role using #{param.class}. " +

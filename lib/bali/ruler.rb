@@ -24,4 +24,15 @@ class Bali::Ruler
     symbolized_role = role.to_sym if role
     @roles[symbolized_role]
   end
+
+  def find_or_create_role role_name
+    role = self[role_name]
+
+    if role.nil?
+      role = Bali::Role.new(role_name)
+      self << role
+    end
+
+    role
+  end
 end
