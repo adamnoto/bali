@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   def index
-    @current_user = User.create
+    @current_user = params[:id] ? User.find(params[:id]) : User.create
     render file: Rails.root.join("app/views/users/index")
   end
 
