@@ -39,6 +39,10 @@ module Bali::Statics::Authorizer
       if arg2.nil? && arg3.nil? && obj.respond_to?(:current_user)
         arg2 = arg1
         arg1 = obj.current_user
+      elsif arg3.nil? && obj.respond_to?(:current_user)
+        arg3 = arg2
+        arg2 = arg1
+        arg1 = obj.current_user
       end
 
       arg3 = HelperFunctions.determine_model_class! obj, arg1, arg2, arg3

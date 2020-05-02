@@ -12,6 +12,14 @@ describe UsersController do
       expect(response.body).to include("Cant see banner from helper? true")
       expect(response.body).to include("Can update transaction? true")
     end
+
+    context "as an accountant" do
+      let(:user) { User.create(role: :accountant) }
+      it "cannot update transaction" do
+        get :index, params: { id: user.id }
+        expect(response.body).to include("Can update transaction? false")
+      end
+    end
   end
 
   describe "GET /index_no_current_user" do
