@@ -104,5 +104,5 @@
 3. Uniform `can?` and `cant?` authorizization checker
 4. Adding `scope` block
 
-== Version 6.0.0rc4
+== Version 6.0.0
 1. Bug fix for `can?` and `cant?` when passing 2 arguments.
