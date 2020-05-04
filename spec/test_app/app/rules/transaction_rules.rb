@@ -8,7 +8,7 @@ class TransactionRules < Bali::Rules
     end
   end
 
-  # redefine :delete
+  # overwrites :unsettle
   can :unsettle do |record|
     record.settled?
   end

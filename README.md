@@ -7,11 +7,10 @@ Bali is a to-the-point authorization library for Rails. Bali is short for Bulwar
 Why I created Bali?
 
 - I want to segment access rules per roles
-- I want to assign those roles to a user
-- I don't want to force access rules to match controllers' actions
-- I want an intuitive DSL
-- I want to easily print those defined roles
-- On top of that, it integrates well with Rails (and optionally, RSpec)
+- I don't want to marry rules with controllers' actions
+- I want an intuitive DSL that makes defining things fast
+- I want to print those rules if I want, to see who can do what
+- On top of that, it integrates well with Rails (also, RSpec)
 
 ## Supported versions
 
@@ -38,7 +37,7 @@ We can suplant `User` with something else
 
 ## Usage
 
-In a nutshell, authorization rules are to be defined in a class extending `Bali::Rules` (by default located in `app/rules`). We use `can?` and `cant?` to check against those rules which we define using `can`, `cant`, `can_all`, and `cant_all`. Unscoped rules are inherited, otherwise we can scope rules by defining them within a `role` block.
+In a nutshell, authorization rules are to be defined in a class extending `Bali::Rules` (located in `app/rules`). We use `can?` and `cant?` to check against those rules we define using `can`, `cant`, `can_all`, and `cant_all`. Unscoped rules are inherited, otherwise we can scope rules by defining them within a `role` block.
 
 Given a model as follows:
 
@@ -61,17 +60,19 @@ class TransactionRules < Bali::Rules
   can :update, :unsettle
   can :print
 
-  # redefine :delete
+  # overwrites :unsettle
   can :unsettle do |record, current_user|
     record.settled?
   end
 
-  # will inherit update, and print
+  # will inherit update, print
   role :supervisor, :accountant do
+    # will always be able to unsettle
     can :unsettle
   end
 
   role :accountant do
+    # must not be able to perform an update operation
     cant :update
   end
 
@@ -90,7 +91,7 @@ class TransactionRules < Bali::Rules
 end
 ```
 
-We can ask various permissions in this way:
+We can do authorization in this way:
 
 ```ruby
 transaction = Transaction.new
@@ -100,7 +101,7 @@ TransactionRules.can?(:archive, transaction)
 TransactionRules.can?(:accept_new_transaction)
 ```
 
-Inside a controller or a view; we can do:
+Inside a controller or a view; we can also do:
 
 ```ruby
 if can? current_user, :update, transaction
@@ -142,7 +143,7 @@ end
 
 ## Scoping data to role
 
-Some user can access all data, and some can only access to data belonging to them. This can be achieved by using a `scope` block. A `scope` block must not be defined within a `role` block.
+Some user can access all data, and some can only access to data belonging to them. This can be achieved by using a `scope` block.
 
 An example of defining a `scope` block for the `TransactionRules`.
 
@@ -169,6 +170,8 @@ Inside a controller/view, we may also omit `current_user` to make the call conci
 ```ruby
 transactions = rule_scope(Transaction.all)
 ```
+
+It is important to note that a `scope` block must not be defined within a `role` block.
 
 ## Printing defined roles
 
@@ -219,13 +222,9 @@ Will print, for example, this definition:
 Printed at 2020-01-01 12:34AM +00:00
 ```
 
-## Contributing
-
-Bug reports and pull requests are welcome. Bali is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
-
 ## License
 
-Bali is proudly available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+Bali is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
 ## Changelog
 
