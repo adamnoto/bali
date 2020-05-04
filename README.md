@@ -121,7 +121,7 @@ end
 
 For more coding examples, please take a look at the written test files. Otherwise, if you may encounter some unclear points, please feel free to suggest for edits. Thank you.
 
-## Testing the rules
+## Testing through RSpec
 
 Bali is integrated into RSpec pretty well. There's a `be_able_to` matcher that we can use to test the rule:
 
