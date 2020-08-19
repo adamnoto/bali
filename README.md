@@ -6,11 +6,14 @@ Bali is a to-the-point authorization library for Rails. Bali is short for Bulwar
 
 Why I created Bali?
 
-- I want to segment access rules per roles
+- Defining authorization rules are complicated, I want to make it natural and so much simper like Ruby
+- I want to easily segment authorization rules per roles
 - I don't want to marry rules with controllers' actions
-- I want an intuitive DSL that makes defining things fast
+- I want an intuitive DSL
 - I want to print those rules if I want, to see who can do what
 - On top of that, it integrates well with Rails (also, RSpec)
+
+Internally, Bali is quite complicated, but externally, Bali should be very easy and intuitive to use.
 
 ## Supported versions
 
