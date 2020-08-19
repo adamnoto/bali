@@ -26,6 +26,15 @@ describe "TransactionRules" do
     it "returns the judgement correctly for a class" do
       expect(TransactionRules.can?(:update, transaction)).to be_truthy
     end
+
+    context "when the role is an empty array" do
+      let(:role) { [] }
+
+      it "returns the judgement correctly for an object" do
+        expect(user.role).to eq []
+        expect(TransactionRules.can?(user, :update, transaction)).to be_truthy
+      end
+    end
   end
 
   describe ".cant?" do

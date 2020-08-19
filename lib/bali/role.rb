@@ -23,7 +23,7 @@ class Bali::Role
   def self.formalize(object)
     case object
     when *IDENTIFIER_CLASSES then [object]
-    when Array then object
+    when Array then (object.count == 0 ? nil : object)
     else formalize(extract_roles_from_object(object))
     end
   end
