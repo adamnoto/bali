@@ -106,3 +106,6 @@
 
 == Version 6.0.0
 1. Bug fix for `can?` and `cant?` when passing 2 arguments.
+
+== Version 6.0.1
+1. Bug fix for judgement issue when the user's role is an empty array
