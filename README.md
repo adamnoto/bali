@@ -173,6 +173,28 @@ transactions = rule_scope(Transaction.all)
 
 It is important to note that a `scope` block must not be defined within a `role` block.
 
+## Usage outside of Rails
+
+This authorization library might be used outside of Rails, such as with Grape or Sinatra projects. However, although it should work as expected, such integration is not natively supported by Bali itself. Hence, additional works for such integration is needed.
+
+If ActiveRecord is not used, we need to add the following code into a user class.
+
+```ruby
+class User
+  extend Bali::Statics::Record
+  extract_roles_from :roles
+end
+```
+
+On the controller, we should add these helper modules:
+
+```ruby
+include Bali::Statics::ScopeRuler
+include Bali::Statics::Authorizer
+```
+
+Doing so allow us to use the `can?` and other functions on the controller. Bali should also be able to deduce the user's roles properly.
+
 ## Printing defined roles
 
 ```ruby
