@@ -1,9 +1,9 @@
-describe Bali::Statics::ActiveRecord do
+describe Bali::Statics::Record do
   describe ".role_field_for_authorization" do
     describe "each models" do
       it "has their own role field" do
         class MockRecordBase
-          extend Bali::Statics::ActiveRecord
+          extend Bali::Statics::Record
         end
 
         record_class_1 = Class.new(MockRecordBase) do
@@ -19,5 +19,9 @@ describe Bali::Statics::ActiveRecord do
         expect(MockRecordBase.role_field_for_authorization).to be_blank
       end
     end
+  end
+
+  it "is aliased as Bali::Statics::ActiveRecord" do
+    expect(Bali::Statics::ActiveRecord).to eq described_class
   end
 end
